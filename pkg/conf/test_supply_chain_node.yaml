@@ -1,0 +1,27 @@
+supplyChainNode:
+  - templateClass: BUSINESS_APPLICATION
+    templateType: BASE
+    templatePriority: -1
+    commodityBought:
+      - key:
+          templateClass: SERVICE
+          providerType: LAYERED_OVER
+          cardinalityMax: 2147483647
+          cardinalityMin: 0
+        value:
+          - commodityType: TRANSACTION
+            key: key-placeholder
+          - commodityType: RESPONSE_TIME
+            key: key-placeholder
+          - commodityType: APPLICATION
+      - key:
+          templateClass: BUSINESS_TRANSACTION
+          providerType: LAYERED_OVER
+          cardinalityMax: 2147483647
+          cardinalityMin: 0
+        value:
+          - commodityType: TRANSACTION
+            key: key-placeholder
+          - commodityType: RESPONSE_TIME
+            key: key-placeholder
+          - commodityType: APPLICATION

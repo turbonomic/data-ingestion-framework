@@ -1,0 +1,66 @@
+supplyChainNode:
+  - templateClass: APPLICATION_COMPONENT
+    templateType: BASE
+    templatePriority: -1
+    commoditySold:
+      - commodityType: TRANSACTION
+        key: key-placeholder
+      - commodityType: RESPONSE_TIME
+        key: key-placeholder
+      - commodityType: HEAP
+        key: key-placeholder
+      - commodityType: COLLECTION_TIME
+        key: key-placeholder
+      - commodityType: THREADS
+        key: key-placeholder
+    commodityBought:
+      - key:
+          templateClass: VIRTUAL_MACHINE
+          providerType: HOSTING
+          cardinalityMax: 1
+          cardinalityMin: 1
+        value:
+          - commodityType: VCPU
+          - commodityType: VMEM
+    externalLink:
+      - key: VIRTUAL_MACHINE
+        value:
+          buyerRef: APPLICATION_COMPONENT
+          sellerRef: VIRTUAL_MACHINE
+          relationship: HOSTING
+          commodityDefs:
+            - type: VCPU
+              hasKey: false
+            - type: VMEM
+              hasKey: false
+            - type: TRANSACTION
+              hasKey: true
+            - type: RESPONSE_TIME
+              hasKey: true
+          probeEntityPropertyDef:
+            - name: VM_IP
+              description: IP Address of the VM hosting the discovered node
+          externalEntityPropertyDefs:
+            - entity: VIRTUAL_MACHINE
+              attribute: UsesEndPoints
+              propertyHandler:
+                methodName: getAddress
+                entityType: IP
+                directlyApply: false
+    mergedEntityMetaData:
+      keepStandalone: false
+      matchingMetadata:
+        returnType: STRING
+        matchingData:
+          - matchingProperty:
+              propertyName: IP
+        externalEntityReturnType: STRING
+        externalEntityMatchingProperty:
+          - matchingProperty:
+              propertyName: IP
+      commoditiesSold:
+        - RESPONSE_TIME
+        - TRANSACTION
+        - HEAP
+        - COLLECTION_TIME
+        - THREADS
