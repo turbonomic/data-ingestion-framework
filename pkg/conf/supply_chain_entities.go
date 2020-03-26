@@ -7,7 +7,9 @@ import (
 )
 
 type SupplyChainConfig struct {
-	Nodes []*NodeConfig `yaml:"supplyChainNode"`
+	ProbeCategory *string       `yaml:"probeCategory"`
+	TargetType    *string       `yaml:"targetType"`
+	Nodes         []*NodeConfig `yaml:"supplyChainNode"`
 }
 
 type NodeConfig struct {
@@ -123,14 +125,28 @@ func LoadSupplyChain(filename string) (*SupplyChainConfig, error) {
 		return nil, err
 	}
 
-	//if glog.V(3) {
-	PrintSupplyChain(supplyChain)
-	//}
+	defaultProbeCategory := DefaultProbeCategory
+	if supplyChain.ProbeCategory == nil {
+		supplyChain.ProbeCategory = &defaultProbeCategory
+	}
+
+	defaultTargetType := DefaultTargetType
+	if supplyChain.TargetType == nil {
+		supplyChain.TargetType = &defaultTargetType
+	}
+
+	glog.Infof("PROBE CATEGORY: %s\n", *supplyChain.ProbeCategory)
+	glog.Infof("TARGET TYPE: %s\n", *supplyChain.TargetType)
+
+	if glog.V(2) {
+		PrintSupplyChain(supplyChain)
+	}
 
 	return &supplyChain, nil
 }
 
 func PrintSupplyChain(supplyChain SupplyChainConfig) {
+
 	for _, node := range supplyChain.Nodes {
 		glog.Infof("********* %s::%s::%d", node.TemplateClass, *node.TemplateType, node.TemplatePriority)
 		if node.CommodityBoughtList != nil {
@@ -194,9 +210,9 @@ func PrintSupplyChain(supplyChain SupplyChainConfig) {
 		if node.MergedEntityMetaData != nil {
 			metadata := node.MergedEntityMetaData
 
-			glog.Infof("KeepInTopology: %v", metadata.KeepInTopology)
-			glog.Infof("matching data returnType: %s", metadata.MatchingMetadata.ReturnType)
-			glog.Infof("matching data external returnType: %s", metadata.MatchingMetadata.ExternalEntityReturnType)
+			glog.Infof("KeepInTopology: %v\n", metadata.KeepInTopology)
+			glog.Infof("matching data returnType: %s\n", metadata.MatchingMetadata.ReturnType)
+			glog.Infof("matching data external returnType: %s\n", metadata.MatchingMetadata.ExternalEntityReturnType)
 
 			if metadata.MatchingMetadata != nil {
 				matchingDataList := metadata.MatchingMetadata.MatchingDataList

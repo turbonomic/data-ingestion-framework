@@ -3,26 +3,10 @@ package registration
 import (
 	"fmt"
 	"github.com/golang/glog"
-	"github.com/turbonomic/data-ingestion-framework/pkg/conf"
 	"github.com/turbonomic/turbo-go-sdk/pkg/builder"
 	"github.com/turbonomic/turbo-go-sdk/pkg/proto"
 	"github.com/turbonomic/turbo-go-sdk/pkg/supplychain"
-)
-
-var (
-	templateTypeMapping = map[string]proto.TemplateDTO_TemplateType{
-		"BASE":      proto.TemplateDTO_BASE,
-		"EXTENSION": proto.TemplateDTO_EXTENSION,
-	}
-	returnTypeMapping = map[string]builder.ReturnType{
-		"STRING":      builder.MergedEntityMetadata_STRING,
-		"LIST_STRING": builder.MergedEntityMetadata_LIST_STRING,
-	}
-
-	relationshipMapping = map[string]proto.Provider_ProviderType{
-		"HOSTING":      proto.Provider_HOSTING,
-		"LAYERED_OVER": proto.Provider_LAYERED_OVER,
-	}
+	"github.com/turbonomic/data-ingestion-framework/pkg/conf"
 )
 
 // SupplyChain for the TurboDIF probe created from the supply chain configuration
@@ -44,7 +28,7 @@ type SupplyChainNode struct {
 	// EXTERNAL HOSTED_BY CONFIG
 	HostedByProviderProps map[proto.EntityDTO_EntityType][]string
 	HostedByProviderType  map[proto.EntityDTO_EntityType]string
-	HostedByProviderComms map[proto.EntityDTO_EntityType][]proto.CommodityDTO_CommodityType
+	HostedByBoughtComms   map[proto.EntityDTO_EntityType]map[proto.CommodityDTO_CommodityType]DefaultValue
 }
 
 // Create new supply chain consisting of supply chain nodes using the supply chain configuration
@@ -65,6 +49,14 @@ func NewSupplyChain(config *conf.SupplyChainConfig) (*SupplyChain, error) {
 	}
 
 	return supplyChain, nil
+}
+
+func (s *SupplyChain) GetProbeCategory() string {
+	return *s.config.ProbeCategory
+}
+
+func (s *SupplyChain) GetTargetType() string {
+	return *s.config.TargetType
 }
 
 // Get the supply chain nodes configured in the supply chain
@@ -133,6 +125,7 @@ func parseSoldComms(nodeConfig *conf.NodeConfig, node *SupplyChainNode) error {
 		if _, exists := TemplateCommodityTypeMap[soldComm]; exists {
 			commType := TemplateCommodityTypeMap[soldComm]
 			supportedComms[commType] = DefaultValue{Key: sold.Key}
+			fmt.Printf("%s Sold comm %s::%v\n", nodeConfig.TemplateClass, soldComm, commType)
 		} else {
 			glog.Warningf("%s: Invalid sold commodity type %s", nodeConfig.TemplateClass, soldComm)
 		}
@@ -166,12 +159,19 @@ func parseBoughtComms(nodeConfig *conf.NodeConfig, node *SupplyChainNode) error 
 		if provider == nil || provider.TemplateClass == nil {
 			return fmt.Errorf("%s: Nill provider in bought commodities section", nodeConfig.TemplateClass)
 		}
-		if _, exists := TemplateEntityTypeMap[*provider.TemplateClass]; !exists {
+
+		providerClass := *provider.TemplateClass
+		if _, exists := TemplateEntityTypeMap[providerClass]; !exists {
 			return fmt.Errorf("%s: Invalid provider in bought commodities section for provider %s",
-				nodeConfig.TemplateClass, *provider.TemplateClass)
+				nodeConfig.TemplateClass, providerClass)
 		}
 
-		providerType := TemplateEntityTypeMap[*provider.TemplateClass]
+		providerType := TemplateEntityTypeMap[providerClass]
+
+		if bought.Comms == nil || len(bought.Comms) == 0 {
+			return fmt.Errorf("%s: Missing bought commodities for provider %s",
+				nodeConfig.TemplateClass, providerClass)
+		}
 
 		accessCommMap := make(map[proto.CommodityDTO_CommodityType]DefaultValue)
 		commMap := make(map[proto.CommodityDTO_CommodityType]DefaultValue)
@@ -183,7 +183,7 @@ func parseBoughtComms(nodeConfig *conf.NodeConfig, node *SupplyChainNode) error 
 			boughtComm := *comm.CommodityType
 			if _, exists := TemplateCommodityTypeMap[boughtComm]; exists {
 				commType := TemplateCommodityTypeMap[boughtComm]
-				fmt.Printf("%s --> %s Bought comm %s::%s\n", nodeConfig.TemplateClass, *provider.TemplateClass,
+				fmt.Printf("%s --> %s Bought comm %s::%s\n", nodeConfig.TemplateClass, providerClass,
 					boughtComm, commType)
 				commMap[commType] = DefaultValue{Key: comm.Key}
 			} else {
@@ -195,8 +195,8 @@ func parseBoughtComms(nodeConfig *conf.NodeConfig, node *SupplyChainNode) error 
 			}
 		}
 		if len(commMap) == 0 {
-			return fmt.Errorf("%s: Missing commodities in bought commodities section for provider %s\n",
-				nodeConfig.TemplateClass, *provider.TemplateClass)
+			return fmt.Errorf("%s: Missing bought commodities for provider %s\n",
+				nodeConfig.TemplateClass, providerClass)
 		}
 		supportedBoughtComms[providerType] = commMap
 		supportedBoughtAccessComms[providerType] = accessCommMap
@@ -216,7 +216,7 @@ func parseExternalLinks(nodeConfig *conf.NodeConfig, node *SupplyChainNode) erro
 	// EXTERNAL HOSTED_BY CONFIG - saving links to external providers
 	hostedByProviderProps := make(map[proto.EntityDTO_EntityType][]string)
 	hostedByProviderType := make(map[proto.EntityDTO_EntityType]string)
-	hostedByProviderComms := make(map[proto.EntityDTO_EntityType][]proto.CommodityDTO_CommodityType)
+	hostedByBoughtComms := make(map[proto.EntityDTO_EntityType]map[proto.CommodityDTO_CommodityType]DefaultValue)
 	for _, externalLink := range nodeConfig.ExternalLinkList {
 		if externalLink.Value == nil {
 			glog.Warningf("%s: Null external link value", nodeConfig.TemplateClass)
@@ -239,36 +239,36 @@ func parseExternalLinks(nodeConfig *conf.NodeConfig, node *SupplyChainNode) erro
 		sellerType := TemplateEntityTypeMap[*link.SellerRef]
 
 		if sellerType == node.NodeType && buyerType == node.NodeType {
-			return fmt.Errorf("%s: Same seller %s and buyer %s in external link", nodeConfig.TemplateClass,
-				*link.SellerRef, *link.BuyerRef)
+			return fmt.Errorf("%s: Same seller %s and buyer %s in external link",
+				nodeConfig.TemplateClass, *link.SellerRef, *link.BuyerRef)
 		}
 		if sellerType != node.NodeType && buyerType != node.NodeType {
 			return fmt.Errorf("%s: Either seller %s or buyer %s must be same as the node in external link",
 				nodeConfig.TemplateClass, *link.SellerRef, *link.BuyerRef)
 		}
 
-		//if buyerType != node.NodeType { //skip link to external consumer - TODO: move to entity builder
-		//	continue
-		//}
-
 		if link.CommodityDefList == nil || len(link.CommodityDefList) == 0 {
 			return fmt.Errorf("%s: Missing commodity metadata in external link", nodeConfig.TemplateClass)
 		}
 
-		var commList []proto.CommodityDTO_CommodityType
+		commMap := make(map[proto.CommodityDTO_CommodityType]DefaultValue)
 		for _, commDef := range link.CommodityDefList {
 			if commDef.CommType == nil {
 				continue
 			}
-			commType := TemplateCommodityTypeMap[*commDef.CommType]
-			if _, exists := TemplateCommodityTypeMap[*commDef.CommType]; exists {
-				commList = append(commList, commType)
+			//commType := TemplateCommodityTypeMap[*commDef.CommType]
+			commTypeDef := *commDef.CommType
+			if commType, exists := TemplateCommodityTypeMap[commTypeDef]; exists {
+				commMap[commType] = DefaultValue{HasKey: commDef.HasKey}
+				fmt.Printf("%s : %s-->%s hostedBy comm %s::%v\n", nodeConfig.TemplateClass,
+					buyerType, sellerType, commTypeDef, commType)
 			} else {
 				glog.Warningf("%s: Invalid commodity type %s in external link",
-					nodeConfig.TemplateClass, *commDef.CommType)
+					nodeConfig.TemplateClass, commTypeDef)
 			}
 		}
-		if len(commList) == 0 {
+
+		if len(commMap) == 0 {
 			return fmt.Errorf("%s: Invalid commodity metadata in external link", nodeConfig.TemplateClass)
 		}
 
@@ -285,7 +285,8 @@ func parseExternalLinks(nodeConfig *conf.NodeConfig, node *SupplyChainNode) erro
 			propList = append(propList, propDef.Name)
 		}
 		hostedByProviderProps[sellerType] = propList
-		hostedByProviderComms[sellerType] = commList
+		hostedByBoughtComms[sellerType] = commMap
+
 		if link.Relationship != nil {
 			hostedByProviderType[sellerType] = *link.Relationship
 		}
@@ -293,7 +294,7 @@ func parseExternalLinks(nodeConfig *conf.NodeConfig, node *SupplyChainNode) erro
 
 	node.HostedByProviderProps = hostedByProviderProps
 	node.HostedByProviderType = hostedByProviderType
-	node.HostedByProviderComms = hostedByProviderComms
+	node.HostedByBoughtComms = hostedByBoughtComms
 
 	return nil
 }

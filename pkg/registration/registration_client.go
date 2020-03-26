@@ -4,15 +4,14 @@ import (
 	"fmt"
 	"github.com/golang/glog"
 	protobuf "github.com/golang/protobuf/proto"
-	"github.com/turbonomic/data-ingestion-framework/pkg/conf"
 	"github.com/turbonomic/turbo-go-sdk/pkg/builder"
 	"github.com/turbonomic/turbo-go-sdk/pkg/proto"
+	"github.com/turbonomic/data-ingestion-framework/pkg/conf"
 )
 
 const (
 	TargetIdField string = "targetIdentifier"
-	ProbeCategory string = "Guest OS Processes"
-	targetType    string = "DataInjectionFramework"
+
 	propertyId    string = "id"
 )
 
@@ -43,8 +42,7 @@ func (p *DIFRegistrationClient) GetSupplyChainDefinition() []*proto.TemplateDTO 
 	templateDtoMap := p.supplyChain.CreateSupplyChainNodeTemplates()
 
 	for _, templateDto := range templateDtoMap {
-		glog.Infof("Template DTO for %s : \n		%++v\n",
-			templateDto.TemplateClass, protobuf.MarshalTextString(templateDto))
+		glog.Infof("Template DTO for %s : \n		%++v\n", templateDto.TemplateClass, protobuf.MarshalTextString(templateDto))
 		templateDtos = append(templateDtos, templateDto)
 	}
 
@@ -69,6 +67,10 @@ func (p *DIFRegistrationClient) GetAccountDefinition() []*proto.AccountDefEntry 
 // TargetType returns the target type as the default target type appended
 // an optional (from configuration) suffix
 func (p *DIFRegistrationClient) TargetType() string {
+	targetType := p.supplyChain.GetTargetType()
+	if len(targetType) == 0 {
+		targetType = conf.DefaultTargetType
+	}
 	if len(p.TargetTypeSuffix) == 0 {
 		return targetType
 	}

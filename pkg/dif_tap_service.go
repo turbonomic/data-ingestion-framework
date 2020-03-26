@@ -71,50 +71,27 @@ func createTAPService(args *conf.DIFProbeArgs) (*service.TAPService, error) {
 	communicator := difConf.Communicator
 
 	// Load the supply chain config
-	supplyChain, err := conf.LoadSupplyChain(supplyChainConf)
+	supplyChainConfig, err := conf.LoadSupplyChain(supplyChainConf)
 	if err != nil {
 		glog.Errorf("Error while parsing the supply chain config file %s: %++v", supplyChainConf, err)
 		os.Exit(1)
 	}
 
 	// Registration client - configured with the supply chain definition
-	registrationClient, err := registration.NewDIFRegistrationClient(supplyChain, difConf.TargetTypeSuffix)
+	registrationClient, err := registration.NewDIFRegistrationClient(supplyChainConfig, difConf.TargetTypeSuffix)
 
 	if err != nil {
 		glog.Fatalf("error: %v", err)
 	}
 	// Discovery client - target type, target address, supply chain
 	targetType := registrationClient.TargetType()
-	builder := probe.NewProbeBuilder(targetType, registration.ProbeCategory).
+	builder := probe.NewProbeBuilder(targetType, *supplyChainConfig.ProbeCategory).
 		WithDiscoveryOptions(probe.FullRediscoveryIntervalSecondsOption(int32(*args.DiscoveryIntervalSec))).
 		WithEntityMetadata(registrationClient).
 		RegisteredBy(registrationClient)
 
 	// TODO: TO ENABLE DISCOVERY
-	// Target
-	//var targetAddr string
-	//if difConf.TargetConf != nil {
-	//	targetAddr = difConf.TargetConf.Address //HTTP URL for metric json data
-	//}
-
-	//var optionalTargetAddr *string
-	//if len(targetAddr) > 0 {
-	//	optionalTargetAddr = &targetAddr
-	//}
-
-	//keepStandalone := args.KeepStandalone
-
-	//discoveryClient := discovery.NewDiscoveryClient(*keepStandalone, optionalTargetAddr, targetType, supplyChain)
-
-	//if len(targetAddr) > 0 {
-	//	// Preconfigured with target address or DIF metric endpoint
-	//	glog.Infof("***** Should discover target %s", targetAddr)
-	//	builder = builder.DiscoversTarget(targetAddr, discoveryClient)
-	//} else {
-	//	// Target will be entered from the UI
-	//	glog.Infof("Not discovering target")
-	//	builder = builder.WithDiscoveryClient(discoveryClient)
-	//}
+	//var discoveryClient discovery.DiscoveryClient()
 
 	return service.NewTAPServiceBuilder().
 		WithTurboCommunicator(communicator).

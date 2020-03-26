@@ -1,6 +1,9 @@
 package registration
 
-import "github.com/turbonomic/turbo-go-sdk/pkg/proto"
+import (
+	"github.com/turbonomic/turbo-go-sdk/pkg/builder"
+	"github.com/turbonomic/turbo-go-sdk/pkg/proto"
+)
 
 const (
 	// The default namespace of entity property
@@ -13,10 +16,28 @@ const (
 type DefaultValue struct {
 	Key      *string
 	Capacity float64
+	HasKey   *bool
 }
-
 // ===============================================================================
 
+var (
+	templateTypeMapping = map[string]proto.TemplateDTO_TemplateType{
+		"BASE":      proto.TemplateDTO_BASE,
+		"EXTENSION": proto.TemplateDTO_EXTENSION,
+	}
+	returnTypeMapping = map[string]builder.ReturnType{
+		"STRING":      builder.MergedEntityMetadata_STRING,
+		"LIST_STRING": builder.MergedEntityMetadata_LIST_STRING,
+	}
+
+	relationshipMapping = map[string]proto.Provider_ProviderType{
+		"HOSTING":      proto.Provider_HOSTING,
+		"LAYERED_OVER": proto.Provider_LAYERED_OVER,
+	}
+)
+
+// ===============================================================================
+// Mapping of entity type strings as specified in supply chain configuration yaml to Turbo SDK Entity Type
 var TemplateEntityTypeMap = map[string]proto.EntityDTO_EntityType{
 	"SWITCH":                          proto.EntityDTO_SWITCH,
 	"VIRTUAL_DATACENTER":              proto.EntityDTO_VIRTUAL_DATACENTER,
@@ -54,9 +75,9 @@ var TemplateEntityTypeMap = map[string]proto.EntityDTO_EntityType{
 	"APPLICATION":                     proto.EntityDTO_APPLICATION,
 	"THIS_ENTITY":                     proto.EntityDTO_THIS_ENTITY,
 	"COMPUTE_RESOURCE":                proto.EntityDTO_COMPUTE_RESOURCE,
-	"EntityDTO_MAC":                   proto.EntityDTO_MAC,
-	"EntityDTO_INTERNET":              proto.EntityDTO_INTERNET,
-	"EntityDTO_MOVER ":                proto.EntityDTO_MOVER,
+	"MAC":                             proto.EntityDTO_MAC,
+	"INTERNET":                        proto.EntityDTO_INTERNET,
+	"MOVER ":                          proto.EntityDTO_MOVER,
 	"DISTRIBUTED_VIRTUAL_PORTGROUP":   proto.EntityDTO_DISTRIBUTED_VIRTUAL_PORTGROUP,
 	"CONTAINER":                       proto.EntityDTO_CONTAINER,
 	"CONTAINER_POD":                   proto.EntityDTO_CONTAINER_POD,
@@ -86,6 +107,7 @@ var TemplateEntityTypeMap = map[string]proto.EntityDTO_EntityType{
 	"APPLICATION_COMPONENT":           proto.EntityDTO_APPLICATION_COMPONENT,
 }
 
+// Mapping of commodity type strings as specified in supply chain configuration yaml to Turbo SDK Commodity Type
 var TemplateCommodityTypeMap = map[string]proto.CommodityDTO_CommodityType{
 	"CLUSTER":                    proto.CommodityDTO_CLUSTER,
 	"THREADS":                    proto.CommodityDTO_THREADS,
