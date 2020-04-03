@@ -2,6 +2,7 @@ package pkg
 
 import (
 	"github.com/turbonomic/data-ingestion-framework/pkg/conf"
+	"github.com/turbonomic/data-ingestion-framework/pkg/discovery"
 	"github.com/turbonomic/data-ingestion-framework/pkg/registration"
 
 	"os"
@@ -70,13 +71,19 @@ func createTAPService(args *conf.DIFProbeArgs) (*service.TAPService, error) {
 	// Server communicator
 	communicator := difConf.Communicator
 
+	// Target
+	var targetAddr, targetName string
+	if difConf.TargetConf != nil {
+		targetAddr = difConf.TargetConf.Address //HTTP URL for metric json data
+		targetName = difConf.TargetConf.Name
+	}
+
 	// Load the supply chain config
 	supplyChainConfig, err := conf.LoadSupplyChain(supplyChainConf)
 	if err != nil {
 		glog.Errorf("Error while parsing the supply chain config file %s: %++v", supplyChainConf, err)
 		os.Exit(1)
 	}
-
 	// Registration client - configured with the supply chain definition
 	registrationClient, err := registration.NewDIFRegistrationClient(supplyChainConfig, difConf.TargetTypeSuffix)
 
@@ -85,13 +92,36 @@ func createTAPService(args *conf.DIFProbeArgs) (*service.TAPService, error) {
 	}
 	// Discovery client - target type, target address, supply chain
 	targetType := registrationClient.TargetType()
+	probeCategory := registrationClient.ProbeCategory()
+
+	var optionalTargetAddr *string
+	if len(targetAddr) > 0 {
+		optionalTargetAddr = &targetAddr
+	}
+	discoveryTargetParams := &discovery.DiscoveryTargetParams{
+		TargetType:            targetType,
+		ProbeCategory:         probeCategory,
+		TargetName:            targetName,
+		OptionalTargetAddress: optionalTargetAddr,
+	}
+	keepStandalone := args.KeepStandalone
+
+	discoveryClient := discovery.NewDiscoveryClient(discoveryTargetParams, *keepStandalone, supplyChainConfig)
+
 	builder := probe.NewProbeBuilder(targetType, *supplyChainConfig.ProbeCategory).
 		WithDiscoveryOptions(probe.FullRediscoveryIntervalSecondsOption(int32(*args.DiscoveryIntervalSec))).
 		WithEntityMetadata(registrationClient).
 		RegisteredBy(registrationClient)
 
-	// TODO: TO ENABLE DISCOVERY
-	//var discoveryClient discovery.DiscoveryClient()
+	if len(targetAddr) > 0 {
+		// Preconfigured with target address or DIF metric endpoint
+		glog.Infof("***** Should discover target %s", targetAddr)
+		builder = builder.DiscoversTarget(targetAddr, discoveryClient)
+	} else {
+		// Target will be entered from the UI
+		glog.Infof("Not discovering target")
+		builder = builder.WithDiscoveryClient(discoveryClient)
+	}
 
 	return service.NewTAPServiceBuilder().
 		WithTurboCommunicator(communicator).

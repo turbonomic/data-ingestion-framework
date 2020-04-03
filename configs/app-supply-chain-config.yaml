@@ -1,4 +1,5 @@
-
+probeCategory: Guest OS Processes
+targetType: DataIngestionFramework
 supplyChainNode:
   - templateClass: BUSINESS_APPLICATION
     templateType: BASE
@@ -10,9 +11,7 @@ supplyChainNode:
           cardinalityMin: 0
         value:
           - commodityType: TRANSACTION
-            key: key-placeholder
           - commodityType: RESPONSE_TIME
-            key: key-placeholder
           - commodityType: APPLICATION
       - key:
           templateClass: BUSINESS_TRANSACTION
@@ -21,18 +20,14 @@ supplyChainNode:
           cardinalityMin: 0
         value:
           - commodityType: TRANSACTION
-            key: key-placeholder
           - commodityType: RESPONSE_TIME
-            key: key-placeholder
           - commodityType: APPLICATION
   - templateClass: BUSINESS_TRANSACTION
     templateType: BASE
     templatePriority: -1
     commoditySold:
       - commodityType: TRANSACTION
-        key: key-placeholder
       - commodityType: RESPONSE_TIME
-        key: key-placeholder
       - commodityType: APPLICATION
     commodityBought:
       - key:
@@ -42,9 +37,7 @@ supplyChainNode:
           cardinalityMin: 0
         value:
           - commodityType: TRANSACTION
-            key: key-placeholder
           - commodityType: RESPONSE_TIME
-            key: key-placeholder
           - commodityType: APPLICATION
   - templateClass: SERVICE
     templateType: BASE
@@ -112,10 +105,20 @@ supplyChainNode:
         key: key-placeholder
       - commodityType: THREADS
         key: key-placeholder
+      - commodityType: APPLICATION
+        key: key-placeholder
     commodityBought:
       - key:
           templateClass: VIRTUAL_MACHINE
           providerType: HOSTING
+          cardinalityMax: 1
+          cardinalityMin: 1
+        value:
+          - commodityType: VCPU
+          - commodityType: VMEM
+      - key:
+          templateClass: CONTAINER
+          providerType: LAYERED_OVER
           cardinalityMax: 1
           cardinalityMin: 1
         value:
@@ -137,8 +140,8 @@ supplyChainNode:
             - type: RESPONSE_TIME
               hasKey: true
           probeEntityPropertyDef:
-            - name: VM_IP
-              description: IP Address of the VM hosting the discovered node
+            - name: HOST_IP
+              description: IP Address of the VM hosting the discovered application
           externalEntityPropertyDefs:
             - entity: VIRTUAL_MACHINE
               attribute: UsesEndPoints
@@ -163,6 +166,65 @@ supplyChainNode:
         - HEAP
         - COLLECTION_TIME
         - THREADS
+  - templateClass: DATABASE_SERVER
+    templateType: BASE
+    templatePriority: -1
+    commoditySold:
+      - commodityType: TRANSACTION
+        key: key-placeholder
+      - commodityType: RESPONSE_TIME
+        key: key-placeholder
+      - commodityType: CONNECTION
+      - commodityType: DB_MEM
+      - commodityType: DB_CACHE_HIT_RATE
+      - commodityType: APPLICATION
+    commodityBought:
+      - key:
+          templateClass: VIRTUAL_MACHINE
+          providerType: HOSTING
+          cardinalityMax: 1
+          cardinalityMin: 1
+        value:
+          - commodityType: VCPU
+          - commodityType: VMEM
+    externalLink:
+      - key: VIRTUAL_MACHINE
+        value:
+          buyerRef: DATABASE_SERVER
+          sellerRef: VIRTUAL_MACHINE
+          relationship: HOSTING
+          commodityDefs:
+            - type: VCPU
+              hasKey: false
+            - type: VMEM
+              hasKey: false
+          probeEntityPropertyDef:
+            - name: HOST_IP
+              description: IP Address of the VM hosting the discovered application
+          externalEntityPropertyDefs:
+            - entity: VIRTUAL_MACHINE
+              attribute: UsesEndPoints
+              propertyHandler:
+                methodName: getAddress
+                entityType: IP
+                directlyApply: false
+    mergedEntityMetaData:
+      keepStandalone: false
+      matchingMetadata:
+        returnType: STRING
+        matchingData:
+          - matchingProperty:
+              propertyName: IP
+        externalEntityReturnType: STRING
+        externalEntityMatchingProperty:
+          - matchingProperty:
+              propertyName: IP
+        commoditiesSold:
+          - RESPONSE_TIME
+          - TRANSACTION
+          - HEAP
+          - COLLECTION_TIME
+          - THREADS
   - templateClass: VIRTUAL_MACHINE
     templateType: BASE
     templatePriority: -1
@@ -175,7 +237,7 @@ supplyChainNode:
         returnType: LIST_STRING
         matchingData:
           - matchingProperty:
-              propertyName: IP
+              propertyName: HOST_IP
             delimiter: ","
         externalEntityReturnType: LIST_STRING
         externalEntityMatchingProperty:
@@ -184,3 +246,20 @@ supplyChainNode:
                 - virtual_machine_data
               fieldName: ipAddress
             delimiter: ","
+  - templateClass: CONTAINER
+    templateType: BASE
+    templatePriority: -1
+    commoditySold:
+      - commodityType: VCPU
+      - commodityType: VMEM
+    mergedEntityMetaData:
+      keepStandalone: true
+      matchingMetadata:
+        returnType: STRING
+        matchingData:
+          - matchingProperty:
+              propertyName: HOST_UUID
+        externalEntityReturnType: STRING
+        externalEntityMatchingProperty:
+          - matchingProperty:
+              propertyName: CNTFULL

@@ -36,6 +36,7 @@ type DIFConf struct {
 // Configuration for the TurboDIF target
 type DIFTargetConf struct {
 	Address string `json:"targetAddress,omitempty"`
+	Name    string `json:"targetName,omitempty"`
 }
 
 func NewDIFConf(configFilePath string) (*DIFConf, error) {

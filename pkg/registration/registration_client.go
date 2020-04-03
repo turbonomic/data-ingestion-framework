@@ -4,15 +4,16 @@ import (
 	"fmt"
 	"github.com/golang/glog"
 	protobuf "github.com/golang/protobuf/proto"
+	"github.com/turbonomic/data-ingestion-framework/pkg/conf"
 	"github.com/turbonomic/turbo-go-sdk/pkg/builder"
 	"github.com/turbonomic/turbo-go-sdk/pkg/proto"
-	"github.com/turbonomic/data-ingestion-framework/pkg/conf"
 )
 
 const (
-	TargetIdField string = "targetIdentifier"
+	TargetIdField   string = "targetIdentifier"
+	TargetNameField string = "Name"
 
-	propertyId    string = "id"
+	propertyId string = "id"
 )
 
 // Implements the TurboRegistrationClient interface
@@ -55,13 +56,26 @@ func (p *DIFRegistrationClient) GetIdentifyingFields() string {
 }
 
 func (p *DIFRegistrationClient) GetAccountDefinition() []*proto.AccountDefEntry {
+	nameIDAcctDefEntry := builder.NewAccountDefEntryBuilder(TargetNameField, "Name",
+		"Target Name", ".*", true, false).Create()
 
 	targetIDAcctDefEntry := builder.NewAccountDefEntryBuilder(TargetIdField, "URL",
 		"HTTP URL for the JSON DIF data", ".*", true, false).Create()
 
 	return []*proto.AccountDefEntry{
 		targetIDAcctDefEntry,
+		nameIDAcctDefEntry,
 	}
+}
+
+// TargetType returns the target type as the default target type appended
+// an optional (from configuration) suffix
+func (p *DIFRegistrationClient) ProbeCategory() string {
+	probeCategory := p.supplyChain.GetProbeCategory()
+	if len(probeCategory) == 0 {
+		probeCategory = conf.DefaultProbeCategory
+	}
+	return probeCategory
 }
 
 // TargetType returns the target type as the default target type appended

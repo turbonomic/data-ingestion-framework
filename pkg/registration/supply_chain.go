@@ -3,10 +3,10 @@ package registration
 import (
 	"fmt"
 	"github.com/golang/glog"
+	"github.com/turbonomic/data-ingestion-framework/pkg/conf"
 	"github.com/turbonomic/turbo-go-sdk/pkg/builder"
 	"github.com/turbonomic/turbo-go-sdk/pkg/proto"
 	"github.com/turbonomic/turbo-go-sdk/pkg/supplychain"
-	"github.com/turbonomic/data-ingestion-framework/pkg/conf"
 )
 
 // SupplyChain for the TurboDIF probe created from the supply chain configuration
@@ -52,10 +52,16 @@ func NewSupplyChain(config *conf.SupplyChainConfig) (*SupplyChain, error) {
 }
 
 func (s *SupplyChain) GetProbeCategory() string {
+	if s.config.ProbeCategory == nil {
+		return conf.DefaultProbeCategory
+	}
 	return *s.config.ProbeCategory
 }
 
 func (s *SupplyChain) GetTargetType() string {
+	if s.config.TargetType == nil {
+		return conf.DefaultTargetType
+	}
 	return *s.config.TargetType
 }
 
@@ -125,7 +131,7 @@ func parseSoldComms(nodeConfig *conf.NodeConfig, node *SupplyChainNode) error {
 		if _, exists := TemplateCommodityTypeMap[soldComm]; exists {
 			commType := TemplateCommodityTypeMap[soldComm]
 			supportedComms[commType] = DefaultValue{Key: sold.Key}
-			fmt.Printf("%s Sold comm %s::%v\n", nodeConfig.TemplateClass, soldComm, commType)
+			glog.V(3).Infof("%s Sold comm %s::%v\n", nodeConfig.TemplateClass, soldComm, commType)
 		} else {
 			glog.Warningf("%s: Invalid sold commodity type %s", nodeConfig.TemplateClass, soldComm)
 		}
@@ -161,13 +167,14 @@ func parseBoughtComms(nodeConfig *conf.NodeConfig, node *SupplyChainNode) error 
 		}
 
 		providerClass := *provider.TemplateClass
+		glog.V(3).Infof("%s : providerClass %v\n", nodeConfig.TemplateClass, providerClass)
 		if _, exists := TemplateEntityTypeMap[providerClass]; !exists {
 			return fmt.Errorf("%s: Invalid provider in bought commodities section for provider %s",
 				nodeConfig.TemplateClass, providerClass)
 		}
 
 		providerType := TemplateEntityTypeMap[providerClass]
-
+		glog.V(3).Infof("%s : provider type %v\n", nodeConfig.TemplateClass, providerType)
 		if bought.Comms == nil || len(bought.Comms) == 0 {
 			return fmt.Errorf("%s: Missing bought commodities for provider %s",
 				nodeConfig.TemplateClass, providerClass)
@@ -183,7 +190,7 @@ func parseBoughtComms(nodeConfig *conf.NodeConfig, node *SupplyChainNode) error 
 			boughtComm := *comm.CommodityType
 			if _, exists := TemplateCommodityTypeMap[boughtComm]; exists {
 				commType := TemplateCommodityTypeMap[boughtComm]
-				fmt.Printf("%s --> %s Bought comm %s::%s\n", nodeConfig.TemplateClass, providerClass,
+				glog.V(3).Infof("%s --> %s Bought comm %s::%s\n", nodeConfig.TemplateClass, providerClass,
 					boughtComm, commType)
 				commMap[commType] = DefaultValue{Key: comm.Key}
 			} else {
@@ -260,7 +267,7 @@ func parseExternalLinks(nodeConfig *conf.NodeConfig, node *SupplyChainNode) erro
 			commTypeDef := *commDef.CommType
 			if commType, exists := TemplateCommodityTypeMap[commTypeDef]; exists {
 				commMap[commType] = DefaultValue{HasKey: commDef.HasKey}
-				fmt.Printf("%s : %s-->%s hostedBy comm %s::%v\n", nodeConfig.TemplateClass,
+				glog.V(3).Infof("%s : %s-->%s hostedBy comm %s::%v\n", nodeConfig.TemplateClass,
 					buyerType, sellerType, commTypeDef, commType)
 			} else {
 				glog.Warningf("%s: Invalid commodity type %s in external link",
@@ -322,7 +329,7 @@ func (sn *SupplyChainNode) CreateTemplateDTO() (*proto.TemplateDTO, error) {
 				CommodityType: &commType,
 				Key:           commSold.Key,
 			}
-			fmt.Printf("%s : adding sold comm %++v\n", sn.NodeType, commTemplate)
+			glog.V(3).Infof("%s : adding sold comm %++v\n", sn.NodeType, commTemplate)
 			snBuilder.Sells(commTemplate)
 		} else {
 			glog.Errorf("Unsupported sold commodity type %s", *commSold.CommodityType)
@@ -358,7 +365,7 @@ func (sn *SupplyChainNode) CreateTemplateDTO() (*proto.TemplateDTO, error) {
 			}
 			if _, exists := TemplateCommodityTypeMap[*comm.CommodityType]; exists {
 				commType := TemplateCommodityTypeMap[*comm.CommodityType]
-				fmt.Printf("%s --> %s Bought comm %s::%s\n", sn.nodeConfig.TemplateClass, *provider.TemplateClass,
+				glog.V(3).Infof("%s --> %s Bought comm %s::%s\n", sn.nodeConfig.TemplateClass, *provider.TemplateClass,
 					*comm.CommodityType, commType)
 				commTemplate := &proto.TemplateCommodity{
 					CommodityType: &commType,
@@ -369,7 +376,7 @@ func (sn *SupplyChainNode) CreateTemplateDTO() (*proto.TemplateDTO, error) {
 		}
 		snBuilder.Provider(providerType, relationship)
 		for _, commTemplate := range commTemplateList {
-			fmt.Printf("%s --> %s adding bought comm %++v\n", sn.NodeType, providerType, commTemplate)
+			glog.V(3).Infof("%s --> %s adding bought comm %++v\n", sn.NodeType, providerType, commTemplate)
 			snBuilder.Buys(commTemplate)
 		}
 	}
@@ -398,16 +405,21 @@ func (sn *SupplyChainNode) CreateTemplateDTO() (*proto.TemplateDTO, error) {
 		}
 		for _, propDef := range link.ExternalEntityPropertyList {
 			eType := TemplateEntityTypeMap[propDef.Entity]
-			propHandlerEntity := TemplateEntityTypeMap[propDef.PropHandler.EntityType]
-			serverPropDef := &proto.ServerEntityPropDef{
-				Entity:     &eType,
-				Attribute:  &propDef.Attribute,
-				UseTopoExt: nil,
-				PropertyHandler: &proto.PropertyHandler{
+			var propertyHandler *proto.PropertyHandler
+			if propDef.PropHandler != nil {
+				propHandlerEntity := TemplateEntityTypeMap[propDef.PropHandler.EntityType]
+				propertyHandler = &proto.PropertyHandler{
 					MethodName:    &propDef.PropHandler.MethodName,
 					EntityType:    &propHandlerEntity,
 					DirectlyApply: &propDef.PropHandler.DirectlyApply,
-				},
+				}
+			}
+
+			serverPropDef := &proto.ServerEntityPropDef{
+				Entity:          &eType,
+				Attribute:       &propDef.Attribute,
+				UseTopoExt:      nil,
+				PropertyHandler: propertyHandler,
 			}
 			externalLinkBuilder.ExternalEntityPropertyDef(serverPropDef)
 		}
@@ -426,7 +438,7 @@ func (sn *SupplyChainNode) CreateTemplateDTO() (*proto.TemplateDTO, error) {
 	// Stitching Metadata
 	metadata := sn.nodeConfig.MergedEntityMetaData
 	if metadata != nil {
-		fmt.Printf("metadata %++v\n", metadata)
+		glog.V(3).Infof("metadata %++v\n", metadata)
 		var metadataBuilder *builder.MergedEntityMetadataBuilder
 		metadataBuilder = builder.NewMergedEntityMetadataBuilder().
 			KeepInTopology(metadata.KeepInTopology)
@@ -445,14 +457,14 @@ func (sn *SupplyChainNode) CreateTemplateDTO() (*proto.TemplateDTO, error) {
 		}
 		matchingData := metadata.MatchingMetadata
 		if matchingData != nil {
-			fmt.Printf("matchingData %++v\n", matchingData)
+			glog.V(3).Infof("matchingData %++v\n", matchingData)
 			returnType := returnTypeMapping[matchingData.ReturnType]
 			extReturnType := returnTypeMapping[matchingData.ExternalEntityReturnType]
 			metadataBuilder.InternalMatchingType(returnType).
 				ExternalMatchingType(extReturnType)
 
 			for _, md := range matchingData.MatchingDataList {
-				fmt.Printf("internal md %++v\n", md)
+				glog.V(3).Infof("internal md %++v\n", md)
 				if md.Delimiter == "" {
 					metadataBuilder.InternalMatchingProperty(md.MatchingProperty.PropertyName)
 				} else {
@@ -461,7 +473,7 @@ func (sn *SupplyChainNode) CreateTemplateDTO() (*proto.TemplateDTO, error) {
 			}
 
 			for _, md := range matchingData.ExternalEntityMatchingPropertyList {
-				fmt.Printf("external md %++v\n", md)
+				glog.V(3).Infof("external md %++v\n", md)
 				if md.MatchingProperty != nil {
 					if md.Delimiter == "" {
 						metadataBuilder.ExternalMatchingProperty(md.MatchingProperty.PropertyName)

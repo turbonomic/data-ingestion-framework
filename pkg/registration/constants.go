@@ -18,6 +18,7 @@ type DefaultValue struct {
 	Capacity float64
 	HasKey   *bool
 }
+
 // ===============================================================================
 
 var (
@@ -225,4 +226,13 @@ var AccessTemplateCommodityTypeMap = map[string]proto.CommodityDTO_CommodityType
 	"VMPM_ACCESS":    proto.CommodityDTO_VMPM_ACCESS,
 	"APPLICATION":    proto.CommodityDTO_APPLICATION,
 	"DATACENTER":     proto.CommodityDTO_DATACENTER,
+}
+
+// ============================================================================================
+
+// Mapping to the entity that will provide the key value for the commodities
+var KeySupplierMapping = map[proto.EntityDTO_EntityType]proto.EntityDTO_EntityType{
+	proto.EntityDTO_APPLICATION_COMPONENT: proto.EntityDTO_SERVICE,
+	proto.EntityDTO_SERVICE:               proto.EntityDTO_SERVICE,
+	proto.EntityDTO_DATABASE_SERVER:       proto.EntityDTO_SERVICE,
 }
