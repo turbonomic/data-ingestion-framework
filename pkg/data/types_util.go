@@ -82,4 +82,5 @@ var DIFMetricToTemplateCommodityStringMap = map[string]string{
 	"collectionTime": "COLLECTION_TIME",
 	"heap":           "HEAP",
 	"custom":         "SLA_COMMODITY",
+	"kpi":            "SLA_COMMODITY",
 }

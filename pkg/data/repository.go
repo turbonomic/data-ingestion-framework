@@ -224,7 +224,7 @@ func (r *DIFRepository) addEntityConnections() {
 			//glog.Infof("Consumer %s::%s ---> ", cType, cId)
 			consumerEntity := r.EntityMap[cType][cId]
 			if consumerEntity == nil {
-				glog.Errorf("NULL CDP Entity for %s::%s", cType, cId)
+				glog.Errorf("NULL DIF Entity for %s::%s", cType, cId)
 				continue
 			}
 			for pId, pType := range pMap {

@@ -124,6 +124,7 @@ var TemplateCommodityTypeMap = map[string]proto.CommodityDTO_CommodityType{
 	"SAME_CLUSTER_MOVE_SVC":      proto.CommodityDTO_SAME_CLUSTER_MOVE_SVC,
 	"Q3_VCPU":                    proto.CommodityDTO_Q3_VCPU,
 	"SLA_COMMODITY":              proto.CommodityDTO_SLA_COMMODITY,
+	//TODO: "KPI": proto.Commodity_KPI
 	"CROSS_CLUSTER_MOVE_SVC":     proto.CommodityDTO_CROSS_CLUSTER_MOVE_SVC,
 	"NUMBER_CONSUMERS_PM":        proto.CommodityDTO_NUMBER_CONSUMERS_PM,
 	"STORAGE_ALLOCATION":         proto.CommodityDTO_STORAGE_ALLOCATION,

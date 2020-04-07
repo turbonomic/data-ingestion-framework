@@ -9,14 +9,14 @@ import (
 
 type CommodityKeyBuilder struct {
 	entityType proto.EntityDTO_EntityType
-	cdpEntity  *data.BasicDIFEntity
+	difEntity  *data.BasicDIFEntity
 }
 
 func NewCommodityKeyBuilder(entityType proto.EntityDTO_EntityType,
-	cdpEntity *data.BasicDIFEntity) *CommodityKeyBuilder {
+	difEntity *data.BasicDIFEntity) *CommodityKeyBuilder {
 	return &CommodityKeyBuilder{
 		entityType: entityType,
-		cdpEntity:  cdpEntity,
+		difEntity:  difEntity,
 	}
 }
 
@@ -26,7 +26,7 @@ func (kb *CommodityKeyBuilder) GetKey() *string {
 		return nil
 	}
 
-	difEntity := kb.cdpEntity
+	difEntity := kb.difEntity
 
 	keySupplierType := registration.KeySupplierMapping[kb.entityType]
 	if keySupplierType == kb.entityType {

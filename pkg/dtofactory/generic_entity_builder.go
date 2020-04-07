@@ -13,19 +13,19 @@ import (
 
 type GenericEntityBuilder struct {
 	entityType      proto.EntityDTO_EntityType
-	cdpEntity       *data.BasicDIFEntity
+	difEntity       *data.BasicDIFEntity
 	scope           string
 	keepStandalone  bool
 	supplyChainNode *registration.SupplyChainNode
 }
 
 func NewGenericEntityBuilder(entityType proto.EntityDTO_EntityType,
-	cdpEntity *data.BasicDIFEntity, scope string, keepStandalone bool,
+	difEntity *data.BasicDIFEntity, scope string, keepStandalone bool,
 	supplyChainNode *registration.SupplyChainNode) *GenericEntityBuilder {
 	return &GenericEntityBuilder{
 		entityType:      entityType,
 		keepStandalone:  keepStandalone,
-		cdpEntity:       cdpEntity,
+		difEntity:       difEntity,
 		scope:           scope,
 		supplyChainNode: supplyChainNode,
 	}
@@ -34,17 +34,17 @@ func NewGenericEntityBuilder(entityType proto.EntityDTO_EntityType,
 func (eb *GenericEntityBuilder) BuildEntity() (*proto.EntityDTO, error) {
 	var dto *proto.EntityDTO
 
-	id := getEntityId(eb.entityType, eb.cdpEntity.EntityId, eb.scope)
+	id := getEntityId(eb.entityType, eb.difEntity.EntityId, eb.scope)
 	glog.Infof("*** building ... %s", id)
 
 	entityBuilder := builder.
 		NewEntityDTOBuilder(eb.entityType, id).
-		DisplayName(getDisplayEntityName(eb.entityType, eb.cdpEntity.EntityId, eb.scope))
+		DisplayName(getDisplayEntityName(eb.entityType, eb.difEntity.EntityId, eb.scope))
 
 	mergePropertiesMap := make(map[string]string)
 	commoditiesMap := make(map[proto.CommodityDTO_CommodityType][]*builder.CommodityDTOBuilder) //[]*proto.CommodityDTO)
 
-	for _, difEntity := range eb.cdpEntity.GetDIFEntities() {
+	for _, difEntity := range eb.difEntity.GetDIFEntities() {
 		// Entity Properties from matching identifiers
 		if difEntity.MatchingIdentifiers != nil {
 			matchingIdentifiers := difEntity.MatchingIdentifiers
@@ -83,7 +83,7 @@ func (eb *GenericEntityBuilder) BuildEntity() (*proto.EntityDTO, error) {
 	entityBuilder.SellsCommodities(soldCommodities)
 
 	// Bought commodities
-	for pType, providerIds := range eb.cdpEntity.GetProviders() {
+	for pType, providerIds := range eb.difEntity.GetProviders() {
 
 		// select commodities bought from the provider
 		providerType, boughtCommodities := eb.boughtCommodities(pType, commoditiesMap)
@@ -104,9 +104,9 @@ func (eb *GenericEntityBuilder) BuildEntity() (*proto.EntityDTO, error) {
 
 	// External providers, commodities and metadata specified using IP or UUID
 	scHostedByProviderType := supplyChainNode.HostedByProviderType //map of external provider type and hosting relationship
-	if eb.cdpEntity.GetExternalProviderByIP() != nil {
+	if eb.difEntity.GetExternalProviderByIP() != nil {
 		// All external providers for this entity - set as provider in the DTO
-		for pType, pMap := range eb.cdpEntity.GetExternalProviderByIP() {
+		for pType, pMap := range eb.difEntity.GetExternalProviderByIP() {
 			// select commodities bought from the provider
 			providerType, boughtCommodities := eb.externalBoughtCommodities(pType, commoditiesMap)
 
@@ -131,7 +131,7 @@ func (eb *GenericEntityBuilder) BuildEntity() (*proto.EntityDTO, error) {
 			if scHostedByProviderType[*providerType] == "HOSTING" && len(pMap) > 1 {
 				// There should only be one of the hosting provider
 				glog.Errorf("%s::%s Invalid number of external hostedBy providers %v",
-					eb.entityType, eb.cdpEntity.EntityId, providerIds)
+					eb.entityType, eb.difEntity.EntityId, providerIds)
 			}
 			entityBuilder.
 				WithProperty(getEntityPropertyNameValue("HOST_IP",
@@ -139,9 +139,9 @@ func (eb *GenericEntityBuilder) BuildEntity() (*proto.EntityDTO, error) {
 		}
 	}
 
-	if eb.cdpEntity.GetExternalProviderByUUID() != nil {
+	if eb.difEntity.GetExternalProviderByUUID() != nil {
 		// All external providers for this entity - set as provider in the DTO
-		for pType, pMap := range eb.cdpEntity.GetExternalProviderByUUID() {
+		for pType, pMap := range eb.difEntity.GetExternalProviderByUUID() {
 			// select commodities bought from the provider
 			providerType, boughtCommodities := eb.externalBoughtCommodities(pType, commoditiesMap)
 
@@ -166,7 +166,7 @@ func (eb *GenericEntityBuilder) BuildEntity() (*proto.EntityDTO, error) {
 			if scHostedByProviderType[*providerType] == "HOSTING" && len(pMap) > 1 {
 				// There should only be one of the hosting provider
 				glog.Errorf("%s::%s Invalid number of external hostedBy providers %v",
-					eb.entityType, eb.cdpEntity.EntityId, providerIds)
+					eb.entityType, eb.difEntity.EntityId, providerIds)
 			}
 			entityBuilder.
 				WithProperty(getEntityPropertyNameValue("HOST_UUID",
@@ -198,14 +198,14 @@ func (eb *GenericEntityBuilder) soldCommodities(
 	scSupportedComms := eb.supplyChainNode.SupportedComms // map of associated comms
 	scSupportedAccessComms := eb.supplyChainNode.SupportedAccessComms
 
-	kb := NewCommodityKeyBuilder(eb.entityType, eb.cdpEntity)
+	kb := NewCommodityKeyBuilder(eb.entityType, eb.difEntity)
 	soldCommKey := kb.GetKey()
 
 	for commType, commList := range commoditiesMap {
 		_, ok := scSupportedComms[commType] // is the commodity type supported by the supply chain
 		if !ok {                            //do no include commodity not specified in the supply chain
 			glog.Warningf("%s:%s : unsupported sold commodity type %v",
-				eb.entityType, eb.cdpEntity.EntityId, commType)
+				eb.entityType, eb.difEntity.EntityId, commType)
 			continue
 		}
 		commTemplate := scSupportedComms[commType] //commodity template
@@ -256,7 +256,7 @@ func (eb *GenericEntityBuilder) boughtCommodities(pType data.DIFEntityType,
 	scProviderComms := scSupportedBoughtComms[providerType]
 	scProviderAccessComms := scSupportedBoughtAccessComms[providerType]
 
-	kb := NewCommodityKeyBuilder(eb.entityType, eb.cdpEntity)
+	kb := NewCommodityKeyBuilder(eb.entityType, eb.difEntity)
 	boughtCommKey := kb.GetKey()
 
 	// Select commodities bought from the provider from the commodities map
@@ -264,7 +264,7 @@ func (eb *GenericEntityBuilder) boughtCommodities(pType data.DIFEntityType,
 		_, ok := scProviderComms[commType]
 		if !ok { //dp not include commodity not specified in the supply chain?
 			glog.Warningf("%s::%s: unsupported bought commodity type %v",
-				eb.entityType, eb.cdpEntity.EntityId, commType)
+				eb.entityType, eb.difEntity.EntityId, commType)
 			continue
 		}
 		commTemplate := scProviderComms[commType]

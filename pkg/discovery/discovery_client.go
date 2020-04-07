@@ -137,12 +137,12 @@ func (d *DIFDiscoveryClient) Discover(accountValues []*proto.AccountValue) (*pro
 	repository.InitRepository(difResult.ParsedEntities)
 
 	for entityType, eMap := range repository.EntityMap {
-		for entityId, cdpEntity := range eMap {
+		for entityId, difEntity := range eMap {
 			glog.V(4).Infof("Entity %s::%s	-----> ", entityType, entityId)
-			for pType, pIds := range cdpEntity.GetProviders() {
+			for pType, pIds := range difEntity.GetProviders() {
 				glog.V(4).Infof("		provider %s [%v] ---> ", pType, pIds)
 			}
-			for pType, pMap := range cdpEntity.HostsByIP {
+			for pType, pMap := range difEntity.HostsByIP {
 				for pId, _ := range pMap {
 					glog.V(4).Infof("		hostedBy %s [%v] ---> ", pType, pId)
 				}
@@ -196,27 +196,27 @@ func (d *DIFDiscoveryClient) buildEntities(repository *data.DIFRepository, scope
 
 	supplyChainNodeMap := supplyChain.GetSupplyChainNodes()
 	// Build entity DTOs using the corresponding supply chain template
-	for cdpEntityType, eMap := range repository.EntityMap {
-		for cdpEntityId, cdpEntity := range eMap {
+	for difEntityType, eMap := range repository.EntityMap {
+		for difEntityId, difEntity := range eMap {
 			// entity type
-			eType := dtofactory.EntityType(cdpEntityType)
+			eType := dtofactory.EntityType(difEntityType)
 			if eType == nil {
-				glog.Errorf("Invalid entity type %v", cdpEntity)
+				glog.Errorf("Invalid entity type %v", difEntity)
 				continue
 			}
 			entityType := *eType
 
 			supplyChainNode, validType := supplyChainNodeMap[entityType]
 			if !validType {
-				glog.Errorf("Supply chain does not support entity type %v", cdpEntity)
+				glog.Errorf("Supply chain does not support entity type %v", difEntity)
 				continue
 			}
 
-			ab := dtofactory.NewGenericEntityBuilder(entityType, cdpEntity, scope,
+			ab := dtofactory.NewGenericEntityBuilder(entityType, difEntity, scope,
 				d.keepStandalone, supplyChainNode)
 			dto, err := ab.BuildEntity()
 			if err != nil {
-				glog.Errorf("Error building entity %s::%s %++v", cdpEntityType, cdpEntityId, err)
+				glog.Errorf("Error building entity %s::%s %++v", difEntity, difEntityId, err)
 				continue
 			}
 			entities = append(entities, dto)
