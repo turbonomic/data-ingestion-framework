@@ -1,0 +1,265 @@
+probeCategory: Guest OS Processes
+targetType: DataIngestionFramework
+supplyChainNode:
+  - templateClass: BUSINESS_APPLICATION
+    templateType: BASE
+    templatePriority: -1
+    commodityBought:
+      - key:
+          templateClass: SERVICE
+          cardinalityMax: 2147483647
+          cardinalityMin: 0
+        value:
+          - commodityType: TRANSACTION
+          - commodityType: RESPONSE_TIME
+          - commodityType: APPLICATION
+      - key:
+          templateClass: BUSINESS_TRANSACTION
+          providerType: LAYERED_OVER
+          cardinalityMax: 2147483647
+          cardinalityMin: 0
+        value:
+          - commodityType: TRANSACTION
+          - commodityType: RESPONSE_TIME
+          - commodityType: APPLICATION
+  - templateClass: BUSINESS_TRANSACTION
+    templateType: BASE
+    templatePriority: -1
+    commoditySold:
+      - commodityType: TRANSACTION
+      - commodityType: RESPONSE_TIME
+      - commodityType: APPLICATION
+    commodityBought:
+      - key:
+          templateClass: SERVICE
+          providerType: LAYERED_OVER
+          cardinalityMax: 2147483647
+          cardinalityMin: 0
+        value:
+          - commodityType: TRANSACTION
+          - commodityType: RESPONSE_TIME
+          - commodityType: APPLICATION
+  - templateClass: SERVICE
+    templateType: BASE
+    templatePriority: -1
+    commoditySold:
+      - commodityType: TRANSACTION
+        key: key-placeholder
+      - commodityType: RESPONSE_TIME
+        key: key-placeholder
+      - commodityType: APPLICATION
+    commodityBought:
+      - key:
+          templateClass: APPLICATION_COMPONENT
+          providerType: LAYERED_OVER
+          cardinalityMax: 2147483647
+          cardinalityMin: 0
+        value:
+          - commodityType: TRANSACTION
+            key: key-placeholder
+          - commodityType: RESPONSE_TIME
+            key: key-placeholder
+          - commodityType: APPLICATION
+      - key:
+          templateClass: DATABASE_SERVER
+          providerType: LAYERED_OVER
+          cardinalityMax: 2147483647
+          cardinalityMin: 0
+        value:
+          - commodityType: TRANSACTION
+            key: key-placeholder
+          - commodityType: RESPONSE_TIME
+            key: key-placeholder
+          - commodityType: APPLICATION
+    mergedEntityMetaData:
+      keepStandalone: false
+      matchingMetadata:
+        returnType: STRING
+        matchingData:
+          - matchingProperty:
+              propertyName: IP
+        externalEntityReturnType: LIST_STRING
+        externalEntityMatchingProperty:
+          - matchingProperty:
+              propertyName: IP
+            delimiter: ","
+      commoditiesSold:
+        - RESPONSE_TIME
+        - TRANSACTION
+      commoditiesBought:
+        - providerType: APPLICATION_COMPONENT
+          commodityMetadata:
+            - RESPONSE_TIME
+            - TRANSACTION
+  - templateClass: APPLICATION_COMPONENT
+    templateType: BASE
+    templatePriority: -1
+    commoditySold:
+      - commodityType: TRANSACTION
+        key: key-placeholder
+      - commodityType: RESPONSE_TIME
+        key: key-placeholder
+      - commodityType: HEAP
+        key: key-placeholder
+      - commodityType: COLLECTION_TIME
+        key: key-placeholder
+      - commodityType: THREADS
+        key: key-placeholder
+      - commodityType: APPLICATION
+        key: key-placeholder
+    commodityBought:
+      - key:
+          templateClass: VIRTUAL_MACHINE
+          providerType: HOSTING
+          cardinalityMax: 1
+          cardinalityMin: 1
+        value:
+          - commodityType: VCPU
+          - commodityType: VMEM
+      - key:
+          templateClass: CONTAINER
+          providerType: LAYERED_OVER
+          cardinalityMax: 1
+          cardinalityMin: 1
+        value:
+          - commodityType: VCPU
+          - commodityType: VMEM
+    externalLink:
+      - key: VIRTUAL_MACHINE
+        value:
+          buyerRef: APPLICATION_COMPONENT
+          sellerRef: VIRTUAL_MACHINE
+          relationship: HOSTING
+          commodityDefs:
+            - type: VCPU
+              hasKey: false
+            - type: VMEM
+              hasKey: false
+            - type: TRANSACTION
+              hasKey: true
+            - type: RESPONSE_TIME
+              hasKey: true
+          probeEntityPropertyDef:
+            - name: HOST_IP
+              description: IP Address of the VM hosting the discovered application
+          externalEntityPropertyDefs:
+            - entity: VIRTUAL_MACHINE
+              attribute: UsesEndPoints
+              propertyHandler:
+                methodName: getAddress
+                entityType: IP
+                directlyApply: false
+    mergedEntityMetaData:
+      keepStandalone: false
+      matchingMetadata:
+        returnType: STRING
+        matchingData:
+          - matchingProperty:
+              propertyName: IP
+        externalEntityReturnType: STRING
+        externalEntityMatchingProperty:
+          - matchingProperty:
+              propertyName: IP
+      commoditiesSold:
+        - RESPONSE_TIME
+        - TRANSACTION
+        - HEAP
+        - COLLECTION_TIME
+        - THREADS
+  - templateClass: DATABASE_SERVER
+    templateType: BASE
+    templatePriority: -1
+    commoditySold:
+      - commodityType: TRANSACTION
+        key: key-placeholder
+      - commodityType: RESPONSE_TIME
+        key: key-placeholder
+      - commodityType: CONNECTION
+      - commodityType: DB_MEM
+      - commodityType: DB_CACHE_HIT_RATE
+      - commodityType: APPLICATION
+    commodityBought:
+      - key:
+          templateClass: VIRTUAL_MACHINE
+          providerType: HOSTING
+          cardinalityMax: 1
+          cardinalityMin: 1
+        value:
+          - commodityType: VCPU
+          - commodityType: VMEM
+    externalLink:
+      - key: VIRTUAL_MACHINE
+        value:
+          buyerRef: DATABASE_SERVER
+          sellerRef: VIRTUAL_MACHINE
+          relationship: HOSTING
+          commodityDefs:
+            - type: VCPU
+              hasKey: false
+            - type: VMEM
+              hasKey: false
+          probeEntityPropertyDef:
+            - name: HOST_IP
+              description: IP Address of the VM hosting the discovered application
+          externalEntityPropertyDefs:
+            - entity: VIRTUAL_MACHINE
+              attribute: UsesEndPoints
+              propertyHandler:
+                methodName: getAddress
+                entityType: IP
+                directlyApply: false
+    mergedEntityMetaData:
+      keepStandalone: false
+      matchingMetadata:
+        returnType: STRING
+        matchingData:
+          - matchingProperty:
+              propertyName: IP
+        externalEntityReturnType: STRING
+        externalEntityMatchingProperty:
+          - matchingProperty:
+              propertyName: IP
+        commoditiesSold:
+          - RESPONSE_TIME
+          - TRANSACTION
+          - HEAP
+          - COLLECTION_TIME
+          - THREADS
+  - templateClass: VIRTUAL_MACHINE
+    templateType: BASE
+    templatePriority: -1
+    commoditySold:
+      - commodityType: VCPU
+      - commodityType: VMEM
+    mergedEntityMetaData:
+      keepStandalone: true
+      matchingMetadata:
+        returnType: LIST_STRING
+        matchingData:
+          - matchingProperty:
+              propertyName: HOST_IP
+            delimiter: ","
+        externalEntityReturnType: LIST_STRING
+        externalEntityMatchingProperty:
+          - matchingField:
+              messagePath:
+                - virtual_machine_data
+              fieldName: ipAddress
+            delimiter: ","
+  - templateClass: CONTAINER
+    templateType: BASE
+    templatePriority: -1
+    commoditySold:
+      - commodityType: VCPU
+      - commodityType: VMEM
+    mergedEntityMetaData:
+      keepStandalone: true
+      matchingMetadata:
+        returnType: STRING
+        matchingData:
+          - matchingProperty:
+              propertyName: HOST_UUID
+        externalEntityReturnType: STRING
+        externalEntityMatchingProperty:
+          - matchingProperty:
+              propertyName: CNTFULL
