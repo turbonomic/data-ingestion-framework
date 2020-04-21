@@ -22,30 +22,23 @@ func (cb *GenericCommodityBuilder) BuildCommodity() (map[proto.CommodityDTO_Comm
 	result := make(map[proto.CommodityDTO_CommodityType][]*builder.CommodityDTOBuilder)
 
 	metrics := cb.entity.Metrics
-	for _, metricMap := range metrics { //Metrics is array of metric map [name,metric Value]
-
-		if len(metricMap) > 1 {
-			glog.Errorf("Invalid metric data %++v", metricMap)
+	for metricKey, metricList := range metrics { // Metrics is array of metric map [name,metric Value]
+		// Check is metric is supported
+		metricName := data.DIFMetricToTemplateCommodityStringMap[metricKey]
+		commodityType, exists := registration.TemplateCommodityTypeMap[metricName]
+		if !exists {
+			glog.Errorf("%s:%s data has unsupported metric %s\n",
+				cb.entity.Type, cb.entity.UID, metricName)
 			continue
 		}
-		for metricKey, metricList := range metricMap {
-			// Check is metric is supported
-			metricName := data.DIFMetricToTemplateCommodityStringMap[metricKey]
-			commodityType, exists := registration.TemplateCommodityTypeMap[metricName]
-			if !exists {
-				glog.Errorf("%s:%s data has unsupported metric %s\n",
-					cb.entity.Type, cb.entity.UID, metricName)
-				continue
-			}
 
-			commodities, err := cb.convertFromMetricValueListToCommodityList(commodityType, metricList)
+		commodities, err := cb.convertFromMetricValueListToCommodityList(commodityType, metricList)
 
-			if err != nil {
-				glog.Errorf("%v", err)
-			}
-
-			result[commodityType] = commodities
+		if err != nil {
+			glog.Errorf("%v", err)
 		}
+
+		result[commodityType] = commodities
 	}
 
 	return result, nil

@@ -11,30 +11,26 @@
    "hostedOn": null,
    "matchIdentifiers": null,
    "partOf": null,
-   "metrics": [
-    {
-     "responseTime": [
-      {
-       "average": 50,
-       "unit": "mhz",
-       "key": null,
-       "description": null,
-       "rawData": null
-      }
-     ]
-    },
-    {
-     "transaction": [
-      {
-       "average": 50,
-       "unit": "mhz",
-       "key": null,
-       "description": null,
-       "rawData": null
-      }
-     ]
-    }
-   ]
+   "metrics": {
+    "responseTime": [
+     {
+      "average": 50,
+      "unit": "mhz",
+      "key": null,
+      "description": null,
+      "rawData": null
+     }
+    ],
+    "transaction": [
+     {
+      "average": 50,
+      "unit": "mhz",
+      "key": null,
+      "description": null,
+      "rawData": null
+     }
+    ]
+   }
   },
   {
    "uniqueId": "app-2",
@@ -43,30 +39,26 @@
    "hostedOn": null,
    "matchIdentifiers": null,
    "partOf": null,
-   "metrics": [
-    {
-     "responseTime": [
-      {
-       "average": 50,
-       "unit": "mhz",
-       "key": null,
-       "description": null,
-       "rawData": null
-      }
-     ]
-    },
-    {
-     "transaction": [
-      {
-       "average": 50,
-       "unit": "mhz",
-       "key": null,
-       "description": null,
-       "rawData": null
-      }
-     ]
-    }
-   ]
+   "metrics": {
+    "responseTime": [
+     {
+      "average": 50,
+      "unit": "mhz",
+      "key": null,
+      "description": null,
+      "rawData": null
+     }
+    ],
+    "transaction": [
+     {
+      "average": 50,
+      "unit": "mhz",
+      "key": null,
+      "description": null,
+      "rawData": null
+     }
+    ]
+   }
   },
   {
    "uniqueId": "app-3",
@@ -75,30 +67,26 @@
    "hostedOn": null,
    "matchIdentifiers": null,
    "partOf": null,
-   "metrics": [
-    {
-     "responseTime": [
-      {
-       "average": 50,
-       "unit": "mhz",
-       "key": null,
-       "description": null,
-       "rawData": null
-      }
-     ]
-    },
-    {
-     "transaction": [
-      {
-       "average": 50,
-       "unit": "mhz",
-       "key": null,
-       "description": null,
-       "rawData": null
-      }
-     ]
-    }
-   ]
+   "metrics": {
+    "responseTime": [
+     {
+      "average": 50,
+      "unit": "mhz",
+      "key": null,
+      "description": null,
+      "rawData": null
+     }
+    ],
+    "transaction": [
+     {
+      "average": 50,
+      "unit": "mhz",
+      "key": null,
+      "description": null,
+      "rawData": null
+     }
+    ]
+   }
   },
   {
    "uniqueId": "app-4",
@@ -107,30 +95,26 @@
    "hostedOn": null,
    "matchIdentifiers": null,
    "partOf": null,
-   "metrics": [
-    {
-     "responseTime": [
-      {
-       "average": 50,
-       "unit": "mhz",
-       "key": null,
-       "description": null,
-       "rawData": null
-      }
-     ]
-    },
-    {
-     "transaction": [
-      {
-       "average": 50,
-       "unit": "mhz",
-       "key": null,
-       "description": null,
-       "rawData": null
-      }
-     ]
-    }
-   ]
+   "metrics": {
+    "responseTime": [
+     {
+      "average": 50,
+      "unit": "mhz",
+      "key": null,
+      "description": null,
+      "rawData": null
+     }
+    ],
+    "transaction": [
+     {
+      "average": 50,
+      "unit": "mhz",
+      "key": null,
+      "description": null,
+      "rawData": null
+     }
+    ]
+   }
   },
   {
    "uniqueId": "app-5",
@@ -139,30 +123,26 @@
    "hostedOn": null,
    "matchIdentifiers": null,
    "partOf": null,
-   "metrics": [
-    {
-     "responseTime": [
-      {
-       "average": 50,
-       "unit": "mhz",
-       "key": null,
-       "description": null,
-       "rawData": null
-      }
-     ]
-    },
-    {
-     "transaction": [
-      {
-       "average": 50,
-       "unit": "mhz",
-       "key": null,
-       "description": null,
-       "rawData": null
-      }
-     ]
-    }
-   ]
+   "metrics": {
+    "responseTime": [
+     {
+      "average": 50,
+      "unit": "mhz",
+      "key": null,
+      "description": null,
+      "rawData": null
+     }
+    ],
+    "transaction": [
+     {
+      "average": 50,
+      "unit": "mhz",
+      "key": null,
+      "description": null,
+      "rawData": null
+     }
+    ]
+   }
   }
  ]
 }

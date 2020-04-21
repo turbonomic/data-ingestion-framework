@@ -124,7 +124,7 @@ var TemplateCommodityTypeMap = map[string]proto.CommodityDTO_CommodityType{
 	"SAME_CLUSTER_MOVE_SVC":      proto.CommodityDTO_SAME_CLUSTER_MOVE_SVC,
 	"Q3_VCPU":                    proto.CommodityDTO_Q3_VCPU,
 	"SLA_COMMODITY":              proto.CommodityDTO_SLA_COMMODITY,
-	//TODO: "KPI": proto.Commodity_KPI
+	"KPI":              		  proto.CommodityDTO_KPI,
 	"CROSS_CLUSTER_MOVE_SVC":     proto.CommodityDTO_CROSS_CLUSTER_MOVE_SVC,
 	"NUMBER_CONSUMERS_PM":        proto.CommodityDTO_NUMBER_CONSUMERS_PM,
 	"STORAGE_ALLOCATION":         proto.CommodityDTO_STORAGE_ALLOCATION,
@@ -213,12 +213,10 @@ var TemplateCommodityTypeMap = map[string]proto.CommodityDTO_CommodityType{
 	"DESIRED_COUPON":             proto.CommodityDTO_DESIRED_COUPON,
 	"VCPU_REQUEST":               proto.CommodityDTO_VCPU_REQUEST,
 	"VMEM_REQUEST":               proto.CommodityDTO_VMEM_REQUEST,
-	"CPU_REQUEST_ALLOCATION":     proto.CommodityDTO_CPU_REQUEST_ALLOCATION,
-	"MEM_REQUEST_ALLOCATION":     proto.CommodityDTO_MEM_REQUEST_ALLOCATION,
+	"CPU_REQUEST_ALLOCATION":     proto.CommodityDTO_VCPU_REQUEST_QUOTA,
+	"MEM_REQUEST_ALLOCATION":     proto.CommodityDTO_VMEM_REQUEST_QUOTA,
 	"NETWORK_INTERFACE_COUNT":    proto.CommodityDTO_NETWORK_INTERFACE_COUNT,
 	"BICLIQUE":                   proto.CommodityDTO_BICLIQUE,
-	"BUSINESS_TRANSACTION":       proto.CommodityDTO_BUSINESS_TRANSACTION,
-	"SERVICE":                    proto.CommodityDTO_SERVICE,
 }
 
 var AccessTemplateCommodityTypeMap = map[string]proto.CommodityDTO_CommodityType{

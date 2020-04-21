@@ -57,7 +57,12 @@ func (eb *GenericEntityBuilder) BuildEntity() (*proto.EntityDTO, error) {
 				mergePropertiesMap[IPAttr] = ip
 			}
 
-			//TODO: mark entity  with MatchingId is PROXY .
+			//mark entity with MatchingId as PROXY
+			// TODO: need to change turbo-go-sdk to allow marking entity as proxy
+			// without needing to set ReplacementMetadata which is not used in XL
+			replacementEntityMetaDataBuilder := builder.NewReplacementEntityMetaDataBuilder()
+			metaData := replacementEntityMetaDataBuilder.Matching(IPAttr).Build()
+			entityBuilder.ReplacedBy(metaData)
 		}
 		// Build commodities corresponding the JSON metrics data
 		cb := NewGenericCommodityBuilder(difEntity)
@@ -178,10 +183,11 @@ func (eb *GenericEntityBuilder) BuildEntity() (*proto.EntityDTO, error) {
 	for propName, propVal := range mergePropertiesMap {
 		entityBuilder.WithProperty(getEntityPropertyNameValue(propName, propVal))
 		//	//TODO: should the prop name be validated with the supply chain
-
 	}
 
 	dto, err := entityBuilder.Create()
+	dto.KeepStandalone = &eb.keepStandalone
+
 	if err != nil {
 		return nil, err
 	}
@@ -210,10 +216,15 @@ func (eb *GenericEntityBuilder) soldCommodities(
 		}
 		commTemplate := scSupportedComms[commType] //commodity template
 		for _, cb := range commList {
-			soldComm, _ := cb.Create() //nothing to fail, so ignore the error
-			if commTemplate.Key != nil && soldCommKey != nil {
-				soldComm.Key = soldCommKey
+			soldComm, _ := cb.Create()   //nothing to fail, so ignore the error
+			if commTemplate.Key != nil { //commodity needs  key
+				if soldComm.Key != nil {
+					glog.Infof("SOLD COMM WITH KEY: %++v\n", soldComm)
+				} else if soldCommKey != nil {
+					soldComm.Key = soldCommKey
+				}
 			}
+
 			soldCommodities = append(soldCommodities, soldComm)
 		}
 	}
@@ -226,6 +237,7 @@ func (eb *GenericEntityBuilder) soldCommodities(
 	for commType, _ := range scSupportedAccessComms {
 		soldCommodities = append(soldCommodities, createCommodityWithKey(commType, accessCommKey))
 	}
+
 	return soldCommodities
 }
 
@@ -270,8 +282,12 @@ func (eb *GenericEntityBuilder) boughtCommodities(pType data.DIFEntityType,
 		commTemplate := scProviderComms[commType]
 		for _, cb := range commList {
 			boughtComm, _ := cb.Create() //nothing to fail, so ignore the error
-			if commTemplate.Key != nil && boughtCommKey != nil {
-				boughtComm.Key = boughtCommKey
+			if commTemplate.Key != nil { //commodity needs  key
+				if boughtComm.Key != nil {
+					glog.Infof("BOUGHT COMM WITH KEY: %++v\n", boughtComm)
+				} else if boughtComm != nil {
+					boughtComm.Key = boughtCommKey
+				}
 			}
 			boughtCommodities = append(boughtCommodities, boughtComm)
 		}

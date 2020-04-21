@@ -67,12 +67,13 @@ func parseHostedOn(json *jsparser.JSON) *data.DIFHostedOn {
 	}
 	hostedOnObj := json.ObjectVals["hostedOn"]
 
-	var hostTypes []string
+	//var hostTypes []string
+	var hostTypes []data.DIFHostType
 	var hostIP, hostID string
 	for key, hostedOnEntry := range hostedOnObj.ObjectVals { //is a map
 		if key == "hostType" && hostedOnEntry.ArrayVals != nil {
 			for _, hType := range hostedOnEntry.ArrayVals {
-				hostTypes = append(hostTypes, hType.StringVal)
+				hostTypes = append(hostTypes, data.DIFHostType(hType.StringVal))
 			}
 		}
 		if key == "ipAddress" {
@@ -94,61 +95,64 @@ func parseHostedOn(json *jsparser.JSON) *data.DIFHostedOn {
 	return nil
 }
 
-func parseMetricVal(metricEntry *jsparser.JSON) map[string][]*data.DIFMetricVal {
-	metricMap := make(map[string][]*data.DIFMetricVal)
-	for key, val := range metricEntry.ObjectVals { // val is an array of metric values
-		if val.ValueType != jsparser.Array {
-			continue
-		}
-		var mValList []*data.DIFMetricVal
-		for _, mVal := range val.ArrayVals {
-			difMetricVal := &data.DIFMetricVal{
-				Average:     nil,
-				Min:         nil,
-				Max:         nil,
-				Capacity:    nil,
-				Unit:        nil,
-				Key:         nil,
-				Description: nil,
-				RawMetrics:  nil,
-			}
-			for k, v := range mVal.ObjectVals {
-				if k == "average" {
-					if v.ValueType == jsparser.Number {
-						numVal, _ := strconv.ParseFloat(v.StringVal, 64)
-						difMetricVal.Average = &numVal
-					}
-				}
-				if k == "max" {
-					if v.ValueType == jsparser.Number {
-						numVal, _ := strconv.ParseFloat(v.StringVal, 64)
-						difMetricVal.Max = &numVal
-					}
-				}
-				if k == "min" {
-					if v.ValueType == jsparser.Number {
-						numVal, _ := strconv.ParseFloat(v.StringVal, 64)
-						difMetricVal.Min = &numVal
-					}
-				}
-				if k == "capacity" {
-					if v.ValueType == jsparser.Number {
-						numVal, _ := strconv.ParseFloat(v.StringVal, 64)
-						difMetricVal.Capacity = &numVal
-					}
-				}
-				if k == "unit" {
-					unitVal := parseUnitValue(val.StringVal)
-					difMetricVal.Unit = &unitVal
-				}
-			}
-			//printMetricVal(key, difMetricVal)
-			mValList = append(mValList, difMetricVal)
-		} //end of innermost metric array
-		metricMap[key] = mValList
+func parseMetricVal(metricEntry *jsparser.JSON) []*data.DIFMetricVal {
+
+	var mValList []*data.DIFMetricVal
+
+	//fmt.Printf("Parsing %++v\n", metricEntry)
+	if metricEntry.ValueType != jsparser.Array {
+		return []*data.DIFMetricVal{}
 	}
 
-	return metricMap
+	for _, mVal := range metricEntry.ArrayVals {
+		// One DIFMetricVal per array element
+		difMetricVal := &data.DIFMetricVal{
+			Average:     nil,
+			Min:         nil,
+			Max:         nil,
+			Capacity:    nil,
+			Unit:        nil,
+			Key:         nil,
+			Description: nil,
+			RawMetrics:  nil,
+		}
+		// Each array element is a map of key and values
+		for k, v := range mVal.ObjectVals {
+			if k == "average" {
+				if v.ValueType == jsparser.Number {
+					numVal, _ := strconv.ParseFloat(v.StringVal, 64)
+					difMetricVal.Average = &numVal
+				}
+			}
+			if k == "max" {
+				if v.ValueType == jsparser.Number {
+					numVal, _ := strconv.ParseFloat(v.StringVal, 64)
+					difMetricVal.Max = &numVal
+				}
+			}
+			if k == "min" {
+				if v.ValueType == jsparser.Number {
+					numVal, _ := strconv.ParseFloat(v.StringVal, 64)
+					difMetricVal.Min = &numVal
+				}
+			}
+			if k == "capacity" {
+				fmt.Printf("*** FOUND CAPACITY %++v\n", v.StringVal)
+				if v.ValueType == jsparser.Number {
+					numVal, _ := strconv.ParseFloat(v.StringVal, 64)
+					difMetricVal.Capacity = &numVal
+				}
+			}
+			if k == "unit" {
+				unitVal := parseUnitValue(v.StringVal)
+				difMetricVal.Unit = &unitVal
+			}
+		}
+		//printMetricVal(difMetricVal)
+		mValList = append(mValList, difMetricVal)
+	} //end of innermost metric array
+
+	return mValList
 }
 
 func parseUnitValue(unitVal interface{}) data.DIFMetricUnit {
@@ -173,8 +177,7 @@ func parseUnitValue(unitVal interface{}) data.DIFMetricUnit {
 
 //==================================================================================
 
-func printMetricVal(key string, m *data.DIFMetricVal) {
-	fmt.Printf("### %v: DifMetricVal:", key)
+func printMetricVal(m *data.DIFMetricVal) {
 	if m.Average != nil {
 		fmt.Printf("	Average: %v ", *m.Average)
 	}
@@ -183,6 +186,9 @@ func printMetricVal(key string, m *data.DIFMetricVal) {
 	}
 	if m.Unit != nil {
 		fmt.Printf("Unit: %v ", *m.Unit)
+	}
+	if m.Key != nil {
+		fmt.Printf("Key: %v ", *m.Key)
 	}
 	fmt.Printf("\n")
 }
@@ -206,28 +212,17 @@ func DIFEntityToString(entity *data.DIFEntity) {
 	}
 
 	if entity.Metrics != nil {
-		for _, metricEntry := range entity.Metrics {
-			for metricName, metricList := range metricEntry {
+		for metricName, metricList := range entity.Metrics {
+			for _, metric := range metricList {
 				fmt.Printf("	Metric %s:\n", metricName)
-				for _, metric := range metricList {
-					if metric.Average != nil {
-						fmt.Printf("	Averaege : %v ", *metric.Average)
-					}
-					if metric.Capacity != nil {
-						fmt.Printf("Capacity : %v ", *metric.Capacity)
-					}
-					if metric.Unit != nil {
-						fmt.Printf("Unit : %v ", *metric.Unit)
-					}
-				}
-				fmt.Printf("\n")
+				printMetricVal(metric)
 			}
 		}
 	}
 }
 
 //==================================================================================
-
+// For unit testing only
 func ReadDIFTopologyStream(path string) {
 	//var resp []byte
 	//rb := bytes.NewBuffer(resp)
@@ -258,7 +253,7 @@ func ReadDIFTopologyStream(path string) {
 			PartOf:              nil,
 			Metrics:             nil,
 		}
-
+		fmt.Printf("%s::%s\n", entity.UID, entity.Type)
 		// ----- Matching Identifiers
 		entity.MatchingIdentifiers = parseMatchingIdentifiers(json)
 
@@ -270,15 +265,15 @@ func ReadDIFTopologyStream(path string) {
 
 		// ------ Metrics
 		if json.ObjectVals["metrics"] != nil {
-			var difMetricValsList []map[string][]*data.DIFMetricVal
-			metrics := json.ObjectVals["metrics"].ArrayVals
-			for _, metricEntry := range metrics {
-				//metricMap := make(map[string][]*data.DIFMetricVal)
-				metricMap := parseMetricVal(metricEntry)
+			difMetricValMap := make(map[string][]*data.DIFMetricVal)
 
-				difMetricValsList = append(difMetricValsList, metricMap)
+			metricsMap := json.ObjectVals["metrics"].ObjectVals
+			for metricName, metrics := range metricsMap {
+				fmt.Printf("%s --> metrics: %++v\n", metricName, metrics)
+				metricList := parseMetricVal(metrics)
+				difMetricValMap[metricName] = metricList
 			}
-			entity.Metrics = difMetricValsList
+			entity.Metrics = difMetricValMap
 		}
 
 		DIFEntityToString(entity)

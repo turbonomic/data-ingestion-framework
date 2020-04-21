@@ -157,7 +157,7 @@ func (r *DIFRepository) addEntities(parsedEntities []*difdata.DIFEntity) {
 		// save external provider connections
 		if entity.HostedOn != nil {
 			for _, pTypeStr := range entity.HostedOn.HostType {
-				pType := ParseEntityType(pTypeStr)
+				pType := ParseEntityType(string(pTypeStr))
 				if pType == "" {
 					glog.Errorf("Invalid entity type for HostedBy: %v\n", pTypeStr)
 					continue
