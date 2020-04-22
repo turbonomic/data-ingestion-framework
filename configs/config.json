@@ -9,7 +9,9 @@
             "opsManagerPassword": "<TURBO-SERVER-PASSWORD>"
         }
     },
-    "difTargetConfig": {
+    "targetConfig": {
+        "targetName":"<TARGET-NAME>",
         "targetAddress":"<METRIC-ENDPOINT-URL>"
-    }
+    },
+    "targetTypeSuffix": ""
 }
