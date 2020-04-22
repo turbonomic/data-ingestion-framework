@@ -8,7 +8,6 @@ import (
 	"github.com/turbonomic/data-ingestion-framework/pkg/registration"
 	"github.com/turbonomic/turbo-go-sdk/pkg/builder"
 	"github.com/turbonomic/turbo-go-sdk/pkg/proto"
-	"strings"
 )
 
 type GenericEntityBuilder struct {
@@ -35,7 +34,7 @@ func (eb *GenericEntityBuilder) BuildEntity() (*proto.EntityDTO, error) {
 	var dto *proto.EntityDTO
 
 	id := getEntityId(eb.entityType, eb.difEntity.EntityId, eb.scope)
-	glog.Infof("*** building ... %s", id)
+	glog.V(3).Infof("*** building ... %s", id)
 
 	entityBuilder := builder.
 		NewEntityDTOBuilder(eb.entityType, id).
@@ -50,15 +49,11 @@ func (eb *GenericEntityBuilder) BuildEntity() (*proto.EntityDTO, error) {
 			matchingIdentifiers := difEntity.MatchingIdentifiers
 			// currently we only have IP address as matching identifiers for merging with real entity in the server
 			ip := matchingIdentifiers.IPAddress
-			if prop, exists := mergePropertiesMap[IPAttr]; exists {
-				prop = fmt.Sprintf(prop + "," + ip)
-				mergePropertiesMap[IPAttr] = prop
-			} else {
-				mergePropertiesMap[IPAttr] = ip
-			}
+			// saving ip address as key to avoid duplicates,
+			//we will create a comma separated list before setting the entity properyy
+			mergePropertiesMap[ip] = IPAttr
 
-			//mark entity with MatchingId as PROXY
-			// TODO: need to change turbo-go-sdk to allow marking entity as proxy
+			// mark entity with MatchingId as PROXY  - TODO: need to change turbo-go-sdk to allow marking entity as proxy
 			// without needing to set ReplacementMetadata which is not used in XL
 			replacementEntityMetaDataBuilder := builder.NewReplacementEntityMetaDataBuilder()
 			metaData := replacementEntityMetaDataBuilder.Matching(IPAttr).Build()
@@ -68,16 +63,12 @@ func (eb *GenericEntityBuilder) BuildEntity() (*proto.EntityDTO, error) {
 		cb := NewGenericCommodityBuilder(difEntity)
 		commMap, _ := cb.BuildCommodity()
 
+		// consolidate the metrics from this dif entity to the main commodities map
 		for commType, commList := range commMap {
-			_, exists := commoditiesMap[commType]
-			if !exists {
-				commoditiesMap[commType] = commList
-			} else {
-				commoditiesMap[commType] = append(commoditiesMap[commType], commList...)
-			}
+			commoditiesMap[commType] = commList
 		}
-		logDebug(fmt.Printf, commoditiesMap)
 	}
+	logDebug(fmt.Printf, commoditiesMap)
 
 	// Setting commodities and properties in the entity builder using the supply chain template
 	supplyChainNode := eb.supplyChainNode
@@ -100,7 +91,7 @@ func (eb *GenericEntityBuilder) BuildEntity() (*proto.EntityDTO, error) {
 		// Adding the provider and associated bought commodities to the entity builder
 		for _, pId := range providerIds {
 			providerId := getEntityId(*providerType, pId, eb.scope)
-			glog.V(3).Infof("%s --> adding provider %s", id, providerId)
+			glog.V(3).Infof("%s --> adding internal provider %s", id, providerId)
 			entityBuilder.
 				Provider(builder.CreateProvider(*providerType, providerId)).
 				BuysCommodities(boughtCommodities)
@@ -108,11 +99,12 @@ func (eb *GenericEntityBuilder) BuildEntity() (*proto.EntityDTO, error) {
 	}
 
 	// External providers, commodities and metadata specified using IP or UUID
-	scHostedByProviderType := supplyChainNode.HostedByProviderType //map of external provider type and hosting relationship
+	scHostedByProviderType := supplyChainNode.ProviderByProviderType //map of external provider type and hosting relationship
 	if eb.difEntity.GetExternalProviderByIP() != nil {
 		// All external providers for this entity - set as provider in the DTO
 		for pType, pMap := range eb.difEntity.GetExternalProviderByIP() {
 			// select commodities bought from the provider
+			//providerType, boughtCommodities := eb.boughtCommodities(pType, commoditiesMap)
 			providerType, boughtCommodities := eb.externalBoughtCommodities(pType, commoditiesMap)
 
 			if providerType == nil {
@@ -121,6 +113,7 @@ func (eb *GenericEntityBuilder) BuildEntity() (*proto.EntityDTO, error) {
 			}
 
 			// Add the provider and associated bought commodities to the entity builder
+			// Provider entity will be created by the proxy_provider_builder
 			var providerIds []string
 			for pId, _ := range pMap {
 				providerIds = append(providerIds, pId)
@@ -131,16 +124,11 @@ func (eb *GenericEntityBuilder) BuildEntity() (*proto.EntityDTO, error) {
 					BuysCommodities(boughtCommodities)
 			}
 
-			// Add the HOST_IP property to the builder
-			// which will be used to connect to the external provider as per the supply chain
 			if scHostedByProviderType[*providerType] == "HOSTING" && len(pMap) > 1 {
 				// There should only be one of the hosting provider
 				glog.Errorf("%s::%s Invalid number of external hostedBy providers %v",
 					eb.entityType, eb.difEntity.EntityId, providerIds)
 			}
-			entityBuilder.
-				WithProperty(getEntityPropertyNameValue("HOST_IP",
-					strings.Join(providerIds, ",")))
 		}
 	}
 
@@ -166,32 +154,40 @@ func (eb *GenericEntityBuilder) BuildEntity() (*proto.EntityDTO, error) {
 					BuysCommodities(boughtCommodities)
 			}
 
-			// Add the HOST_UUID property to the builder
-			// which will be used to connect to the external provider as per the supply chain
+			// Provider entity will be created by the proxy_provider_builder
 			if scHostedByProviderType[*providerType] == "HOSTING" && len(pMap) > 1 {
 				// There should only be one of the hosting provider
 				glog.Errorf("%s::%s Invalid number of external hostedBy providers %v",
 					eb.entityType, eb.difEntity.EntityId, providerIds)
 			}
-			entityBuilder.
-				WithProperty(getEntityPropertyNameValue("HOST_UUID",
-					strings.Join(providerIds, ",")))
 		}
 	}
 
 	// Adding merging metadata properties to the entity builder
-	for propName, propVal := range mergePropertiesMap {
+	// create comma separated list if there are multiple values for the same property
+	propMap := make(map[string]string)
+	for propVal, propName := range mergePropertiesMap {
+		if prop, exists := propMap[propName]; exists {
+			prop = fmt.Sprintf(prop + "," + propVal)
+			propMap[propName] = prop
+		} else {
+			propMap[propName] = propVal
+		}
+	}
+
+	for propName, propVal := range propMap {
 		entityBuilder.WithProperty(getEntityPropertyNameValue(propName, propVal))
-		//	//TODO: should the prop name be validated with the supply chain
 	}
 
 	dto, err := entityBuilder.Create()
-	dto.KeepStandalone = &eb.keepStandalone
 
 	if err != nil {
 		return nil, err
 	}
 
+	if eb.entityType == proto.EntityDTO_VIRTUAL_MACHINE {
+		glog.Infof("NODE %++v\n", dto)
+	}
 	logDebug(fmt.Printf, protobuf.MarshalTextString(dto))
 	return dto, nil
 }
@@ -219,7 +215,7 @@ func (eb *GenericEntityBuilder) soldCommodities(
 			soldComm, _ := cb.Create()   //nothing to fail, so ignore the error
 			if commTemplate.Key != nil { //commodity needs  key
 				if soldComm.Key != nil {
-					glog.Infof("SOLD COMM WITH KEY: %++v\n", soldComm)
+					glog.V(3).Infof("Commodity Key is available in the json file : %++v\n", soldComm)
 				} else if soldCommKey != nil {
 					soldComm.Key = soldCommKey
 				}
@@ -250,6 +246,7 @@ func (eb *GenericEntityBuilder) boughtCommodities(pType data.DIFEntityType,
 	var providerType proto.EntityDTO_EntityType
 	var boughtCommodities []*proto.CommodityDTO
 
+	// provider type
 	eType := EntityType(pType)
 	if eType == nil {
 		return nil, boughtCommodities
@@ -284,7 +281,7 @@ func (eb *GenericEntityBuilder) boughtCommodities(pType data.DIFEntityType,
 			boughtComm, _ := cb.Create() //nothing to fail, so ignore the error
 			if commTemplate.Key != nil { //commodity needs  key
 				if boughtComm.Key != nil {
-					glog.Infof("BOUGHT COMM WITH KEY: %++v\n", boughtComm)
+					glog.V(3).Infof("Commodity Key is available in the json file : %++v\n", boughtComm)
 				} else if boughtComm != nil {
 					boughtComm.Key = boughtCommKey
 				}
@@ -305,7 +302,7 @@ func (eb *GenericEntityBuilder) boughtCommodities(pType data.DIFEntityType,
 }
 
 // Select the commodities from the metrics in the json file as commodities bought from the given external provider.
-// Commodity types are selected based on the external link in the supply chain specification for the entity type
+// Commodity types are selected based on the commodities bought section in the supply chain specification for the entity type
 func (eb *GenericEntityBuilder) externalBoughtCommodities(pType data.DIFEntityType,
 	commoditiesMap map[proto.CommodityDTO_CommodityType][]*builder.CommodityDTOBuilder,
 ) (*proto.EntityDTO_EntityType, []*proto.CommodityDTO) {
@@ -319,7 +316,7 @@ func (eb *GenericEntityBuilder) externalBoughtCommodities(pType data.DIFEntityTy
 	}
 	providerType = *eType
 
-	scHostedByBoughtComms := eb.supplyChainNode.HostedByBoughtComms
+	scHostedByBoughtComms := eb.supplyChainNode.SupportedBoughtComms
 	// Get the commodities that should be created as per the supply chain for this proxy provider
 	if _, exists := scHostedByBoughtComms[providerType]; !exists {
 		glog.Errorf("Supply chain does not support hostedBy provider %s for entity %s",
@@ -336,6 +333,7 @@ func (eb *GenericEntityBuilder) externalBoughtCommodities(pType data.DIFEntityTy
 				boughtCommodities = append(boughtCommodities, boughtComm)
 			}
 		} else {
+			glog.V(3).Infof("Creating fake bought commodity %v for provider %v", commType, providerType)
 			boughtCommodities = append(boughtCommodities, createCommodity(commType))
 		}
 	}

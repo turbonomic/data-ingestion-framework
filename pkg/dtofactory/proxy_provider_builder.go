@@ -39,7 +39,7 @@ func (eb *ProxyProviderEntityBuilder) BuildEntity() (*proto.EntityDTO, error) {
 
 	// no matching id
 	// set properties
-	propName := "HOST_IP"
+	propName := "IP"
 	propVal := eb.entityId
 	entityBuilder.WithProperty(getEntityPropertyNameValue(propName, propVal))
 
@@ -71,8 +71,8 @@ func (eb *ProxyProviderEntityBuilder) BuildEntity() (*proto.EntityDTO, error) {
 	entityBuilder.ReplacedBy(metaData)
 
 	dto, err := entityBuilder.Create()
-	keepStandalone := false
-	dto.KeepStandalone = &keepStandalone
+	//keepStandalone := false
+	//dto.KeepStandalone = &keepStandalone
 
 	if err != nil {
 		return nil, err

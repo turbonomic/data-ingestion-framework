@@ -69,25 +69,6 @@ func TestSupplyChainNode(t *testing.T) {
 	}
 	assert.EqualValues(t, expectedProviders, providers)
 	assert.ElementsMatch(t, expectedProviderComms, providerComms)
-
-	assert.EqualValues(t, len(appNode.HostedByProviderType), 1)
-
-	if _, exists := appNode.HostedByProviderType[proto.EntityDTO_VIRTUAL_MACHINE]; !exists {
-		assert.Fail(t, "Missing hosted by link")
-	}
-	hostedRel := appNode.HostedByProviderType[proto.EntityDTO_VIRTUAL_MACHINE]
-	assert.True(t, hostedRel == "HOSTING")
-
-	expectedHostedByProviderComms := []proto.CommodityDTO_CommodityType{
-		proto.CommodityDTO_VMEM,
-		proto.CommodityDTO_VCPU,
-		proto.CommodityDTO_TRANSACTION,
-		proto.CommodityDTO_RESPONSE_TIME,
-	}
-	assert.ElementsMatch(t, expectedHostedByProviderComms, appNode.HostedByProviderComms[proto.EntityDTO_VIRTUAL_MACHINE])
-
-	propList := []string{"VM_IP"}
-	assert.ElementsMatch(t, propList, appNode.HostedByProviderProps[proto.EntityDTO_VIRTUAL_MACHINE])
 }
 
 var SERVICE_NODE string

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"os"
 
 	"github.com/golang/glog"
 	"github.com/turbonomic/turbo-go-sdk/pkg/service"
@@ -54,6 +55,16 @@ func NewDIFConf(configFilePath string) (*DIFConf, error) {
 
 	if config.TargetConf == nil {
 		return nil, fmt.Errorf("unable to read the turbo target config from %s", configFilePath)
+	}
+
+	if len(config.TargetConf.Address) > 0  && len(config.TargetConf.Name) == 0{
+		glog.Errorf("unspecified name for target with addressr: %s", config.TargetConf.Address)
+		os.Exit(1)
+	}
+
+	if len(config.TargetConf.Name)  > 0  && len(config.TargetConf.Address) == 0{
+		glog.Errorf("unspecified address for target with name: %s", config.TargetConf.Name)
+		os.Exit(1)
 	}
 
 	return config, nil

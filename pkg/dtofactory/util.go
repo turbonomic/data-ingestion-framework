@@ -53,13 +53,13 @@ func createCommodity(accessCommType proto.CommodityDTO_CommodityType) *proto.Com
 }
 
 func logDebug(f func(format string, a ...interface{}) (int, error), msg ...interface{}) {
-	if os.Getenv("TURBODIF_LOCAL_DEBUG") == "1" && glog.V(2) {
+	if os.Getenv("TURBODIF_LOCAL_DEBUG") == "1" && glog.V(4) {
 		f("%++v\n", msg)
 	}
 }
 
 func logSupplyChainDetails(supplyChainNode *registration.SupplyChainNode) {
-	if os.Getenv("TURBODIF_LOCAL_DEBUG") == "1" && glog.V(3) {
+	if os.Getenv("TURBODIF_LOCAL_DEBUG") == "1" && glog.V(4) {
 
 		var expectedSoldComms []string
 		for comm, _ := range supplyChainNode.SupportedComms {
@@ -93,29 +93,30 @@ func logSupplyChainDetails(supplyChainNode *registration.SupplyChainNode) {
 		}
 		fmt.Printf("expectedAccessBought: %v\n", expectedAccessBought)
 
-		hostedByProviderProps := supplyChainNode.HostedByProviderProps
-		hostedByProviderType := supplyChainNode.HostedByProviderType
-
-		expectedHostedByProviderProps := make(map[string][]string)
-		for provider, props := range hostedByProviderProps {
-			expectedHostedByProviderProps[fmt.Sprintf("%v", provider)] = props
-		}
+		hostedByProviderType := supplyChainNode.ProviderByProviderType
 		expectedHostedByProviderType := make(map[string]string)
 		for provider, hostingType := range hostedByProviderType {
 			expectedHostedByProviderType[fmt.Sprintf("%v", provider)] = hostingType
 		}
-
-		expectedHostedByBoughtComms := make(map[string][]string)
-		for provider, bought := range supplyChainNode.HostedByBoughtComms {
-			var comms []string
-			for comm, _ := range bought {
-				comms = append(comms, fmt.Sprintf("%v", comm))
-			}
-			expectedHostedByBoughtComms[fmt.Sprintf("%v", provider)] = comms
-		}
-
-		fmt.Printf("expectedHostedByProviderProps: %v\n", expectedHostedByProviderProps)
 		fmt.Printf("expectedHostedByProviderType: %v\n", expectedHostedByProviderType)
-		fmt.Printf("expectedHostedByBoughtComms: %v\n", expectedHostedByBoughtComms)
+
+		//hostedByProviderProps := supplyChainNode.HostedByProviderProps
+		//expectedHostedByProviderProps := make(map[string][]string)
+		//for provider, props := range hostedByProviderProps {
+		//	expectedHostedByProviderProps[fmt.Sprintf("%v", provider)] = props
+		//}
+
+
+		//expectedHostedByBoughtComms := make(map[string][]string)
+		//for provider, bought := range supplyChainNode.HostedByBoughtComms {
+		//	var comms []string
+		//	for comm, _ := range bought {
+		//		comms = append(comms, fmt.Sprintf("%v", comm))
+		//	}
+		//	expectedHostedByBoughtComms[fmt.Sprintf("%v", provider)] = comms
+		//}
+
+		//fmt.Printf("expectedHostedByProviderProps: %v\n", expectedHostedByProviderProps)
+		//fmt.Printf("expectedHostedByBoughtComms: %v\n", expectedHostedByBoughtComms)
 	}
 }

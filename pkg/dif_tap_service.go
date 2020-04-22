@@ -71,14 +71,15 @@ func createTAPService(args *conf.DIFProbeArgs) (*service.TAPService, error) {
 	// Server communicator
 	communicator := difConf.Communicator
 
-	// Target
+	// Target - this spec is optional since the target can be added from the UI
+	// But if specified, we require both the target name and address to be present
 	var targetAddr, targetName string
 	if difConf.TargetConf != nil {
-		targetAddr = difConf.TargetConf.Address //HTTP URL for metric json data
-		targetName = difConf.TargetConf.Name
+		targetAddr = difConf.TargetConf.Address // HTTP URL for metric server endpoint serving the json data
+		targetName = difConf.TargetConf.Name    // User friendly name for metric server endpoint
 	}
 
-	// Load the supply chain config
+	// Load the supply chain config and create the registration client
 	supplyChainConfig, err := conf.LoadSupplyChain(supplyChainConf)
 	if err != nil {
 		glog.Errorf("Error while parsing the supply chain config file %s: %++v", supplyChainConf, err)
@@ -98,24 +99,30 @@ func createTAPService(args *conf.DIFProbeArgs) (*service.TAPService, error) {
 	if len(targetAddr) > 0 {
 		optionalTargetAddr = &targetAddr
 	}
+	var optionalTargetName *string
+	if len(targetName) > 0 {
+		optionalTargetName = &targetName
+	}
+
 	discoveryTargetParams := &discovery.DiscoveryTargetParams{
 		TargetType:            targetType,
 		ProbeCategory:         probeCategory,
-		TargetName:            targetName,
+		OptionalTargetName:    optionalTargetName,
 		OptionalTargetAddress: optionalTargetAddr,
 	}
 	keepStandalone := args.KeepStandalone
 
 	discoveryClient := discovery.NewDiscoveryClient(discoveryTargetParams, *keepStandalone, supplyChainConfig)
 
+	// Turbo probe
 	builder := probe.NewProbeBuilder(targetType, *supplyChainConfig.ProbeCategory).
 		WithDiscoveryOptions(probe.FullRediscoveryIntervalSecondsOption(int32(*args.DiscoveryIntervalSec))).
 		WithEntityMetadata(registrationClient).
 		RegisteredBy(registrationClient)
 
-	if len(targetAddr) > 0 {
+	if len(targetAddr) > 0 && len(targetName) > 0 {
 		// Preconfigured with target address or DIF metric endpoint
-		glog.Infof("***** Should discover target %s", targetAddr)
+		glog.Infof("***** Should discover target with URL %s [%s] ", targetAddr, targetName)
 		builder = builder.DiscoversTarget(targetAddr, discoveryClient)
 	} else {
 		// Target will be entered from the UI
