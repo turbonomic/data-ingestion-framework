@@ -216,7 +216,7 @@ func (d *DIFDiscoveryClient) buildEntities(repository *data.DIFRepository, scope
 				d.keepStandalone, supplyChainNode)
 			dto, err := ab.BuildEntity()
 			if err != nil {
-				glog.Errorf("Error building entity %s::%s %++v", difEntity, difEntityId, err)
+				glog.Errorf("Error building entity %s::%s %++v", difEntityType, difEntityId, err)
 				continue
 			}
 			entities = append(entities, dto)

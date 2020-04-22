@@ -4,6 +4,9 @@ supplyChainNode:
   - templateClass: BUSINESS_APPLICATION
     templateType: BASE
     templatePriority: -1
+    commoditySold:
+      - commodityType: KPI
+        key: key-placeholder
     commodityBought:
       - key:
           templateClass: SERVICE
@@ -13,6 +16,8 @@ supplyChainNode:
           - commodityType: TRANSACTION
           - commodityType: RESPONSE_TIME
           - commodityType: APPLICATION
+          - commodityType: KPI
+            key: key-placeholder
       - key:
           templateClass: BUSINESS_TRANSACTION
           providerType: LAYERED_OVER
@@ -22,6 +27,8 @@ supplyChainNode:
           - commodityType: TRANSACTION
           - commodityType: RESPONSE_TIME
           - commodityType: APPLICATION
+          - commodityType: KPI
+            key: key-placeholder
   - templateClass: BUSINESS_TRANSACTION
     templateType: BASE
     templatePriority: -1
@@ -29,6 +36,8 @@ supplyChainNode:
       - commodityType: TRANSACTION
       - commodityType: RESPONSE_TIME
       - commodityType: APPLICATION
+      - commodityType: KPI
+        key: key-placeholder
     commodityBought:
       - key:
           templateClass: SERVICE
@@ -39,6 +48,8 @@ supplyChainNode:
           - commodityType: TRANSACTION
           - commodityType: RESPONSE_TIME
           - commodityType: APPLICATION
+          - commodityType: KPI
+            key: key-placeholder
   - templateClass: SERVICE
     templateType: BASE
     templatePriority: -1
@@ -47,7 +58,15 @@ supplyChainNode:
         key: key-placeholder
       - commodityType: RESPONSE_TIME
         key: key-placeholder
+      - commodityType: HEAP
+        key: key-placeholder
+      - commodityType: COLLECTION_TIME
+        key: key-placeholder
+      - commodityType: THREADS
+        key: key-placeholder
       - commodityType: APPLICATION
+      - commodityType: KPI
+        key: key-placeholder
     commodityBought:
       - key:
           templateClass: APPLICATION_COMPONENT
@@ -59,7 +78,15 @@ supplyChainNode:
             key: key-placeholder
           - commodityType: RESPONSE_TIME
             key: key-placeholder
+          - commodityType: HEAP
+            key: key-placeholder
+          - commodityType: COLLECTION_TIME
+            key: key-placeholder
+          - commodityType: THREADS
+            key: key-placeholder
           - commodityType: APPLICATION
+          - commodityType: KPI
+            key: key-placeholder
       - key:
           templateClass: DATABASE_SERVER
           providerType: LAYERED_OVER
@@ -71,6 +98,8 @@ supplyChainNode:
           - commodityType: RESPONSE_TIME
             key: key-placeholder
           - commodityType: APPLICATION
+          - commodityType: KPI
+            key: key-placeholder
     mergedEntityMetaData:
       keepStandalone: false
       matchingMetadata:
@@ -86,6 +115,7 @@ supplyChainNode:
       commoditiesSold:
         - RESPONSE_TIME
         - TRANSACTION
+        - KPI
       commoditiesBought:
         - providerType: APPLICATION_COMPONENT
           commodityMetadata:
@@ -106,6 +136,8 @@ supplyChainNode:
       - commodityType: THREADS
         key: key-placeholder
       - commodityType: APPLICATION
+        key: key-placeholder
+      - commodityType: KPI
         key: key-placeholder
     commodityBought:
       - key:
@@ -166,6 +198,7 @@ supplyChainNode:
         - HEAP
         - COLLECTION_TIME
         - THREADS
+        - KPI
   - templateClass: DATABASE_SERVER
     templateType: BASE
     templatePriority: -1
@@ -178,6 +211,8 @@ supplyChainNode:
       - commodityType: DB_MEM
       - commodityType: DB_CACHE_HIT_RATE
       - commodityType: APPLICATION
+      - commodityType: KPI
+        key: key-placeholder
     commodityBought:
       - key:
           templateClass: VIRTUAL_MACHINE
@@ -222,9 +257,10 @@ supplyChainNode:
         commoditiesSold:
           - RESPONSE_TIME
           - TRANSACTION
-          - HEAP
-          - COLLECTION_TIME
-          - THREADS
+          - DB_MEM
+          - DB_CACHE_HIT_RATE
+          - CONNECTION
+          - KPI
   - templateClass: VIRTUAL_MACHINE
     templateType: BASE
     templatePriority: -1

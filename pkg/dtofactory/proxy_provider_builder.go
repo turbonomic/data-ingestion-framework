@@ -65,11 +65,21 @@ func (eb *ProxyProviderEntityBuilder) BuildEntity() (*proto.EntityDTO, error) {
 	}
 	entityBuilder.SellsCommodities(soldCommodities)
 
+	// mark the  provider as proxy
+	replacementEntityMetaDataBuilder := builder.NewReplacementEntityMetaDataBuilder()
+	metaData := replacementEntityMetaDataBuilder.Matching(propName).Build()
+	entityBuilder.ReplacedBy(metaData)
+
 	dto, err := entityBuilder.Create()
+	keepStandalone := false
+	dto.KeepStandalone = &keepStandalone
+
 	if err != nil {
 		return nil, err
 	}
 	logDebug(fmt.Printf, protobuf.MarshalTextString(dto))
+
+	glog.Infof("proxy provider dto: %++v\n", dto)
 
 	return dto, nil
 }

@@ -15,7 +15,7 @@ const (
 	DefaultSupplyChainConfPath = "/etc/turbodif/app-supply-chain-config.yaml"
 
 	// Debug file paths
-	LocalDebugConfPath            = "configs/turbodif-config.json"
+	LocalDebugConfPath            = "configs/config.json"
 	LocalDebugSupplyChainConfPath = "configs/app-supply-chain-config.yaml"
 
 	DefaultProbeCategory string = "Guest OS Processes"

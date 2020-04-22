@@ -162,7 +162,6 @@ func (md *FileBasedMetricDatSource) GetMetricData() (*data.Topology, error) {
 	return topology, err
 }
 
-//TODO: use json streaming to parse data
 func loadJSON(metricEndpoint string, resp []byte) (*data.Topology, error) {
 
 	var topology *data.Topology
@@ -178,7 +177,6 @@ func loadJSON(metricEndpoint string, resp []byte) (*data.Topology, error) {
 	return topology, nil
 }
 
-//TODO: use json streaming to parse data
 func loadJSONStream(metricEndpoint string, resp []byte) (*data.Topology, error) {
 
 	rb := bytes.NewBuffer(resp)
@@ -205,9 +203,8 @@ func loadJSONStream(metricEndpoint string, resp []byte) (*data.Topology, error) 
 			PartOf:              nil,
 			Metrics:             nil,
 		}
-
+		fmt.Printf("%s::%s\n", entity.UID, entity.Type)
 		// ----- Matching Identifiers
-		//TODO: complete this
 		entity.MatchingIdentifiers = parseMatchingIdentifiers(json)
 
 		// ----- Part Of
@@ -218,15 +215,15 @@ func loadJSONStream(metricEndpoint string, resp []byte) (*data.Topology, error) 
 
 		// ------ Metrics
 		if json.ObjectVals["metrics"] != nil {
-			var difMetricValsList []map[string][]*data.DIFMetricVal
-			metrics := json.ObjectVals["metrics"].ArrayVals
-			for _, metricEntry := range metrics {
-				//metricMap := make(map[string][]*data.DIFMetricVal)
-				metricMap := parseMetricVal(metricEntry)
+			difMetricValMap := make(map[string][]*data.DIFMetricVal)
 
-				difMetricValsList = append(difMetricValsList, metricMap)
+			metricsMap := json.ObjectVals["metrics"].ObjectVals
+			for metricName, metrics := range metricsMap {
+				fmt.Printf("%s --> metrics: %++v\n", metricName, metrics)
+				metricList := parseMetricVal(metrics)
+				difMetricValMap[metricName] = metricList
 			}
-			entity.Metrics = difMetricValsList
+			entity.Metrics = difMetricValMap
 		}
 
 		if glog.V(4) {

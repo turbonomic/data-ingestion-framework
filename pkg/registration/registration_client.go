@@ -52,19 +52,22 @@ func (p *DIFRegistrationClient) GetSupplyChainDefinition() []*proto.TemplateDTO 
 }
 
 func (p *DIFRegistrationClient) GetIdentifyingFields() string {
-	return TargetIdField
+	return TargetNameField
 }
 
 func (p *DIFRegistrationClient) GetAccountDefinition() []*proto.AccountDefEntry {
+	targetDisplayField := true
 	nameIDAcctDefEntry := builder.NewAccountDefEntryBuilder(TargetNameField, "Name",
-		"Target Name", ".*", true, false).Create()
+		"Name for the metric server endpoint", ".*", true, false).Create()
+	nameIDAcctDefEntry.IsTargetDisplayName = &targetDisplayField
 
 	targetIDAcctDefEntry := builder.NewAccountDefEntryBuilder(TargetIdField, "URL",
 		"HTTP URL for the JSON DIF data", ".*", true, false).Create()
 
 	return []*proto.AccountDefEntry{
-		targetIDAcctDefEntry,
 		nameIDAcctDefEntry,
+		targetIDAcctDefEntry,
+
 	}
 }
 

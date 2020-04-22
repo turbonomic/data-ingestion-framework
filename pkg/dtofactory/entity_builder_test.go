@@ -36,18 +36,14 @@ func TestEntityBuilder(t *testing.T) {
 			"	\"type\": \"application\"," +
 			"	\"uniqueId\": \"456\"," +
 			"	\"name\": \"My App Name 2\"," +
-			"	\"metrics\" : [" +
-			"       {" +
+			"	\"metrics\" : {" +
 			RESPONSE_TIME +
-			" 		}," +
-			"		{" +
+			"]," +
 			TRANSACTION +
-			"       }," +
-			"		{" +
+			"],"+
 			HEAP_ARRAY +
-			"		}" +
-			"     ]," +
-			//"}		"+
+			"]"+
+			"		}," +
 			"	\"hostedOn\":{" +
 			"		\"hostType\":[" +
 			"			\"virtualMachine\"" +
@@ -198,14 +194,12 @@ func TestMergingMetadataProperty(t *testing.T) {
 			"	\"matchIdentifiers\":{" +
 			"		\"ipAddress\":\"10.233.90.114\"" +
 			"	 }," +
-			"	\"metrics\" : [" +
-			"       {" +
+			"	\"metrics\" : {" +
 			RESPONSE_TIME +
-			" 		}," +
-			"		{" +
+			" 		]," +
 			TRANSACTION +
-			"       }" +
-			"     ]" +
+			"       ]" +
+			"     }" +
 			"}"
 
 	parsedDifEntity := parseEntity(ENTITY)
@@ -248,14 +242,12 @@ func TestExternalLinkMetadataProperty(t *testing.T) {
 			"	\"type\": \"application\"," +
 			"	\"uniqueId\":\"10.233.90.114\"," +
 			"	\"name\":\"10.233.90.114\"," +
-			"	\"metrics\" : [" +
-			"       {" +
+			"	\"metrics\" : {" +
 			RESPONSE_TIME +
-			" 		}," +
-			"		{" +
+			" 		]," +
 			TRANSACTION +
-			"       }" +
-			"     ]," +
+			"       ]" +
+			"     }," +
 			"	\"hostedOn\":{" +
 			"		\"hostType\":[" +
 			"			\"virtualMachine\"" +

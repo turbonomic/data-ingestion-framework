@@ -60,6 +60,7 @@ const (
 	COLLECTION_TIME DIFMetricType = "collectionTime"
 	DBMEM           DIFMetricType = "dbMem"
 	DBCACHEHITRATE  DIFMetricType = "dbCacheHitRate"
+	KPI            	DIFMetricType = "kpi"
 )
 
 // Mapping of the dif metric string to supply chain template commodity string
@@ -81,6 +82,5 @@ var DIFMetricToTemplateCommodityStringMap = map[string]string{
 	"dbCacheHitRate": "DB_CACHE_HIT_RATE",
 	"collectionTime": "COLLECTION_TIME",
 	"heap":           "HEAP",
-	"custom":         "SLA_COMMODITY",
-	"kpi":            "SLA_COMMODITY",
+	"kpi":            "KPI",
 }
