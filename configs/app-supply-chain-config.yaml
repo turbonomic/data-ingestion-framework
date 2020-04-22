@@ -10,6 +10,7 @@ supplyChainNode:
     commodityBought:
       - key:
           templateClass: SERVICE
+          providerType: LAYERED_OVER
           cardinalityMax: 2147483647
           cardinalityMin: 0
         value:
@@ -156,31 +157,6 @@ supplyChainNode:
         value:
           - commodityType: VCPU
           - commodityType: VMEM
-    externalLink:
-      - key: VIRTUAL_MACHINE
-        value:
-          buyerRef: APPLICATION_COMPONENT
-          sellerRef: VIRTUAL_MACHINE
-          relationship: HOSTING
-          commodityDefs:
-            - type: VCPU
-              hasKey: false
-            - type: VMEM
-              hasKey: false
-            - type: TRANSACTION
-              hasKey: true
-            - type: RESPONSE_TIME
-              hasKey: true
-          probeEntityPropertyDef:
-            - name: HOST_IP
-              description: IP Address of the VM hosting the discovered application
-          externalEntityPropertyDefs:
-            - entity: VIRTUAL_MACHINE
-              attribute: UsesEndPoints
-              propertyHandler:
-                methodName: getAddress
-                entityType: IP
-                directlyApply: false
     mergedEntityMetaData:
       keepStandalone: false
       matchingMetadata:
@@ -222,27 +198,6 @@ supplyChainNode:
         value:
           - commodityType: VCPU
           - commodityType: VMEM
-    externalLink:
-      - key: VIRTUAL_MACHINE
-        value:
-          buyerRef: DATABASE_SERVER
-          sellerRef: VIRTUAL_MACHINE
-          relationship: HOSTING
-          commodityDefs:
-            - type: VCPU
-              hasKey: false
-            - type: VMEM
-              hasKey: false
-          probeEntityPropertyDef:
-            - name: HOST_IP
-              description: IP Address of the VM hosting the discovered application
-          externalEntityPropertyDefs:
-            - entity: VIRTUAL_MACHINE
-              attribute: UsesEndPoints
-              propertyHandler:
-                methodName: getAddress
-                entityType: IP
-                directlyApply: false
     mergedEntityMetaData:
       keepStandalone: false
       matchingMetadata:
@@ -273,7 +228,7 @@ supplyChainNode:
         returnType: LIST_STRING
         matchingData:
           - matchingProperty:
-              propertyName: HOST_IP
+              propertyName: IP
             delimiter: ","
         externalEntityReturnType: LIST_STRING
         externalEntityMatchingProperty:

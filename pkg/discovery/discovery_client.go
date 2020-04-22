@@ -27,13 +27,14 @@ type EntityBuilderParams struct {
 
 type DiscoveryTargetParams struct {
 	OptionalTargetAddress *string
+	OptionalTargetName    *string
 	TargetType            string
-	TargetName            string
 	ProbeCategory         string
 }
 
 func NewDiscoveryClient(discoveryTargetParams *DiscoveryTargetParams, keepStandalone bool,
 	supplyChainConfig *conf.SupplyChainConfig) *DIFDiscoveryClient {
+
 	return &DIFDiscoveryClient{
 		discoveryTargetParams: discoveryTargetParams,
 		keepStandalone:        keepStandalone,
@@ -50,16 +51,23 @@ func (d *DIFDiscoveryClient) GetAccountValues() *probe.TurboTargetInfo {
 		targetAddr = *targetParams.OptionalTargetAddress
 	}
 
-	targetId := registration.TargetIdField
+	targetName := ""
+	if targetParams.OptionalTargetName != nil {
+		targetName = *targetParams.OptionalTargetName
+	}
+
+	// this field is used to reach the target
+	targetIdField := registration.TargetIdField
 	targetIdVal := &proto.AccountValue{
-		Key:         &targetId,
+		Key:         &targetIdField,
 		StringValue: &targetAddr,
 	}
 
-	targetName := registration.TargetNameField
+	//this field is used as name of the target for displaying in the UI
+	targetNameField := registration.TargetNameField
 	targetNameVal := &proto.AccountValue{
-		Key:         &targetName,
-		StringValue: &targetParams.TargetName,
+		Key:         &targetNameField,
+		StringValue: &targetName,
 	}
 
 	accountValues := []*proto.AccountValue{
@@ -67,14 +75,22 @@ func (d *DIFDiscoveryClient) GetAccountValues() *probe.TurboTargetInfo {
 		targetNameVal,
 	}
 
-	targetInfo := probe.NewTurboTargetInfoBuilder(targetParams.ProbeCategory, targetParams.TargetType,
-		registration.TargetIdField, accountValues).Create()
+	targetInfo := probe.NewTurboTargetInfoBuilder(targetParams.ProbeCategory,
+		targetParams.TargetType,
+		registration.TargetIdField,
+		accountValues).
+		Create()
+
+	glog.V(2).Infof("Created target info - id field: '%s', address:%s, name:%s",
+		targetInfo.TargetIdentifierField(), targetAddr, targetName)
 
 	return targetInfo
 }
 
 // Validate the Target
 func (d *DIFDiscoveryClient) Validate(accountValues []*proto.AccountValue) (*proto.ValidationResponse, error) {
+	glog.V(2).Infof("Validating target %s", accountValues)
+
 	targetAddr, found := targetAddress(accountValues)
 	if !found {
 		description := fmt.Sprintf("No target address (%s) in account values %v",
@@ -97,15 +113,13 @@ func (d *DIFDiscoveryClient) Validate(accountValues []*proto.AccountValue) (*pro
 		validationResponse = d.failValidationWithError(targetAddr, err)
 	}
 
-	glog.V(2).Infof("Validating to validate target %s", targetAddr)
-
 	return validationResponse, nil
 }
 
 // Discover the Target Topology
 func (d *DIFDiscoveryClient) Discover(accountValues []*proto.AccountValue) (*proto.DiscoveryResponse, error) {
 
-	glog.V(2).Infof("Discovering the target %s", accountValues)
+	glog.V(2).Infof("Discovering target %s", accountValues)
 	targetAddr, found := targetAddress(accountValues)
 	if !found {
 		description := fmt.Sprintf("No target address (%s) in account values %v",

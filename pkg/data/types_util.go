@@ -60,7 +60,7 @@ const (
 	COLLECTION_TIME DIFMetricType = "collectionTime"
 	DBMEM           DIFMetricType = "dbMem"
 	DBCACHEHITRATE  DIFMetricType = "dbCacheHitRate"
-	KPI            	DIFMetricType = "kpi"
+	KPI             DIFMetricType = "kpi"
 )
 
 // Mapping of the dif metric string to supply chain template commodity string

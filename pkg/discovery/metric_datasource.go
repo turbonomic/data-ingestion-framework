@@ -28,7 +28,6 @@ type MetricDataSource interface {
 
 func ValidateMetricDataSource(metricEndpoint string) error {
 	metricEndpoint = strings.TrimSpace(metricEndpoint)
-	glog.Infof("METRIC ENDPOINT : %s", metricEndpoint)
 
 	var valid bool
 	switch {
@@ -52,7 +51,6 @@ func ValidateMetricDataSource(metricEndpoint string) error {
 func CreateMetricDataSource(metricEndpoint string) MetricDataSource {
 	var metricDataSource MetricDataSource
 	metricEndpoint = strings.TrimSpace(metricEndpoint)
-	glog.Infof("METRIC ENDPOINT : %s", metricEndpoint)
 
 	switch {
 	// HTTP endpoint - send request and retrieve the JSON response

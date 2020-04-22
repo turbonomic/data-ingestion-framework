@@ -40,9 +40,9 @@ func TestEntityBuilder(t *testing.T) {
 			RESPONSE_TIME +
 			"]," +
 			TRANSACTION +
-			"],"+
+			"]," +
 			HEAP_ARRAY +
-			"]"+
+			"]" +
 			"		}," +
 			"	\"hostedOn\":{" +
 			"		\"hostType\":[" +
@@ -115,8 +115,6 @@ func TestEntityBuilder(t *testing.T) {
 
 	comms := make(map[proto.CommodityDTO_CommodityType]*proto.CommodityDTO)
 	expectedTestEntity.boughtComms[proto.EntityDTO_VIRTUAL_MACHINE] = comms
-	comms[proto.CommodityDTO_TRANSACTION] = &proto.CommodityDTO{}
-	comms[proto.CommodityDTO_RESPONSE_TIME] = &proto.CommodityDTO{}
 	comms[proto.CommodityDTO_VCPU] = &proto.CommodityDTO{}
 	comms[proto.CommodityDTO_VMEM] = &proto.CommodityDTO{}
 

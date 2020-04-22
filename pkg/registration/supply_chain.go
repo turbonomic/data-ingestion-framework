@@ -24,11 +24,7 @@ type SupplyChainNode struct {
 	// provider type to allowed commodity map
 	SupportedBoughtComms       map[proto.EntityDTO_EntityType]map[proto.CommodityDTO_CommodityType]DefaultValue
 	SupportedBoughtAccessComms map[proto.EntityDTO_EntityType]map[proto.CommodityDTO_CommodityType]DefaultValue
-
-	// EXTERNAL HOSTED_BY CONFIG
-	HostedByProviderProps map[proto.EntityDTO_EntityType][]string
-	HostedByProviderType  map[proto.EntityDTO_EntityType]string
-	HostedByBoughtComms   map[proto.EntityDTO_EntityType]map[proto.CommodityDTO_CommodityType]DefaultValue
+	ProviderByProviderType     map[proto.EntityDTO_EntityType]string
 }
 
 // Create new supply chain consisting of supply chain nodes using the supply chain configuration
@@ -105,10 +101,7 @@ func parseNodeConfig(nodeConfig *conf.NodeConfig) (*SupplyChainNode, error) {
 	if err != nil {
 		return nil, err
 	}
-	err = parseExternalLinks(nodeConfig, node)
-	if err != nil {
-		return nil, err
-	}
+
 	return node, nil
 }
 
@@ -157,6 +150,7 @@ func parseBoughtComms(nodeConfig *conf.NodeConfig, node *SupplyChainNode) error 
 		return nil
 	}
 	// PROVIDER AND BOUGHT COMM CONFIG
+	hostedByProviderType := make(map[proto.EntityDTO_EntityType]string)
 	// provider type to allowed commodity map
 	supportedBoughtComms := make(map[proto.EntityDTO_EntityType]map[proto.CommodityDTO_CommodityType]DefaultValue)
 	supportedBoughtAccessComms := make(map[proto.EntityDTO_EntityType]map[proto.CommodityDTO_CommodityType]DefaultValue)
@@ -165,9 +159,12 @@ func parseBoughtComms(nodeConfig *conf.NodeConfig, node *SupplyChainNode) error 
 		if provider == nil || provider.TemplateClass == nil {
 			return fmt.Errorf("%s: Nill provider in bought commodities section", nodeConfig.TemplateClass)
 		}
+		if provider.ProviderType == nil {
+			return fmt.Errorf("%s: Nill provider relationship in bought commodities section",
+				nodeConfig.TemplateClass)
+		}
 
 		providerClass := *provider.TemplateClass
-		glog.V(3).Infof("%s : providerClass %v\n", nodeConfig.TemplateClass, providerClass)
 		if _, exists := TemplateEntityTypeMap[providerClass]; !exists {
 			return fmt.Errorf("%s: Invalid provider in bought commodities section for provider %s",
 				nodeConfig.TemplateClass, providerClass)
@@ -179,6 +176,9 @@ func parseBoughtComms(nodeConfig *conf.NodeConfig, node *SupplyChainNode) error 
 			return fmt.Errorf("%s: Missing bought commodities for provider %s",
 				nodeConfig.TemplateClass, providerClass)
 		}
+
+		hostedByProviderType[providerType] = *bought.Provider.ProviderType
+		glog.V(3).Infof("%s : provider relationship  %v\n", nodeConfig.TemplateClass, *bought.Provider.ProviderType)
 
 		accessCommMap := make(map[proto.CommodityDTO_CommodityType]DefaultValue)
 		commMap := make(map[proto.CommodityDTO_CommodityType]DefaultValue)
@@ -209,99 +209,9 @@ func parseBoughtComms(nodeConfig *conf.NodeConfig, node *SupplyChainNode) error 
 		supportedBoughtAccessComms[providerType] = accessCommMap
 	}
 
+	node.ProviderByProviderType = hostedByProviderType
 	node.SupportedBoughtComms = supportedBoughtComms
 	node.SupportedBoughtAccessComms = supportedBoughtAccessComms
-
-	return nil
-}
-
-func parseExternalLinks(nodeConfig *conf.NodeConfig, node *SupplyChainNode) error {
-	if nodeConfig.ExternalLinkList == nil {
-		glog.Infof("%s: no external links\n", nodeConfig.TemplateClass)
-		return nil
-	}
-	// EXTERNAL HOSTED_BY CONFIG - saving links to external providers
-	hostedByProviderProps := make(map[proto.EntityDTO_EntityType][]string)
-	hostedByProviderType := make(map[proto.EntityDTO_EntityType]string)
-	hostedByBoughtComms := make(map[proto.EntityDTO_EntityType]map[proto.CommodityDTO_CommodityType]DefaultValue)
-	for _, externalLink := range nodeConfig.ExternalLinkList {
-		if externalLink.Value == nil {
-			glog.Warningf("%s: Null external link value", nodeConfig.TemplateClass)
-			continue
-		}
-		link := externalLink.Value
-		if link.BuyerRef == nil || link.SellerRef == nil {
-			return fmt.Errorf("%s: Null buyer or seller in external link", nodeConfig.TemplateClass)
-		}
-		if _, exists := TemplateEntityTypeMap[*link.BuyerRef]; !exists {
-			return fmt.Errorf("%s: Invalid buyer %s in external link for provider",
-				nodeConfig.TemplateClass, *link.BuyerRef)
-		}
-		buyerType := TemplateEntityTypeMap[*link.BuyerRef]
-
-		if _, exists := TemplateEntityTypeMap[*link.SellerRef]; !exists {
-			return fmt.Errorf("%s: Invalid seller %s in external link for provider",
-				nodeConfig.TemplateClass, *link.SellerRef)
-		}
-		sellerType := TemplateEntityTypeMap[*link.SellerRef]
-
-		if sellerType == node.NodeType && buyerType == node.NodeType {
-			return fmt.Errorf("%s: Same seller %s and buyer %s in external link",
-				nodeConfig.TemplateClass, *link.SellerRef, *link.BuyerRef)
-		}
-		if sellerType != node.NodeType && buyerType != node.NodeType {
-			return fmt.Errorf("%s: Either seller %s or buyer %s must be same as the node in external link",
-				nodeConfig.TemplateClass, *link.SellerRef, *link.BuyerRef)
-		}
-
-		if link.CommodityDefList == nil || len(link.CommodityDefList) == 0 {
-			return fmt.Errorf("%s: Missing commodity metadata in external link", nodeConfig.TemplateClass)
-		}
-
-		commMap := make(map[proto.CommodityDTO_CommodityType]DefaultValue)
-		for _, commDef := range link.CommodityDefList {
-			if commDef.CommType == nil {
-				continue
-			}
-			//commType := TemplateCommodityTypeMap[*commDef.CommType]
-			commTypeDef := *commDef.CommType
-			if commType, exists := TemplateCommodityTypeMap[commTypeDef]; exists {
-				commMap[commType] = DefaultValue{HasKey: commDef.HasKey}
-				glog.V(3).Infof("%s : %s-->%s hostedBy comm %s::%v\n", nodeConfig.TemplateClass,
-					buyerType, sellerType, commTypeDef, commType)
-			} else {
-				glog.Warningf("%s: Invalid commodity type %s in external link",
-					nodeConfig.TemplateClass, commTypeDef)
-			}
-		}
-
-		if len(commMap) == 0 {
-			return fmt.Errorf("%s: Invalid commodity metadata in external link", nodeConfig.TemplateClass)
-		}
-
-		if link.ProbeEntityPropertyList == nil || len(link.ProbeEntityPropertyList) == 0 {
-			return fmt.Errorf("%s: Missing internal properties metadata for stitching with external entities",
-				nodeConfig.TemplateClass)
-		}
-		if link.ExternalEntityPropertyList == nil || len(link.ExternalEntityPropertyList) == 0 {
-			return fmt.Errorf("%s: Missing external properties metadata for stitching with external entities",
-				nodeConfig.TemplateClass)
-		}
-		var propList []string
-		for _, propDef := range link.ProbeEntityPropertyList {
-			propList = append(propList, propDef.Name)
-		}
-		hostedByProviderProps[sellerType] = propList
-		hostedByBoughtComms[sellerType] = commMap
-
-		if link.Relationship != nil {
-			hostedByProviderType[sellerType] = *link.Relationship
-		}
-	}
-
-	node.HostedByProviderProps = hostedByProviderProps
-	node.HostedByProviderType = hostedByProviderType
-	node.HostedByBoughtComms = hostedByBoughtComms
 
 	return nil
 }
@@ -379,55 +289,6 @@ func (sn *SupplyChainNode) CreateTemplateDTO() (*proto.TemplateDTO, error) {
 			glog.V(3).Infof("%s --> %s adding bought comm %++v\n", sn.NodeType, providerType, commTemplate)
 			snBuilder.Buys(commTemplate)
 		}
-	}
-
-	// External Links
-	for _, extLink := range sn.nodeConfig.ExternalLinkList {
-		if extLink.Value == nil {
-			glog.Warningf("%s: null external link", sn.nodeConfig.TemplateClass)
-			continue
-		}
-		link := extLink.Value
-		buyerType := TemplateEntityTypeMap[*link.BuyerRef]
-		sellerType := TemplateEntityTypeMap[*link.SellerRef]
-		relationship := relationshipMapping[*link.Relationship]
-
-		externalLinkBuilder := supplychain.NewExternalEntityLinkBuilder().
-			Link(buyerType, sellerType, relationship)
-		commDefs := link.CommodityDefList
-		for _, commDef := range commDefs {
-			commType := TemplateCommodityTypeMap[*commDef.CommType]
-			externalLinkBuilder.Commodity(commType, *commDef.HasKey)
-		}
-
-		for _, propDef := range link.ProbeEntityPropertyList {
-			externalLinkBuilder.ProbeEntityPropertyDef(propDef.Name, propDef.Description)
-		}
-		for _, propDef := range link.ExternalEntityPropertyList {
-			eType := TemplateEntityTypeMap[propDef.Entity]
-			var propertyHandler *proto.PropertyHandler
-			if propDef.PropHandler != nil {
-				propHandlerEntity := TemplateEntityTypeMap[propDef.PropHandler.EntityType]
-				propertyHandler = &proto.PropertyHandler{
-					MethodName:    &propDef.PropHandler.MethodName,
-					EntityType:    &propHandlerEntity,
-					DirectlyApply: &propDef.PropHandler.DirectlyApply,
-				}
-			}
-
-			serverPropDef := &proto.ServerEntityPropDef{
-				Entity:          &eType,
-				Attribute:       &propDef.Attribute,
-				UseTopoExt:      nil,
-				PropertyHandler: propertyHandler,
-			}
-			externalLinkBuilder.ExternalEntityPropertyDef(serverPropDef)
-		}
-		external, err := externalLinkBuilder.Build()
-		if err != nil {
-			glog.Errorf("%++v", err)
-		}
-		snBuilder.ConnectsTo(external)
 	}
 
 	snNode, err := snBuilder.Create()

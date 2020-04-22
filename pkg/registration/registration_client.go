@@ -10,8 +10,8 @@ import (
 )
 
 const (
-	TargetIdField   string = "targetIdentifier"
-	TargetNameField string = "Name"
+	TargetIdField   string = "targetIdentifier" // this is used to reach the target
+	TargetNameField string = "Name"             // this is used to display the target in the UI
 
 	propertyId string = "id"
 )
@@ -52,22 +52,33 @@ func (p *DIFRegistrationClient) GetSupplyChainDefinition() []*proto.TemplateDTO 
 }
 
 func (p *DIFRegistrationClient) GetIdentifyingFields() string {
-	return TargetNameField
+	return TargetIdField
 }
 
 func (p *DIFRegistrationClient) GetAccountDefinition() []*proto.AccountDefEntry {
+	//this field is used as name of the target for displaying in the UI
 	targetDisplayField := true
-	nameIDAcctDefEntry := builder.NewAccountDefEntryBuilder(TargetNameField, "Name",
-		"Name for the metric server endpoint", ".*", true, false).Create()
+	nameIDAcctDefEntry := builder.NewAccountDefEntryBuilder(TargetNameField,
+		"Name",
+		"Name for the metric server endpoint",
+		".*",
+		true,
+		false).
+		Create()
 	nameIDAcctDefEntry.IsTargetDisplayName = &targetDisplayField
 
-	targetIDAcctDefEntry := builder.NewAccountDefEntryBuilder(TargetIdField, "URL",
-		"HTTP URL for the JSON DIF data", ".*", true, false).Create()
+	// this field is used to reach the target
+	targetIDAcctDefEntry := builder.NewAccountDefEntryBuilder(TargetIdField,
+		"URL",
+		"HTTP URL for the JSON DIF data",
+		".*",
+		true,
+		false).
+		Create()
 
 	return []*proto.AccountDefEntry{
 		nameIDAcctDefEntry,
 		targetIDAcctDefEntry,
-
 	}
 }
 
