@@ -40,9 +40,9 @@ func TestEntityBuilder(t *testing.T) {
 			RESPONSE_TIME +
 			"]," +
 			TRANSACTION +
-			"],"+
+			"]," +
 			HEAP_ARRAY +
-			"]"+
+			"]" +
 			"		}," +
 			"	\"hostedOn\":{" +
 			"		\"hostType\":[" +

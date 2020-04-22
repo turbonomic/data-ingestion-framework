@@ -12,8 +12,7 @@ import (
 	"testing"
 )
 
-var TEST_ENTITY =
-	"{" +
+var TEST_ENTITY = "{" +
 	"	\"type\": \"application\"," +
 	"	\"uniqueId\": \"456\"," +
 	"	\"name\": \"My App Name\"," +
@@ -79,16 +78,16 @@ func TestCommodity(t *testing.T) {
 		//	continue
 		//}
 		//for metricKey, metricList := range metricMap {
-			// Parse metric
-			metricName := data.DIFMetricToTemplateCommodityStringMap[metricKey]
-			commodityType := registration.TemplateCommodityTypeMap[metricName]
+		// Parse metric
+		metricName := data.DIFMetricToTemplateCommodityStringMap[metricKey]
+		commodityType := registration.TemplateCommodityTypeMap[metricName]
 
-			commodities, err := cb.convertFromMetricValueListToCommodityList(commodityType, metricList)
-			if err != nil {
-				fmt.Printf("%v\n", err)
-			}
+		commodities, err := cb.convertFromMetricValueListToCommodityList(commodityType, metricList)
+		if err != nil {
+			fmt.Printf("%v\n", err)
+		}
 
-			fmt.Printf("comm %v\n", commodities)
+		fmt.Printf("comm %v\n", commodities)
 
 		//}
 	}
@@ -99,14 +98,14 @@ var INVALID_COMM_NAME = "    	  \"INVALID_COMM_NAME\": [" +
 	"			{" +
 	"		          \"average\": 33.2," +
 	"		          \"unit\": \"tps\"" +
-	"			}"+
+	"			}" +
 	"	   ]"
 
 var INVALID_METRIC = "    	  \"responseTime\": [" +
 	"			{" +
 	"		          \"unit\": \"tps\"," +
 	"				  \"capacity\": 100" +
-	"	        }"+
+	"	        }" +
 	"		]"
 
 var CONNECTION = "    	  \"connection\": [" +
@@ -235,7 +234,7 @@ func TestCommodityKPI(t *testing.T) {
 	}
 
 	expectedCommMap := map[proto.CommodityDTO_CommodityType]int{
-		proto.CommodityDTO_SLA_COMMODITY:        2,
+		proto.CommodityDTO_SLA_COMMODITY: 2,
 	}
 
 	for commType, num := range expectedCommMap {

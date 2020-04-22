@@ -99,24 +99,5 @@ func logSupplyChainDetails(supplyChainNode *registration.SupplyChainNode) {
 			expectedHostedByProviderType[fmt.Sprintf("%v", provider)] = hostingType
 		}
 		fmt.Printf("expectedHostedByProviderType: %v\n", expectedHostedByProviderType)
-
-		//hostedByProviderProps := supplyChainNode.HostedByProviderProps
-		//expectedHostedByProviderProps := make(map[string][]string)
-		//for provider, props := range hostedByProviderProps {
-		//	expectedHostedByProviderProps[fmt.Sprintf("%v", provider)] = props
-		//}
-
-
-		//expectedHostedByBoughtComms := make(map[string][]string)
-		//for provider, bought := range supplyChainNode.HostedByBoughtComms {
-		//	var comms []string
-		//	for comm, _ := range bought {
-		//		comms = append(comms, fmt.Sprintf("%v", comm))
-		//	}
-		//	expectedHostedByBoughtComms[fmt.Sprintf("%v", provider)] = comms
-		//}
-
-		//fmt.Printf("expectedHostedByProviderProps: %v\n", expectedHostedByProviderProps)
-		//fmt.Printf("expectedHostedByBoughtComms: %v\n", expectedHostedByBoughtComms)
 	}
 }

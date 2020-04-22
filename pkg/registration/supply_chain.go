@@ -24,7 +24,7 @@ type SupplyChainNode struct {
 	// provider type to allowed commodity map
 	SupportedBoughtComms       map[proto.EntityDTO_EntityType]map[proto.CommodityDTO_CommodityType]DefaultValue
 	SupportedBoughtAccessComms map[proto.EntityDTO_EntityType]map[proto.CommodityDTO_CommodityType]DefaultValue
-	ProviderByProviderType  map[proto.EntityDTO_EntityType]string
+	ProviderByProviderType     map[proto.EntityDTO_EntityType]string
 }
 
 // Create new supply chain consisting of supply chain nodes using the supply chain configuration
