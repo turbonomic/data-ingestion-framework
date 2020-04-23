@@ -94,6 +94,7 @@ func createTAPService(args *conf.DIFProbeArgs) (*service.TAPService, error) {
 	// Discovery client - target type, target address, supply chain
 	targetType := registrationClient.TargetType()
 	probeCategory := registrationClient.ProbeCategory()
+	probeUICategory := registrationClient.ProbeUICategory()
 
 	var optionalTargetAddr *string
 	if len(targetAddr) > 0 {
@@ -115,7 +116,7 @@ func createTAPService(args *conf.DIFProbeArgs) (*service.TAPService, error) {
 	discoveryClient := discovery.NewDiscoveryClient(discoveryTargetParams, *keepStandalone, supplyChainConfig)
 
 	// Turbo probe
-	builder := probe.NewProbeBuilder(targetType, *supplyChainConfig.ProbeCategory).
+	builder := probe.NewProbeBuilder(targetType, probeCategory, probeUICategory).
 		WithDiscoveryOptions(probe.FullRediscoveryIntervalSecondsOption(int32(*args.DiscoveryIntervalSec))).
 		WithEntityMetadata(registrationClient).
 		RegisteredBy(registrationClient)

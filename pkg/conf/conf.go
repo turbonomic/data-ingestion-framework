@@ -19,8 +19,9 @@ const (
 	LocalDebugConfPath            = "configs/turbodif-config.json"
 	LocalDebugSupplyChainConfPath = "configs/app-supply-chain-config.yaml"
 
-	DefaultProbeCategory string = "Guest OS Processes"
-	DefaultTargetType    string = "DataIngestionFramework"
+	DefaultProbeCategory   string = "Guest OS Processes"
+	DefaultProbeUICategory string = "Applications and Databases"
+	DefaultTargetType      string = "DataIngestionFramework"
 )
 
 // Configuration for the TurboDIF probe

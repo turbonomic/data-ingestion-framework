@@ -54,6 +54,13 @@ func (s *SupplyChain) GetProbeCategory() string {
 	return *s.config.ProbeCategory
 }
 
+func (s *SupplyChain) GetProbeUICategory() string {
+	if s.config.ProbeUICategory == nil {
+		return conf.DefaultProbeUICategory
+	}
+	return *s.config.ProbeUICategory
+}
+
 func (s *SupplyChain) GetTargetType() string {
 	if s.config.TargetType == nil {
 		return conf.DefaultTargetType

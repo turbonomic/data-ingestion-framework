@@ -1,4 +1,5 @@
 probeCategory: Guest OS Processes
+probeUICategory: Applications and Databases
 targetType: DataIngestionFramework
 supplyChainNode:
   - templateClass: BUSINESS_APPLICATION
