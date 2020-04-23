@@ -1,12 +1,10 @@
 package discovery
 
 import (
-	"bufio"
 	//"bytes"
 	"fmt"
 	"github.com/tamerh/jsparser"
 	"github.com/turbonomic/turbo-go-sdk/pkg/dataingestionframework/data"
-	"os"
 	"strconv"
 )
 
@@ -173,122 +171,4 @@ func parseUnitValue(unitVal interface{}) data.DIFMetricUnit {
 	default:
 		return ""
 	}
-}
-
-//==================================================================================
-
-func printMetricVal(m *data.DIFMetricVal) {
-	if m.Average != nil {
-		fmt.Printf("	Average: %v ", *m.Average)
-	}
-	if m.Capacity != nil {
-		fmt.Printf("Capacity: %v ", *m.Capacity)
-	}
-	if m.Unit != nil {
-		fmt.Printf("Unit: %v ", *m.Unit)
-	}
-	if m.Key != nil {
-		fmt.Printf("Key: %v ", *m.Key)
-	}
-	fmt.Printf("\n")
-}
-
-func DIFEntityToString(entity *data.DIFEntity) {
-	fmt.Printf("*** [%s]%s:%s\n", entity.Type, entity.UID, entity.Name)
-
-	if entity.MatchingIdentifiers != nil {
-		fmt.Printf("	MatchingIdentifiers:\n")
-		fmt.Printf("		IPAddress : %++v\n", entity.MatchingIdentifiers.IPAddress)
-	}
-	if entity.PartOf != nil {
-		fmt.Printf("	PartOf: %d\n", len(entity.PartOf))
-		for _, partOf := range entity.PartOf {
-			fmt.Printf("		%s:%s\n", partOf.ParentEntity, partOf.UniqueId)
-		}
-	}
-
-	if entity.HostedOn != nil {
-		fmt.Printf("		%s:%s\n", entity.HostedOn.HostUuid, entity.HostedOn.IPAddress)
-	}
-
-	if entity.Metrics != nil {
-		for metricName, metricList := range entity.Metrics {
-			for _, metric := range metricList {
-				fmt.Printf("	Metric %s:\n", metricName)
-				printMetricVal(metric)
-			}
-		}
-	}
-}
-
-//==================================================================================
-// For unit testing only
-func ReadDIFTopologyStream(path string) {
-	//var resp []byte
-	//rb := bytes.NewBuffer(resp)
-	//reader := bufio.NewReader(rb)
-	//br := bufio.NewReaderSize(reader, 65536)
-	//parser := jsparser.NewJSONParser(br, "topology")
-
-	fmt.Printf("========================================\n")
-	f, _ := os.Open(path)
-	br := bufio.NewReaderSize(f, 65536)
-	parser1 := jsparser.NewJSONParser(br, "scope")
-	for json := range parser1.Stream() {
-		fmt.Printf("Scope %++v\n", json.StringVal)
-	}
-
-	f, _ = os.Open(path)
-	br = bufio.NewReaderSize(f, 65536)
-	parser := jsparser.NewJSONParser(br, "topology")
-	var entities []*data.DIFEntity
-	for json := range parser.Stream() {
-		// Create DIFEntity
-		entity := &data.DIFEntity{
-			UID:                 json.ObjectVals["uniqueId"].StringVal,
-			Type:                json.ObjectVals["type"].StringVal,
-			Name:                json.ObjectVals["name"].StringVal,
-			HostedOn:            nil,
-			MatchingIdentifiers: nil,
-			PartOf:              nil,
-			Metrics:             nil,
-		}
-		fmt.Printf("%s::%s\n", entity.UID, entity.Type)
-		// ----- Matching Identifiers
-		entity.MatchingIdentifiers = parseMatchingIdentifiers(json)
-
-		// ----- Part Of
-		entity.PartOf = parsePartOf(json)
-
-		// ----- HostedOn
-		entity.HostedOn = parseHostedOn(json)
-
-		// ------ Metrics
-		if json.ObjectVals["metrics"] != nil {
-			difMetricValMap := make(map[string][]*data.DIFMetricVal)
-
-			metricsMap := json.ObjectVals["metrics"].ObjectVals
-			for metricName, metrics := range metricsMap {
-				fmt.Printf("%s --> metrics: %++v\n", metricName, metrics)
-				metricList := parseMetricVal(metrics)
-				difMetricValMap[metricName] = metricList
-			}
-			entity.Metrics = difMetricValMap
-		}
-
-		DIFEntityToString(entity)
-		entities = append(entities, entity)
-		fmt.Printf("------------------------------\n")
-	} //end of topology
-
-	var topology *data.Topology
-	topology = &data.Topology{
-		Version:    "",
-		Updatetime: 0,
-		Scope:      "",
-		Source:     "",
-		Entities:   nil,
-	}
-	topology.Entities = entities
-	fmt.Printf("========================================\n")
 }

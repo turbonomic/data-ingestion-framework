@@ -45,7 +45,7 @@ func ValidateMetricDataSource(metricEndpoint string) error {
 	if valid {
 		return nil
 	}
-	return fmt.Errorf("Unsupported metric endpoint: %s", metricEndpoint)
+	return fmt.Errorf("unsupported metric endpoint: %s", metricEndpoint)
 }
 
 func CreateMetricDataSource(metricEndpoint string) MetricDataSource {
@@ -201,7 +201,6 @@ func loadJSONStream(metricEndpoint string, resp []byte) (*data.Topology, error) 
 			PartOf:              nil,
 			Metrics:             nil,
 		}
-		fmt.Printf("%s::%s\n", entity.UID, entity.Type)
 		// ----- Matching Identifiers
 		entity.MatchingIdentifiers = parseMatchingIdentifiers(json)
 
@@ -223,10 +222,7 @@ func loadJSONStream(metricEndpoint string, resp []byte) (*data.Topology, error) 
 			}
 			entity.Metrics = difMetricValMap
 		}
-
-		if glog.V(4) {
-			DIFEntityToString(entity)
-		}
+		glog.V(4).Infof("%v", entity)
 		entities = append(entities, entity)
 	} //end of topology
 
@@ -240,7 +236,7 @@ func loadJSONStream(metricEndpoint string, resp []byte) (*data.Topology, error) 
 	}
 
 	if topology.Entities != nil {
-		glog.Infof("%s: parsed %d entities\n", metricEndpoint, len(topology.Entities))
+		glog.Infof("%s: parsed %d entities", metricEndpoint, len(topology.Entities))
 	}
 	return topology, nil
 
