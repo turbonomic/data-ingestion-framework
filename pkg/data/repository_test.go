@@ -18,7 +18,7 @@ func TestMultipleDIFEntitiesForApplication(t *testing.T) {
 			Type: "application",
 			Name: id,
 			HostedOn: &data.DIFHostedOn{
-				HostType:  []string{"virtualMachine"},
+				HostType:  []data.DIFHostType{"virtualMachine"},
 				IPAddress: "1.1.1.1",
 				HostUuid:  "",
 			},
@@ -100,7 +100,7 @@ func TestApplicationHostByUUID(t *testing.T) {
 	var entities []*data.DIFEntity
 	appMap := map[string]*data.DIFEntity{}
 	hostUUID := "host-1"
-	hostType := string(VM)
+	hostType := data.DIFHostType(VM)
 	for i := 1; i <= 2; i++ {
 		id := fmt.Sprintf("app-%d", i)
 
@@ -109,7 +109,7 @@ func TestApplicationHostByUUID(t *testing.T) {
 			Type: "application",
 			Name: id,
 			HostedOn: &data.DIFHostedOn{
-				HostType:  []string{hostType},
+				HostType:  []data.DIFHostType{hostType},
 				IPAddress: "",
 				HostUuid:  hostUUID,
 			},
@@ -141,15 +141,13 @@ func TestApplicationHostByUUID(t *testing.T) {
 			}
 		}
 	}
-
-	fmt.Printf("ExternalProxyProviders: %v\n", repository.ExternalProxyProviders)
 }
 
 func TestApplicationHostByIP(t *testing.T) {
 	var entities []*data.DIFEntity
 	appMap := map[string]*data.DIFEntity{}
 	hostIP := "1.1.1.1"
-	hostType := string(VM)
+	hostType := data.DIFHostType(VM)
 	for i := 1; i <= 2; i++ {
 		id := fmt.Sprintf("app-%d", i)
 
@@ -158,7 +156,7 @@ func TestApplicationHostByIP(t *testing.T) {
 			Type: "application",
 			Name: id,
 			HostedOn: &data.DIFHostedOn{
-				HostType:  []string{hostType},
+				HostType:  []data.DIFHostType{hostType},
 				IPAddress: hostIP,
 				HostUuid:  "",
 			},
@@ -190,17 +188,14 @@ func TestApplicationHostByIP(t *testing.T) {
 			}
 		}
 	}
-
-	fmt.Printf("ExternalProxyProviders: %v\n", repository.ExternalProxyProviders)
-
 }
 
 func TestApplicationMultipleHostTypesByIP(t *testing.T) {
 	var entities []*data.DIFEntity
 	appMap := map[string]*data.DIFEntity{}
 	hostIP := "1.1.1.1"
-	hostType := string(VM)
-	containerType := string(CONTAINER)
+	hostType := data.DIFHostType(VM)
+	containerType := data.DIFHostType(CONTAINER)
 	for i := 1; i <= 2; i++ {
 		id := fmt.Sprintf("app-%d", i)
 
@@ -209,7 +204,7 @@ func TestApplicationMultipleHostTypesByIP(t *testing.T) {
 			Type: "application",
 			Name: id,
 			HostedOn: &data.DIFHostedOn{
-				HostType:  []string{hostType, containerType},
+				HostType:  []data.DIFHostType{hostType, containerType},
 				IPAddress: hostIP,
 				HostUuid:  "",
 			},
@@ -248,16 +243,14 @@ func TestApplicationMultipleHostTypesByIP(t *testing.T) {
 		providersByUUID := appEntity.GetExternalProviderByUUID()
 		assert.True(t, len(providersByUUID) == 0)
 	}
-
-	fmt.Printf("ExternalProxyProviders: %v\n", repository.ExternalProxyProviders)
 }
 
 func TestApplicationMultipleHostTypesByUUID(t *testing.T) {
 	var entities []*data.DIFEntity
 	appMap := map[string]*data.DIFEntity{}
 	hostID := "host-1"
-	hostType := string(VM)
-	containerType := string(CONTAINER)
+	hostType := data.DIFHostType(VM)
+	containerType := data.DIFHostType(CONTAINER)
 	for i := 1; i <= 2; i++ {
 		id := fmt.Sprintf("app-%d", i)
 
@@ -266,7 +259,7 @@ func TestApplicationMultipleHostTypesByUUID(t *testing.T) {
 			Type: "application",
 			Name: id,
 			HostedOn: &data.DIFHostedOn{
-				HostType: []string{hostType, containerType},
+				HostType: []data.DIFHostType{hostType, containerType},
 				HostUuid: hostID,
 			},
 		}
@@ -304,6 +297,4 @@ func TestApplicationMultipleHostTypesByUUID(t *testing.T) {
 		providersByIP := appEntity.GetExternalProviderByIP()
 		assert.True(t, len(providersByIP) == 0)
 	}
-
-	fmt.Printf("ExternalProxyProviders: %v\n", repository.ExternalProxyProviders)
 }

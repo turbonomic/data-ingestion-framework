@@ -47,7 +47,7 @@ var TEST_ENTITY = "{" +
 	"				\"units\": \"mhz\"" +
 	"			}" +
 	"		]," +
-	"		\"sla\": [" +
+	"		\"kpi\": [" +
 	"			{" +
 	"				\"unit\": \"tps\"," +
 	"				\"average\": 33.2," +
@@ -234,7 +234,7 @@ func TestCommodityKPI(t *testing.T) {
 	}
 
 	expectedCommMap := map[proto.CommodityDTO_CommodityType]int{
-		proto.CommodityDTO_SLA_COMMODITY: 2,
+		proto.CommodityDTO_KPI: 2,
 	}
 
 	for commType, num := range expectedCommMap {
