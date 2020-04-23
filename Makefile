@@ -1,11 +1,11 @@
-OUTPUT_DIR=./_output
+OUTPUT_DIR=./build
 SOURCE_DIRS = cmd pkg
 PACKAGES := go list ./... | grep -v /vendor | grep -v /out
 
 .DEFAULT_GOAL := build
 
 bin=turbodif
-product: fmtcheck vet
+product: clean
 	env GOOS=linux GOARCH=amd64 go build -o ${OUTPUT_DIR}/${bin}.linux ./cmd
 
 debug-product: clean
@@ -17,8 +17,8 @@ build: clean
 debug: clean
 	go build -gcflags "-N -l" -o ${OUTPUT_DIR}/${bin}.debug ./cmd
 
-docker: clean
-	docker build -t turbonomic/turbodif:6.4dev --build-arg GIT_COMMIT=$(shell git rev-parse --short HEAD) .
+docker: product
+	docker build -f build/Dockerfile -t turbonomic/turbodif --build-arg GIT_COMMIT=$(shell git rev-parse --short HEAD) .
 
 test: clean
 	@go test -v -race ./pkg/...
@@ -32,4 +32,4 @@ vet:
 	@go vet $(shell $(PACKAGES))
 
 clean:
-	@: if [ -f ${OUTPUT_DIR} ] then rm -rf ${OUTPUT_DIR} fi
+	@rm -rf ${OUTPUT_DIR}/${bin}*

@@ -13,10 +13,10 @@ import (
 const (
 	// Config file paths as volume mounts for the service pod
 	DefaultConfPath            = "/etc/turbodif/turbodif-config.json"
-	DefaultSupplyChainConfPath = "/etc/turbodif/app-supply-chain-config.yaml"
+	DefaultSupplyChainConfPath = "/opt/turbonomic/conf/app-supply-chain-config.yaml"
 
 	// Debug file paths
-	LocalDebugConfPath            = "configs/config.json"
+	LocalDebugConfPath            = "configs/turbodif-config.json"
 	LocalDebugSupplyChainConfPath = "configs/app-supply-chain-config.yaml"
 
 	DefaultProbeCategory string = "Guest OS Processes"
@@ -28,7 +28,7 @@ type DIFConf struct {
 	// configuration for connecting to the Turbo server
 	Communicator *service.TurboCommunicationConfig `json:"communicationConfig,omitempty"`
 	// configuration for the DIF Probe target
-	TargetConf *DIFTargetConf `json:"difTargetConfig,omitempty"`
+	TargetConf *DIFTargetConf `json:"targetConfig,omitempty"`
 	// Appended to the end of a probe name when registering with the platform. Useful when you need
 	// multiple prometheus probe instances with affinity for discovering specific targets.
 	TargetTypeSuffix string `json:"targetTypeSuffix,omitempty"`
