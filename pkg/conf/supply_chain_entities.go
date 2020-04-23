@@ -7,9 +7,10 @@ import (
 )
 
 type SupplyChainConfig struct {
-	ProbeCategory *string       `yaml:"probeCategory"`
-	TargetType    *string       `yaml:"targetType"`
-	Nodes         []*NodeConfig `yaml:"supplyChainNode"`
+	ProbeCategory   *string       `yaml:"probeCategory"`
+	ProbeUICategory *string       `yaml:"probeUICategory"`
+	TargetType      *string       `yaml:"targetType"`
+	Nodes           []*NodeConfig `yaml:"supplyChainNode"`
 }
 
 type NodeConfig struct {

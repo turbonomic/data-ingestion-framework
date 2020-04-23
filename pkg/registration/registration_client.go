@@ -82,14 +82,20 @@ func (p *DIFRegistrationClient) GetAccountDefinition() []*proto.AccountDefEntry 
 	}
 }
 
-// TargetType returns the target type as the default target type appended
-// an optional (from configuration) suffix
 func (p *DIFRegistrationClient) ProbeCategory() string {
 	probeCategory := p.supplyChain.GetProbeCategory()
 	if len(probeCategory) == 0 {
 		probeCategory = conf.DefaultProbeCategory
 	}
 	return probeCategory
+}
+
+func (p *DIFRegistrationClient) ProbeUICategory() string {
+	probeUICategory := p.supplyChain.GetProbeUICategory()
+	if len(probeUICategory) == 0 {
+		probeUICategory = conf.DefaultProbeUICategory
+	}
+	return probeUICategory
 }
 
 // TargetType returns the target type as the default target type appended
