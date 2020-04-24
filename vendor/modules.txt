@@ -1,0 +1,59 @@
+# github.com/davecgh/go-spew v1.1.1
+github.com/davecgh/go-spew/spew
+# github.com/deckarep/golang-set v1.7.1
+github.com/deckarep/golang-set
+# github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b
+github.com/golang/glog
+# github.com/golang/protobuf v1.4.0
+github.com/golang/protobuf/proto
+# github.com/gorilla/websocket v1.4.2
+github.com/gorilla/websocket
+# github.com/pmezard/go-difflib v1.0.0
+github.com/pmezard/go-difflib/difflib
+# github.com/stretchr/testify v1.3.0
+github.com/stretchr/testify/assert
+# github.com/tamerh/jsparser v1.2.0
+github.com/tamerh/jsparser
+# github.com/turbonomic/turbo-api v0.0.0-20200413140231-3bef8fb11708
+github.com/turbonomic/turbo-api/pkg/api
+github.com/turbonomic/turbo-api/pkg/client
+# github.com/turbonomic/turbo-go-sdk v0.0.0-20200424200957-1ac8c3b841dd
+github.com/turbonomic/turbo-go-sdk/pkg
+github.com/turbonomic/turbo-go-sdk/pkg/builder
+github.com/turbonomic/turbo-go-sdk/pkg/dataingestionframework/data
+github.com/turbonomic/turbo-go-sdk/pkg/mediationcontainer
+github.com/turbonomic/turbo-go-sdk/pkg/probe
+github.com/turbonomic/turbo-go-sdk/pkg/proto
+github.com/turbonomic/turbo-go-sdk/pkg/service
+github.com/turbonomic/turbo-go-sdk/pkg/supplychain
+github.com/turbonomic/turbo-go-sdk/pkg/version
+# google.golang.org/protobuf v1.21.0
+google.golang.org/protobuf/encoding/prototext
+google.golang.org/protobuf/encoding/protowire
+google.golang.org/protobuf/internal/descfmt
+google.golang.org/protobuf/internal/descopts
+google.golang.org/protobuf/internal/detrand
+google.golang.org/protobuf/internal/encoding/defval
+google.golang.org/protobuf/internal/encoding/messageset
+google.golang.org/protobuf/internal/encoding/tag
+google.golang.org/protobuf/internal/encoding/text
+google.golang.org/protobuf/internal/errors
+google.golang.org/protobuf/internal/fieldnum
+google.golang.org/protobuf/internal/fieldsort
+google.golang.org/protobuf/internal/filedesc
+google.golang.org/protobuf/internal/filetype
+google.golang.org/protobuf/internal/flags
+google.golang.org/protobuf/internal/genname
+google.golang.org/protobuf/internal/impl
+google.golang.org/protobuf/internal/mapsort
+google.golang.org/protobuf/internal/pragma
+google.golang.org/protobuf/internal/set
+google.golang.org/protobuf/internal/strs
+google.golang.org/protobuf/internal/version
+google.golang.org/protobuf/proto
+google.golang.org/protobuf/reflect/protoreflect
+google.golang.org/protobuf/reflect/protoregistry
+google.golang.org/protobuf/runtime/protoiface
+google.golang.org/protobuf/runtime/protoimpl
+# gopkg.in/yaml.v2 v2.2.8
+gopkg.in/yaml.v2
