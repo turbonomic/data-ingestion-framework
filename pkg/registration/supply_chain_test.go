@@ -46,7 +46,7 @@ func TestSupplyChainNode(t *testing.T) {
 	}
 
 	var soldCommsList []proto.CommodityDTO_CommodityType
-	for key, _ := range appNode.SupportedComms {
+	for key := range appNode.SupportedComms {
 		soldCommsList = append(soldCommsList, key)
 	}
 
@@ -63,7 +63,7 @@ func TestSupplyChainNode(t *testing.T) {
 	var providerComms []proto.CommodityDTO_CommodityType
 	for key, boughtMap := range appNode.SupportedBoughtComms {
 		providers = append(providers, key)
-		for comm, _ := range boughtMap {
+		for comm := range boughtMap {
 			providerComms = append(providerComms, comm)
 		}
 	}

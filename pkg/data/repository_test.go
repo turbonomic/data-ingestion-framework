@@ -129,14 +129,14 @@ func TestApplicationHostByUUID(t *testing.T) {
 	//map[application:map[app-1:map[1.1.1.1:virtualMachine] app-2:map[1.1.1.1:virtualMachine]]]
 
 	appEntities := repository.EntityMap[APPLICATION]
-	for appId, _ := range appEntities {
+	for appId := range appEntities {
 		appEntity := appEntities[appId]
 
 		providers := appEntity.GetExternalProviderByUUID()
 		assert.EqualValues(t, 1, len(providers))
 		for pType, pMap := range providers {
 			assert.EqualValues(t, VM, pType)
-			for pId, _ := range pMap {
+			for pId := range pMap {
 				assert.EqualValues(t, hostUUID, pId)
 			}
 		}
@@ -176,14 +176,14 @@ func TestApplicationHostByIP(t *testing.T) {
 	//map[application:map[app-1:map[1.1.1.1:virtualMachine] app-2:map[1.1.1.1:virtualMachine]]]
 
 	appEntities := repository.EntityMap[APPLICATION]
-	for appId, _ := range appEntities {
+	for appId := range appEntities {
 		appEntity := appEntities[appId]
 
 		providers := appEntity.GetExternalProviderByIP()
 		assert.EqualValues(t, 1, len(providers))
 		for pType, pMap := range providers {
 			assert.EqualValues(t, VM, pType)
-			for pId, _ := range pMap {
+			for pId := range pMap {
 				assert.EqualValues(t, hostIP, pId)
 			}
 		}
@@ -228,7 +228,7 @@ func TestApplicationMultipleHostTypesByIP(t *testing.T) {
 
 	hostTypes := []DIFEntityType{VM, CONTAINER}
 	appEntities := repository.EntityMap[APPLICATION]
-	for appId, _ := range appEntities {
+	for appId := range appEntities {
 		appEntity := appEntities[appId]
 
 		providersByIP := appEntity.GetExternalProviderByIP()
@@ -282,7 +282,7 @@ func TestApplicationMultipleHostTypesByUUID(t *testing.T) {
 
 	hostTypes := []DIFEntityType{VM, CONTAINER}
 	appEntities := repository.EntityMap[APPLICATION]
-	for appId, _ := range appEntities {
+	for appId := range appEntities {
 		appEntity := appEntities[appId]
 
 		providersByUUID := appEntity.GetExternalProviderByUUID()

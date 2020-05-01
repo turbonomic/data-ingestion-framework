@@ -115,7 +115,7 @@ func (eb *GenericEntityBuilder) BuildEntity() (*proto.EntityDTO, error) {
 			// Add the provider and associated bought commodities to the entity builder
 			// Provider entity will be created by the proxy_provider_builder
 			var providerIds []string
-			for pId, _ := range pMap {
+			for pId := range pMap {
 				providerIds = append(providerIds, pId)
 				providerId := getEntityId(*providerType, pId, eb.scope)
 				glog.V(3).Infof("%s --> adding external provider %s::%s", id, pType, providerId)
@@ -145,7 +145,7 @@ func (eb *GenericEntityBuilder) BuildEntity() (*proto.EntityDTO, error) {
 
 			// Add the provider and associated bought commodities to the entity builder
 			var providerIds []string
-			for pId, _ := range pMap {
+			for pId := range pMap {
 				providerIds = append(providerIds, pId)
 				providerId := getEntityId(*providerType, pId, eb.scope)
 				glog.Infof("%s --> adding external provider %s::%s", id, pType, providerId)
@@ -230,7 +230,7 @@ func (eb *GenericEntityBuilder) soldCommodities(
 	if soldCommKey != nil {
 		accessCommKey = *soldCommKey
 	}
-	for commType, _ := range scSupportedAccessComms {
+	for commType := range scSupportedAccessComms {
 		soldCommodities = append(soldCommodities, createCommodityWithKey(commType, accessCommKey))
 	}
 
@@ -294,7 +294,7 @@ func (eb *GenericEntityBuilder) boughtCommodities(pType data.DIFEntityType,
 	if boughtCommKey != nil {
 		accessCommKey = *boughtCommKey
 	}
-	for commType, _ := range scProviderAccessComms {
+	for commType := range scProviderAccessComms {
 		boughtCommodities = append(boughtCommodities, createCommodityWithKey(commType, accessCommKey))
 	}
 
@@ -326,7 +326,7 @@ func (eb *GenericEntityBuilder) externalBoughtCommodities(pType data.DIFEntityTy
 	// create the commodities bought from the external provider
 	externalProviderComms := scHostedByBoughtComms[providerType]
 
-	for commType, _ := range externalProviderComms {
+	for commType := range externalProviderComms {
 		if commList, exists := commoditiesMap[commType]; exists {
 			for _, cb := range commList {
 				boughtComm, _ := cb.Create() //nothing to fail, so ignore the error

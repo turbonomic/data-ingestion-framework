@@ -157,7 +157,7 @@ func (d *DIFDiscoveryClient) Discover(accountValues []*proto.AccountValue) (*pro
 				glog.V(4).Infof("		provider %s [%v] ---> ", pType, pIds)
 			}
 			for pType, pMap := range difEntity.HostsByIP {
-				for pId, _ := range pMap {
+				for pId := range pMap {
 					glog.V(4).Infof("		hostedBy %s [%v] ---> ", pType, pId)
 				}
 			}

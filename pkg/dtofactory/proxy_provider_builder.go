@@ -59,7 +59,7 @@ func (eb *ProxyProviderEntityBuilder) BuildEntity() (*proto.EntityDTO, error) {
 			soldCommodities = append(soldCommodities, createCommodity(commType))
 		}
 	}
-	for commType, _ := range supportedAccessComms {
+	for commType := range supportedAccessComms {
 		key := id //using the provider id as the key
 		soldCommodities = append(soldCommodities, createCommodityWithKey(commType, key))
 	}

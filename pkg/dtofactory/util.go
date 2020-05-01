@@ -62,13 +62,13 @@ func logSupplyChainDetails(supplyChainNode *registration.SupplyChainNode) {
 	if os.Getenv("TURBODIF_LOCAL_DEBUG") == "1" && glog.V(4) {
 
 		var expectedSoldComms []string
-		for comm, _ := range supplyChainNode.SupportedComms {
+		for comm := range supplyChainNode.SupportedComms {
 			expectedSoldComms = append(expectedSoldComms, fmt.Sprintf("%v", comm))
 		}
 		fmt.Printf("expectedSoldComms: %v\n", expectedSoldComms)
 
 		var expectedSoldAccessComms []string
-		for comm, _ := range supplyChainNode.SupportedAccessComms {
+		for comm := range supplyChainNode.SupportedAccessComms {
 			expectedSoldAccessComms = append(expectedSoldAccessComms, fmt.Sprintf("%v", comm))
 		}
 		fmt.Printf("expectedSoldAccessComms: %v\n", expectedSoldAccessComms)
@@ -76,7 +76,7 @@ func logSupplyChainDetails(supplyChainNode *registration.SupplyChainNode) {
 		expectedBought := make(map[string][]string)
 		for provider, bought := range supplyChainNode.SupportedBoughtComms {
 			var comms []string
-			for comm, _ := range bought {
+			for comm := range bought {
 				comms = append(comms, fmt.Sprintf("%v", comm))
 			}
 			expectedBought[fmt.Sprintf("%v", provider)] = comms
@@ -86,7 +86,7 @@ func logSupplyChainDetails(supplyChainNode *registration.SupplyChainNode) {
 		expectedAccessBought := make(map[string][]string)
 		for provider, bought := range supplyChainNode.SupportedBoughtAccessComms {
 			var comms []string
-			for comm, _ := range bought {
+			for comm := range bought {
 				comms = append(comms, fmt.Sprintf("%v", comm))
 			}
 			expectedAccessBought[fmt.Sprintf("%v", provider)] = comms
