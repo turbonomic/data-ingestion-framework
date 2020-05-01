@@ -1,10 +1,7 @@
 package discovery
 
 import (
-	"encoding/json"
-	"github.com/golang/glog"
 	"github.com/turbonomic/turbo-go-sdk/pkg/dataingestionframework/data"
-	"io/ioutil"
 )
 
 type DIFConsolidationResult struct {
@@ -15,13 +12,14 @@ type DIFConsolidationResult struct {
 
 // Pulls JSON DIF Data from different configured data sources
 func GetDIFData(datasources []MetricDataSource) (*DIFConsolidationResult, error) {
-	consolidationResult := &DIFConsolidationResult{
-		Warnings:       nil,
-		ParsedEntities: nil,
-		Scope:          "",
-	}
+	consolidationResult := &DIFConsolidationResult{}
 	var endpoints []string
-	//TODO: parallel execution for different endpoints
+	// Specifying multiple endpoints in a single targetAddress is NOT
+	// a common use case.
+	// For consolidation of two or more entities coming from multiple data sources to happen,
+	// the topology.Scope returned from those data sources must be the same, in addition
+	// to the entity ID.
+	// TODO: parallel execution for different endpoints
 	for _, datasource := range datasources {
 		endpoints = append(endpoints, datasource.GetMetricEndpoint())
 		var topology *data.Topology
@@ -34,21 +32,5 @@ func GetDIFData(datasources []MetricDataSource) (*DIFConsolidationResult, error)
 		}
 		consolidationResult.Scope = topology.Scope
 	}
-
-	//3. marshal all the entities to json format
-	if glog.V(4) {
-		topo := data.NewTopology()
-		topo.SetUpdateTime()
-		topo.Entities = consolidationResult.ParsedEntities
-		topo.Scope = consolidationResult.Scope
-
-		jdata, err := json.MarshalIndent(topo, "", " ")
-		if err != nil {
-			glog.Errorf("Failed to marshal json: %v.", err)
-		}
-
-		ioutil.WriteFile("./dif-data.json", jdata, 0644)
-	}
-
 	return consolidationResult, nil
 }

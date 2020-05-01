@@ -38,7 +38,7 @@ func (eb *GenericEntityBuilder) BuildEntity() (*proto.EntityDTO, error) {
 
 	entityBuilder := builder.
 		NewEntityDTOBuilder(eb.entityType, id).
-		DisplayName(getDisplayEntityName(eb.entityType, eb.difEntity.EntityId, eb.scope))
+		DisplayName(eb.difEntity.EntityId)
 
 	mergePropertiesMap := make(map[string]string)
 	commoditiesMap := make(map[proto.CommodityDTO_CommodityType][]*builder.CommodityDTOBuilder) //[]*proto.CommodityDTO)
