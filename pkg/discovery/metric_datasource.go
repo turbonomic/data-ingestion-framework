@@ -179,10 +179,10 @@ func loadJSONStream(metricEndpoint string, resp []byte) (*data.Topology, error) 
 
 	rb := bytes.NewBuffer(resp)
 	reader := bufio.NewReader(rb)
-	parser := jsparser.NewJSONParser(reader, "Scope")
+	parser := jsparser.NewJSONParser(reader, "scope")
 	var scope string
 	for json := range parser.Stream() {
-		glog.Infof("Scope %++v\n", json.StringVal)
+		glog.Infof("Scope %+v", json.StringVal)
 		scope = json.StringVal
 	}
 
