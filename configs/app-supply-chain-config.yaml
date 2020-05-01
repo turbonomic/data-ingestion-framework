@@ -1,5 +1,5 @@
-probeCategory: Guest OS Processes
-probeUICategory: Applications and Databases
+probeCategory: Custom
+probeUICategory: Custom
 targetType: DataIngestionFramework
 supplyChainNode:
   - templateClass: BUSINESS_APPLICATION
@@ -31,6 +31,21 @@ supplyChainNode:
           - commodityType: APPLICATION
           - commodityType: KPI
             key: key-placeholder
+    mergedEntityMetaData:
+      keepStandalone: false
+      matchingMetadata:
+        returnType: STRING
+        matchingData:
+          - matchingProperty:
+              propertyName: IP
+        externalEntityReturnType: STRING
+        externalEntityMatchingProperty:
+          - matchingField:
+              fieldName: id
+      commoditiesSold:
+        - RESPONSE_TIME
+        - TRANSACTION
+        - KPI
   - templateClass: BUSINESS_TRANSACTION
     templateType: BASE
     templatePriority: -1
@@ -52,6 +67,21 @@ supplyChainNode:
           - commodityType: APPLICATION
           - commodityType: KPI
             key: key-placeholder
+    mergedEntityMetaData:
+      keepStandalone: false
+      matchingMetadata:
+        returnType: STRING
+        matchingData:
+          - matchingProperty:
+              propertyName: IP
+        externalEntityReturnType: STRING
+        externalEntityMatchingProperty:
+          - matchingField:
+              fieldName: id
+      commoditiesSold:
+        - RESPONSE_TIME
+        - TRANSACTION
+        - KPI
   - templateClass: SERVICE
     templateType: BASE
     templatePriority: -1
