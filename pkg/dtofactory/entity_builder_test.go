@@ -11,25 +11,28 @@ import (
 	"testing"
 )
 
-func createSupplyChainTemplates() map[proto.EntityDTO_EntityType]*registration.SupplyChainNode {
-	// Load the supply chain config
+func createSupplyChainTemplates() (map[proto.EntityDTO_EntityType]*registration.SupplyChainNode, error) {
+	// Load the supply chain conf(ig
 	supplyChainConf := "../../configs/app-supply-chain-config.yaml"
 	supplyChainConfig, err := conf.LoadSupplyChain(supplyChainConf)
 	if err != nil {
-		fmt.Errorf("Error while parsing the supply chain config file %s: %++v", supplyChainConf, err)
+		return nil, fmt.Errorf("Error while parsing the supply chain config file %s: %++v", supplyChainConf, err)
 	}
 
 	supplyChain, err := registration.NewSupplyChain(supplyChainConfig)
 	if err != nil {
-		fmt.Errorf("Error while parsing the supply chain config %++v", err)
+		return nil, fmt.Errorf("Error while parsing the supply chain config %++v", err)
 	}
 	supplyChainNodeMap := supplyChain.GetSupplyChainNodes()
 
-	return supplyChainNodeMap
+	return supplyChainNodeMap, nil
 }
 
 func TestEntityBuilder(t *testing.T) {
-	supplyChainNodeMap := createSupplyChainTemplates()
+	supplyChainNodeMap, err := createSupplyChainTemplates()
+	if err != nil {
+		t.Errorf("Failed to create supply chain template: %v", err)
+	}
 	scope := "test"
 	ENTITY =
 		"{" +
@@ -57,12 +60,12 @@ func TestEntityBuilder(t *testing.T) {
 	//glog.V(2).Infof("%++v", entity)
 	eType := data.ParseEntityType(parsedDifEntity.Type)
 	if eType == "" {
-		fmt.Errorf("Invalid entity type for entity: %v\n", parsedDifEntity)
+		t.Errorf("Invalid entity type for entity: %v", parsedDifEntity)
 	}
 
 	eId := parsedDifEntity.UID
 	if eId == "" {
-		fmt.Errorf("Invalid entity ID for entity: %v\n", parsedDifEntity)
+		t.Errorf("Invalid entity ID for entity: %v", parsedDifEntity)
 	}
 
 	difEntity := data.NewBasicDIFEntity(eType, eId)
@@ -81,7 +84,7 @@ func TestEntityBuilder(t *testing.T) {
 	dto, err := eb.BuildEntity()
 
 	if err != nil {
-		fmt.Errorf("DTO BUILD ERROR %v", err)
+		t.Errorf("DTO BUILD ERROR %v", err)
 	}
 
 	// created from the built DTO
@@ -182,7 +185,10 @@ func entityDTOToTestEntity(dto *proto.EntityDTO) *TestEntity {
 }
 
 func TestMergingMetadataProperty(t *testing.T) {
-	supplyChainNodeMap := createSupplyChainTemplates()
+	supplyChainNodeMap, err := createSupplyChainTemplates()
+	if err != nil {
+		t.Errorf("Failed to create supply chain template: %v", err)
+	}
 	scope := "test"
 	ENTITY =
 		"{" +
@@ -203,12 +209,12 @@ func TestMergingMetadataProperty(t *testing.T) {
 	parsedDifEntity := parseEntity(ENTITY)
 	eType := data.ParseEntityType(parsedDifEntity.Type)
 	if eType == "" {
-		fmt.Errorf("Invalid entity type for entity: %v\n", parsedDifEntity)
+		t.Errorf("Invalid entity type for entity: %v", parsedDifEntity)
 	}
 
 	eId := parsedDifEntity.UID
 	if eId == "" {
-		fmt.Errorf("Invalid entity ID for entity: %v\n", parsedDifEntity)
+		t.Errorf("Invalid entity ID for entity: %v", parsedDifEntity)
 	}
 
 	entityType := EntityType(eType)
@@ -221,7 +227,7 @@ func TestMergingMetadataProperty(t *testing.T) {
 	dto, err := eb.BuildEntity()
 
 	if err != nil {
-		fmt.Errorf("DTO BUILD ERROR %v", err)
+		t.Errorf("DTO BUILD ERROR %v", err)
 	}
 
 	dtoProps := dto.GetEntityProperties()
@@ -233,7 +239,11 @@ func TestMergingMetadataProperty(t *testing.T) {
 }
 
 func TestExternalLinkMetadataProperty(t *testing.T) {
-	supplyChainNodeMap := createSupplyChainTemplates()
+	supplyChainNodeMap, err := createSupplyChainTemplates()
+	if err != nil {
+		t.Errorf("Failed to create supply chain template: %v", err)
+	}
+
 	scope := "test"
 	ENTITY =
 		"{" +
@@ -257,12 +267,12 @@ func TestExternalLinkMetadataProperty(t *testing.T) {
 	parsedDifEntity := parseEntity(ENTITY)
 	eType := data.ParseEntityType(parsedDifEntity.Type)
 	if eType == "" {
-		fmt.Errorf("Invalid entity type for entity: %v\n", parsedDifEntity)
+		t.Errorf("Invalid entity type for entity: %v", parsedDifEntity)
 	}
 
 	eId := parsedDifEntity.UID
 	if eId == "" {
-		fmt.Errorf("Invalid entity ID for entity: %v\n", parsedDifEntity)
+		t.Errorf("Invalid entity ID for entity: %v", parsedDifEntity)
 	}
 
 	difEntity := data.NewBasicDIFEntity(eType, eId)
@@ -282,7 +292,7 @@ func TestExternalLinkMetadataProperty(t *testing.T) {
 	dto, err := eb.BuildEntity()
 
 	if err != nil {
-		fmt.Errorf("DTO BUILD ERROR %v", err)
+		t.Errorf("DTO BUILD ERROR %v", err)
 	}
 
 	dtoProps := dto.GetEntityProperties()
