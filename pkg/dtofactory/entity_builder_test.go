@@ -87,14 +87,14 @@ func TestEntityBuilder(t *testing.T) {
 	// created from the built DTO
 	testEntity := entityDTOToTestEntity(dto)
 	var sold1 []proto.CommodityDTO_CommodityType
-	for s, _ := range testEntity.soldComms {
+	for s := range testEntity.soldComms {
 		sold1 = append(sold1, s)
 	}
 	var bought1 []proto.CommodityDTO_CommodityType
 	var providers1 []proto.EntityDTO_EntityType
 	for p, bc := range testEntity.boughtComms {
 		providers1 = append(providers1, p)
-		for b, _ := range bc {
+		for b := range bc {
 			bought1 = append(bought1, b)
 		}
 	}
@@ -119,7 +119,7 @@ func TestEntityBuilder(t *testing.T) {
 	comms[proto.CommodityDTO_VMEM] = &proto.CommodityDTO{}
 
 	var sold2 []proto.CommodityDTO_CommodityType
-	for s, _ := range expectedTestEntity.soldComms {
+	for s := range expectedTestEntity.soldComms {
 		sold2 = append(sold2, s)
 	}
 
@@ -127,7 +127,7 @@ func TestEntityBuilder(t *testing.T) {
 	var providers2 []proto.EntityDTO_EntityType
 	for p, bc := range expectedTestEntity.boughtComms {
 		providers2 = append(providers2, p)
-		for b, _ := range bc {
+		for b := range bc {
 			bought2 = append(bought2, b)
 		}
 	}

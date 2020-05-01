@@ -118,7 +118,7 @@ func (p *DIFRegistrationClient) GetEntityMetadata() []*proto.EntityIdentityMetad
 	var result []*proto.EntityIdentityMetadata
 	var entities []proto.EntityDTO_EntityType
 	nodeMap := p.supplyChain.GetSupplyChainNodes()
-	for nodeType, _ := range nodeMap {
+	for nodeType := range nodeMap {
 		entities = append(entities, nodeType)
 	}
 
