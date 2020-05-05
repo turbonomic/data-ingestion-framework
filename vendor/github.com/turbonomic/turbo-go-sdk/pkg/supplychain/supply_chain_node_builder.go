@@ -7,15 +7,22 @@ import (
 	"github.com/turbonomic/turbo-go-sdk/pkg/proto"
 )
 
+// provider creates a template entity that sells commodities to a consumer template.
+type provider struct {
+	provider *proto.Provider
+	// Specifies if the provider is optional or not.
+	// For example the provider of Pod is WorkloadController if Pod is deployed by K8s controller, otherwise the provider
+	// of Pod is Namespace. So WorkloadController and Namespace are optional providers for Pod.
+	optional *bool
+}
 type SupplyChainNodeBuilder struct {
 	templateClass              *proto.EntityDTO_EntityType
 	templateType               *proto.TemplateDTO_TemplateType
 	priority                   *int32
 	commoditiesSold            []*proto.TemplateCommodity
-	providerCommodityBoughtMap map[*proto.Provider][]*proto.TemplateCommodity
+	providerCommodityBoughtMap map[*provider][]*proto.TemplateCommodity
 	externalLinks              []*proto.TemplateDTO_ExternalEntityLinkProp
-
-	currentProvider *proto.Provider
+	currentProvider            *provider
 
 	err error
 }
@@ -60,33 +67,41 @@ func (scnb *SupplyChainNodeBuilder) Sells(templateComm *proto.TemplateCommodity)
 	return scnb
 }
 
-// set the provider of the SupplyChainNode
-func (scnb *SupplyChainNodeBuilder) Provider(provider proto.EntityDTO_EntityType,
+// Provider sets the mandatory provider of the SupplyChainNode
+func (scnb *SupplyChainNodeBuilder) Provider(providerType proto.EntityDTO_EntityType,
 	pType proto.Provider_ProviderType) *SupplyChainNodeBuilder {
+	return scnb.ProviderOpt(providerType, pType, nil)
+}
+
+// ProviderOpt sets the optional provider of the SupplyChainNode with min and max cardinality
+func (scnb *SupplyChainNodeBuilder) ProviderOpt(providerType proto.EntityDTO_EntityType,
+	pType proto.Provider_ProviderType, optional *bool) *SupplyChainNodeBuilder {
 	if scnb.err != nil {
 		return scnb
 	}
-
+	var minCardinality int32
+	if optional != nil && *optional {
+		// If provider is optional, set minCardinality to 0
+		minCardinality = int32(0)
+	} else {
+		// else minCardinality is 0
+		minCardinality = int32(1)
+	}
+	var maxCardinality int32
 	if pType == proto.Provider_LAYERED_OVER {
-		// TODO, need a separate class to build provider.
-		maxCardinality := int32(math.MaxInt32)
-		minCardinality := int32(0)
-		scnb.currentProvider = &proto.Provider{
-			TemplateClass:  &provider,
+		maxCardinality = int32(math.MaxInt32)
+	} else {
+		maxCardinality = int32(1)
+	}
+	scnb.currentProvider = &provider{
+		provider: &proto.Provider{
+			TemplateClass:  &providerType,
 			ProviderType:   &pType,
 			CardinalityMax: &maxCardinality,
 			CardinalityMin: &minCardinality,
-		}
-	} else {
-		hostCardinality := int32(1)
-		scnb.currentProvider = &proto.Provider{
-			TemplateClass:  &provider,
-			ProviderType:   &pType,
-			CardinalityMax: &hostCardinality,
-			CardinalityMin: &hostCardinality,
-		}
+		},
+		optional: optional,
 	}
-
 	return scnb
 }
 
@@ -103,7 +118,7 @@ func (scnb *SupplyChainNodeBuilder) Buys(templateComm *proto.TemplateCommodity) 
 	}
 
 	if scnb.providerCommodityBoughtMap == nil {
-		scnb.providerCommodityBoughtMap = make(map[*proto.Provider][]*proto.TemplateCommodity)
+		scnb.providerCommodityBoughtMap = make(map[*provider][]*proto.TemplateCommodity)
 	}
 
 	templateCommoditiesSoldByCurrentProvider, exist := scnb.providerCommodityBoughtMap[scnb.currentProvider]
@@ -173,16 +188,16 @@ func (scnb *SupplyChainNodeBuilder) SetTemplateType(t proto.TemplateDTO_Template
 	scnb.templateType = &t
 }
 
-func buildCommodityBought(
-	providerCommodityBoughtMap map[*proto.Provider][]*proto.TemplateCommodity) []*proto.TemplateDTO_CommBoughtProviderProp {
+func buildCommodityBought(providerCommodityBoughtMap map[*provider][]*proto.TemplateCommodity) []*proto.TemplateDTO_CommBoughtProviderProp {
 	if len(providerCommodityBoughtMap) == 0 {
 		return nil
 	}
 	commBought := []*proto.TemplateDTO_CommBoughtProviderProp{}
 	for provider, templateCommodities := range providerCommodityBoughtMap {
 		commBought = append(commBought, &proto.TemplateDTO_CommBoughtProviderProp{
-			Key:   provider,
-			Value: templateCommodities,
+			Key:        provider.provider,
+			Value:      templateCommodities,
+			IsOptional: provider.optional,
 		})
 	}
 	return commBought

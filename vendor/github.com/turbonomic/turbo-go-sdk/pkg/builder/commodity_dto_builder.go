@@ -25,6 +25,8 @@ type CommodityDTOBuilder struct {
 	storageAccessData     *proto.CommodityDTO_StorageAccessData
 	vstoragePartitionData *proto.VStoragePartitionData
 
+	utilizationData *proto.CommodityDTO_UtilizationData
+
 	vMemData *proto.CommodityDTO_VMemData
 	vCpuData *proto.CommodityDTO_VCpuData
 
@@ -42,20 +44,21 @@ func (cb *CommodityDTOBuilder) Create() (*proto.CommodityDTO, error) {
 		return nil, cb.err
 	}
 	commodityDTO := &proto.CommodityDTO{
-		CommodityType: cb.commodityType,
-		Key:           cb.key,
-		Used:          cb.used,
-		Reservation:   cb.reservation,
-		Capacity:      cb.capacity,
-		Limit:         cb.limit,
-		Peak:          cb.peak,
-		Active:        cb.active,
-		Resizable:     cb.resizable,
-		DisplayName:   cb.displayName,
-		Thin:          cb.thin,
-		ComputedUsed:  cb.computedUsed,
-		UsedIncrement: cb.usedIncrement,
-		PropMap:       buildPropertyMap(cb.propMap),
+		CommodityType:   cb.commodityType,
+		Key:             cb.key,
+		Used:            cb.used,
+		Reservation:     cb.reservation,
+		Capacity:        cb.capacity,
+		Limit:           cb.limit,
+		Peak:            cb.peak,
+		Active:          cb.active,
+		Resizable:       cb.resizable,
+		DisplayName:     cb.displayName,
+		Thin:            cb.thin,
+		ComputedUsed:    cb.computedUsed,
+		UsedIncrement:   cb.usedIncrement,
+		PropMap:         buildPropertyMap(cb.propMap),
+		UtilizationData: cb.utilizationData,
 	}
 
 	if cb.storageLatencyData != nil {
@@ -115,11 +118,31 @@ func (cb *CommodityDTOBuilder) Reservation(reservation float64) *CommodityDTOBui
 	return cb
 }
 
+func (cb *CommodityDTOBuilder) Active(active bool) *CommodityDTOBuilder {
+	if cb.err != nil {
+		return cb
+	}
+	cb.active = &active
+	return cb
+}
+
 func (cb *CommodityDTOBuilder) Resizable(resizable bool) *CommodityDTOBuilder {
 	if cb.err != nil {
 		return cb
 	}
 	cb.resizable = &resizable
+	return cb
+}
+
+func (cb *CommodityDTOBuilder) UtilizationData(points []float64, lastPointTimestampMs int64, intervalMs int32) *CommodityDTOBuilder {
+	if cb.err != nil {
+		return cb
+	}
+	cb.utilizationData = &proto.CommodityDTO_UtilizationData{
+		Point:                points,
+		LastPointTimestampMs: &lastPointTimestampMs,
+		IntervalMs:           &intervalMs,
+	}
 	return cb
 }
 
