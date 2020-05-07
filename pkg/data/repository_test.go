@@ -91,9 +91,19 @@ func TestMultipleDIFEntitiesForApplication(t *testing.T) {
 
 		for key, val := range providers {
 			assert.EqualValues(t, APPLICATION, key)
-			assert.EqualValues(t, []string{"app-1", "app-2"}, val)
+			assert.True(t, contains(val, "app-1"))
+			assert.True(t, contains(val, "app-2"))
 		}
 	}
+}
+
+func contains(s []string, e string) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
 }
 
 func TestApplicationHostByUUID(t *testing.T) {
