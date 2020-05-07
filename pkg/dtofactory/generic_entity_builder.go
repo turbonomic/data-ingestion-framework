@@ -65,7 +65,7 @@ func (eb *GenericEntityBuilder) BuildEntity() (*proto.EntityDTO, error) {
 
 		// consolidate the metrics from this dif entity to the main commodities map
 		for commType, commList := range commMap {
-			commoditiesMap[commType] = commList
+			commoditiesMap[commType] = append(commoditiesMap[commType], commList...)
 		}
 	}
 	logDebug(fmt.Printf, commoditiesMap)
