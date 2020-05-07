@@ -216,7 +216,6 @@ func loadJSONStream(metricEndpoint string, resp []byte) (*data.Topology, error) 
 
 			metricsMap := json.ObjectVals["metrics"].ObjectVals
 			for metricName, metrics := range metricsMap {
-				fmt.Printf("%s --> metrics: %++v\n", metricName, metrics)
 				metricList := parseMetricVal(metrics)
 				difMetricValMap[metricName] = metricList
 			}

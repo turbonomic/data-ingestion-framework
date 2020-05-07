@@ -1,8 +1,8 @@
 package discovery
 
 import (
-	//"bytes"
 	"fmt"
+	"github.com/golang/glog"
 	"github.com/tamerh/jsparser"
 	"github.com/turbonomic/turbo-go-sdk/pkg/dataingestionframework/data"
 	"strconv"
@@ -94,56 +94,50 @@ func parseHostedOn(json *jsparser.JSON) *data.DIFHostedOn {
 }
 
 func parseMetricVal(metricEntry *jsparser.JSON) []*data.DIFMetricVal {
-
 	var mValList []*data.DIFMetricVal
-
-	//fmt.Printf("Parsing %++v\n", metricEntry)
 	if metricEntry.ValueType != jsparser.Array {
 		return []*data.DIFMetricVal{}
 	}
 
 	for _, mVal := range metricEntry.ArrayVals {
 		// One DIFMetricVal per array element
-		difMetricVal := &data.DIFMetricVal{
-			Average:     nil,
-			Min:         nil,
-			Max:         nil,
-			Capacity:    nil,
-			Unit:        nil,
-			Key:         nil,
-			Description: nil,
-			RawMetrics:  nil,
-		}
+		difMetricVal := &data.DIFMetricVal{}
 		// Each array element is a map of key and values
 		for k, v := range mVal.ObjectVals {
-			if k == "average" {
+			if k == string(data.AVERAGE) {
 				if v.ValueType == jsparser.Number {
 					numVal, _ := strconv.ParseFloat(v.StringVal, 64)
 					difMetricVal.Average = &numVal
 				}
 			}
-			if k == "max" {
+			if k == string(data.MAX) {
 				if v.ValueType == jsparser.Number {
 					numVal, _ := strconv.ParseFloat(v.StringVal, 64)
 					difMetricVal.Max = &numVal
 				}
 			}
-			if k == "min" {
+			if k == string(data.MIN) {
 				if v.ValueType == jsparser.Number {
 					numVal, _ := strconv.ParseFloat(v.StringVal, 64)
 					difMetricVal.Min = &numVal
 				}
 			}
-			if k == "capacity" {
-				fmt.Printf("*** FOUND CAPACITY %++v\n", v.StringVal)
+			if k == string(data.CAPACITY) {
+				glog.V(4).Infof("Found Capacity %+v", v.StringVal)
 				if v.ValueType == jsparser.Number {
 					numVal, _ := strconv.ParseFloat(v.StringVal, 64)
 					difMetricVal.Capacity = &numVal
 				}
 			}
-			if k == "unit" {
+			if k == string(data.UNIT) {
 				unitVal := parseUnitValue(v.StringVal)
 				difMetricVal.Unit = &unitVal
+			}
+			if k == string(data.KEY) {
+				if v.ValueType == jsparser.String {
+					keyVal := v.StringVal
+					difMetricVal.Key = &keyVal
+				}
 			}
 		}
 		//printMetricVal(difMetricVal)
