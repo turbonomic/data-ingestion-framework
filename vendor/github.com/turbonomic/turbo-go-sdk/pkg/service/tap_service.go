@@ -35,8 +35,6 @@ func (tapService *TAPService) addTarget(isRegistered chan bool) {
 	case status := <-isRegistered:
 		if !status {
 			glog.Errorf("Probe %v registration failed.", pinfo)
-			close(tapService.disconnectFromTurbo)
-			glog.Errorf("Notified to close TAP service.")
 			return
 		}
 		break

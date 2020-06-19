@@ -80,7 +80,7 @@ type EntityDTOBuilder struct {
 	profileID             *string
 	layeredOver           []string
 	consistsOf            []string
-
+	connectedEntities     []*proto.ConnectedEntity
 	// Action Eligibility related
 	actionEligibility *ActionEligibility
 
@@ -146,6 +146,7 @@ func (eb *EntityDTOBuilder) Create() (*proto.EntityDTO, error) {
 		Notification:          eb.notification,
 		LayeredOver:           eb.layeredOver,
 		ConsistsOf:            eb.consistsOf,
+		ConnectedEntities:     eb.connectedEntities,
 	}
 	if eb.storageData != nil {
 		entityDTO.EntityData = &proto.EntityDTO_StorageData_{eb.storageData}
@@ -362,6 +363,66 @@ func (eb *EntityDTOBuilder) ConsistsOf(consistsOf []string) *EntityDTOBuilder {
 		return eb
 	}
 	eb.consistsOf = consistsOf
+	return eb
+}
+
+func (eb *EntityDTOBuilder) ConnectedTo(connectedEntityId string) *EntityDTOBuilder {
+	if eb.err != nil {
+		return eb
+	}
+	if eb.connectedEntities == nil {
+		eb.connectedEntities = []*proto.ConnectedEntity{}
+	}
+	controllerType := proto.ConnectedEntity_NORMAL_CONNECTION
+	eb.connectedEntities = append(eb.connectedEntities, &proto.ConnectedEntity{
+		ConnectedEntityId: &connectedEntityId,
+		ConnectionType:    &controllerType,
+	})
+	return eb
+}
+
+func (eb *EntityDTOBuilder) ControlledBy(controllerId string) *EntityDTOBuilder {
+	if eb.err != nil {
+		return eb
+	}
+	if eb.connectedEntities == nil {
+		eb.connectedEntities = []*proto.ConnectedEntity{}
+	}
+	controllerType := proto.ConnectedEntity_CONTROLLED_BY_CONNECTION
+	eb.connectedEntities = append(eb.connectedEntities, &proto.ConnectedEntity{
+		ConnectedEntityId: &controllerId,
+		ConnectionType:    &controllerType,
+	})
+	return eb
+}
+
+func (eb *EntityDTOBuilder) Owns(ownedEntityId string) *EntityDTOBuilder {
+	if eb.err != nil {
+		return eb
+	}
+	if eb.connectedEntities == nil {
+		eb.connectedEntities = []*proto.ConnectedEntity{}
+	}
+	controllerType := proto.ConnectedEntity_OWNS_CONNECTION
+	eb.connectedEntities = append(eb.connectedEntities, &proto.ConnectedEntity{
+		ConnectedEntityId: &ownedEntityId,
+		ConnectionType:    &controllerType,
+	})
+	return eb
+}
+
+func (eb *EntityDTOBuilder) AggregatedBy(aggregatorId string) *EntityDTOBuilder {
+	if eb.err != nil {
+		return eb
+	}
+	if eb.connectedEntities == nil {
+		eb.connectedEntities = []*proto.ConnectedEntity{}
+	}
+	controllerType := proto.ConnectedEntity_AGGREGATED_BY_CONNECTION
+	eb.connectedEntities = append(eb.connectedEntities, &proto.ConnectedEntity{
+		ConnectedEntityId: &aggregatorId,
+		ConnectionType:    &controllerType,
+	})
 	return eb
 }
 

@@ -1,6 +1,7 @@
 package mediationcontainer
 
 import (
+	"sync"
 	"time"
 
 	"github.com/turbonomic/turbo-go-sdk/pkg/probe"
@@ -25,8 +26,10 @@ type remoteMediationClient struct {
 	probeResponseChan chan *proto.MediationClientMessage
 	// Channel to stop the mediation client and the underlying transport and message handling
 	stopMediationClientCh chan struct{}
-	//  Channel to stop the routine that monitors the underlying transport connection
+	// Channel to stop the routine that monitors the underlying transport connection
 	closeWatcherCh chan bool
+	// Make sure to stop only once to avoid panic
+	stopOnce sync.Once
 }
 
 func CreateRemoteMediationClient(allProbes map[string]*ProbeProperties,
@@ -96,9 +99,8 @@ func (remoteMediationClient *remoteMediationClient) Init(probeRegisteredMsgCh ch
 
 	glog.V(4).Infof("Sdk client protocol completed with status %v", status)
 	if !status {
-		glog.Errorf("Registration with server failed")
+		glog.Errorf("Registration with server failed with status %v", status)
 		probeRegisteredMsgCh <- status
-		remoteMediationClient.Stop()
 		return
 	}
 
@@ -160,16 +162,18 @@ func (remoteMediationClient *remoteMediationClient) Init(probeRegisteredMsgCh ch
 
 // Stop the remote mediation client by closing the underlying transport and message handler routines
 func (remoteMediationClient *remoteMediationClient) Stop() {
-	// First stop the transport connection monitor
-	close(remoteMediationClient.closeWatcherCh)
-	// Stop the server message listener
-	remoteMediationClient.stopMessageHandler()
-	// Close the transport
-	if remoteMediationClient.Transport != nil {
-		remoteMediationClient.Transport.CloseTransportPoint()
-	}
-	// Notify the client to stop
-	close(remoteMediationClient.stopMediationClientCh)
+	remoteMediationClient.stopOnce.Do(func() {
+		// First stop the transport connection monitor
+		close(remoteMediationClient.closeWatcherCh)
+		// Stop the server message listener
+		remoteMediationClient.stopMessageHandler()
+		// Close the transport
+		if remoteMediationClient.Transport != nil {
+			remoteMediationClient.Transport.CloseTransportPoint()
+		}
+		// Notify the client to stop
+		close(remoteMediationClient.stopMediationClientCh)
+	})
 }
 
 // ======================== Listen for server messages ===================
