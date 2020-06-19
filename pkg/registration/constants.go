@@ -1,7 +1,7 @@
 package registration
 
 import (
-	"github.com/turbonomic/turbo-go-sdk/pkg/builder"
+	set "github.com/deckarep/golang-set"
 	"github.com/turbonomic/turbo-go-sdk/pkg/proto"
 )
 
@@ -26,11 +26,6 @@ var (
 		"BASE":      proto.TemplateDTO_BASE,
 		"EXTENSION": proto.TemplateDTO_EXTENSION,
 	}
-	returnTypeMapping = map[string]builder.ReturnType{
-		"STRING":      builder.MergedEntityMetadata_STRING,
-		"LIST_STRING": builder.MergedEntityMetadata_LIST_STRING,
-	}
-
 	relationshipMapping = map[string]proto.Provider_ProviderType{
 		"HOSTING":      proto.Provider_HOSTING,
 		"LAYERED_OVER": proto.Provider_LAYERED_OVER,
@@ -182,7 +177,7 @@ var TemplateCommodityTypeMap = map[string]proto.CommodityDTO_CommodityType{
 	"TRANSACTION_LOG":            proto.CommodityDTO_TRANSACTION_LOG,
 	"DB_CACHE_HIT_RATE":          proto.CommodityDTO_DB_CACHE_HIT_RATE,
 	"HOT_STORAGE":                proto.CommodityDTO_HOT_STORAGE,
-	"COLLECTION_TIME":            proto.CommodityDTO_COLLECTION_TIME,
+	"REMAINING_GC_CAPACITY":      proto.CommodityDTO_REMAINING_GC_CAPACITY,
 	"BUFFER_COMMODITY":           proto.CommodityDTO_BUFFER_COMMODITY,
 	"SOFTWARE_LICENSE_COMMODITY": proto.CommodityDTO_SOFTWARE_LICENSE_COMMODITY,
 	"VMPM_ACCESS":                proto.CommodityDTO_VMPM_ACCESS,
@@ -230,8 +225,13 @@ var AccessTemplateCommodityTypeMap = map[string]proto.CommodityDTO_CommodityType
 // ============================================================================================
 
 // Mapping to the entity that will provide the key value for the commodities
-var KeySupplierMapping = map[proto.EntityDTO_EntityType]proto.EntityDTO_EntityType{
-	proto.EntityDTO_APPLICATION_COMPONENT: proto.EntityDTO_SERVICE,
-	proto.EntityDTO_SERVICE:               proto.EntityDTO_SERVICE,
-	proto.EntityDTO_DATABASE_SERVER:       proto.EntityDTO_SERVICE,
+var SoldCommKeySupplierMapping = map[proto.EntityDTO_EntityType]set.Set{
+	proto.EntityDTO_APPLICATION_COMPONENT: set.NewSet(proto.EntityDTO_SERVICE),
+	proto.EntityDTO_SERVICE:               set.NewSet(proto.EntityDTO_BUSINESS_TRANSACTION, proto.EntityDTO_BUSINESS_APPLICATION),
+	proto.EntityDTO_DATABASE_SERVER:       set.NewSet(proto.EntityDTO_SERVICE),
+}
+
+var BoughtCommKeySupplierMapping = map[proto.EntityDTO_EntityType]set.Set{
+	proto.EntityDTO_APPLICATION_COMPONENT: set.NewSet(proto.EntityDTO_VIRTUAL_MACHINE, proto.EntityDTO_CONTAINER),
+	proto.EntityDTO_DATABASE_SERVER:       set.NewSet(proto.EntityDTO_VIRTUAL_MACHINE),
 }

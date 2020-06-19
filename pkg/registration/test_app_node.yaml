@@ -4,15 +4,24 @@ supplyChainNode:
     templatePriority: -1
     commoditySold:
       - commodityType: TRANSACTION
-        key: key-placeholder
+        optional: true
       - commodityType: RESPONSE_TIME
+        optional: true
+      - commodityType: KPI
+        key: key-placeholder
+        optional: true
+      - commodityType: APPLICATION
         key: key-placeholder
       - commodityType: HEAP
-        key: key-placeholder
-      - commodityType: COLLECTION_TIME
-        key: key-placeholder
+        optional: true
+        chargedBySold:
+          - REMAINING_GC_CAPACITY
+      - commodityType: REMAINING_GC_CAPACITY
+        optional: true
       - commodityType: THREADS
-        key: key-placeholder
+        optional: true
+        chargedByBought:
+          - VCPU
     commodityBought:
       - key:
           templateClass: VIRTUAL_MACHINE
@@ -22,39 +31,12 @@ supplyChainNode:
         value:
           - commodityType: VCPU
           - commodityType: VMEM
-    externalLink:
-      - key: VIRTUAL_MACHINE
-        value:
-          buyerRef: APPLICATION_COMPONENT
-          sellerRef: VIRTUAL_MACHINE
-          relationship: HOSTING
-          commodityDefs:
-            - type: VCPU
-              hasKey: false
-            - type: VMEM
-              hasKey: false
-            - type: TRANSACTION
-              hasKey: true
-            - type: RESPONSE_TIME
-              hasKey: true
-          probeEntityPropertyDef:
-            - name: VM_IP
-              description: IP Address of the VM hosting the discovered node
-          externalEntityPropertyDefs:
-            - entity: VIRTUAL_MACHINE
-              attribute: UsesEndPoints
-              propertyHandler:
-                methodName: getAddress
-                entityType: IP
-                directlyApply: false
     mergedEntityMetaData:
       keepStandalone: false
       matchingMetadata:
-        returnType: STRING
         matchingData:
           - matchingProperty:
               propertyName: IP
-        externalEntityReturnType: STRING
         externalEntityMatchingProperty:
           - matchingProperty:
               propertyName: IP
@@ -62,5 +44,6 @@ supplyChainNode:
         - RESPONSE_TIME
         - TRANSACTION
         - HEAP
-        - COLLECTION_TIME
+        - REMAINING_GC_CAPACITY
         - THREADS
+        - KPI

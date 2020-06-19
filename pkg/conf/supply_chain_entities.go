@@ -36,8 +36,12 @@ type ProviderConfig struct {
 }
 
 type CommodityConfig struct {
-	CommodityType *string `yaml:"commodityType"`
-	Key           *string `yaml:"key"`
+	CommodityType   *string  `yaml:"commodityType"`
+	Key             *string  `yaml:"key"`
+	Optional        *bool    `yaml:"optional"`
+	ChargedBySold   []string `yaml:"chargedBySold"`
+	ChargedByBought []string `yaml:"chargedByBought"`
+	Resold          *bool    `yaml:"resold"`
 }
 
 type ExternalEntityLinkConfig struct {
@@ -89,9 +93,6 @@ type MergedMetadataBoughtConfig struct {
 }
 
 type MatchingMetadataConfig struct {
-	ReturnType               string `yaml:"returnType"`
-	ExternalEntityReturnType string `yaml:"externalEntityReturnType"`
-
 	MatchingDataList                   []*MatchingDataConfig `yaml:"matchingData"`
 	ExternalEntityMatchingPropertyList []*MatchingDataConfig `yaml:"externalEntityMatchingProperty"`
 }
@@ -115,14 +116,14 @@ type MatchingFieldConfig struct {
 func LoadSupplyChain(filename string) (*SupplyChainConfig, error) {
 	contents, err := ioutil.ReadFile(filename)
 	if err != nil {
-		glog.Errorf("%++v\n", err)
+		glog.Errorf("%+v", err)
 		return nil, err
 	}
 	var supplyChain SupplyChainConfig
 	err = yaml.Unmarshal(contents, &supplyChain)
 
 	if err != nil {
-		glog.Errorf("%++v\n", err)
+		glog.Errorf("%+v", err)
 		return nil, err
 	}
 
@@ -136,8 +137,8 @@ func LoadSupplyChain(filename string) (*SupplyChainConfig, error) {
 		supplyChain.TargetType = &defaultTargetType
 	}
 
-	glog.Infof("PROBE CATEGORY: %s\n", *supplyChain.ProbeCategory)
-	glog.Infof("TARGET TYPE: %s\n", *supplyChain.TargetType)
+	glog.Infof("PROBE CATEGORY: %s", *supplyChain.ProbeCategory)
+	glog.Infof("TARGET TYPE: %s", *supplyChain.TargetType)
 
 	if glog.V(2) {
 		PrintSupplyChain(supplyChain)
@@ -211,9 +212,7 @@ func PrintSupplyChain(supplyChain SupplyChainConfig) {
 		if node.MergedEntityMetaData != nil {
 			metadata := node.MergedEntityMetaData
 
-			glog.Infof("KeepInTopology: %v\n", metadata.KeepInTopology)
-			glog.Infof("matching data returnType: %s\n", metadata.MatchingMetadata.ReturnType)
-			glog.Infof("matching data external returnType: %s\n", metadata.MatchingMetadata.ExternalEntityReturnType)
+			glog.Infof("KeepInTopology: %v", metadata.KeepInTopology)
 
 			if metadata.MatchingMetadata != nil {
 				matchingDataList := metadata.MatchingMetadata.MatchingDataList
