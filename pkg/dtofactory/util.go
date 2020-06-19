@@ -5,7 +5,6 @@ import (
 	"github.com/golang/glog"
 	"github.com/turbonomic/data-ingestion-framework/pkg/data"
 	"github.com/turbonomic/data-ingestion-framework/pkg/registration"
-	"github.com/turbonomic/turbo-go-sdk/pkg/builder"
 	"github.com/turbonomic/turbo-go-sdk/pkg/proto"
 	"os"
 )
@@ -37,19 +36,9 @@ func getEntityPropertyNameValue(name, value string) *proto.EntityDTO_EntityPrope
 	}
 }
 
-func createCommodityWithKey(accessCommType proto.CommodityDTO_CommodityType, key string) *proto.CommodityDTO {
-	appCommodity, _ := builder.NewCommodityDTOBuilder(accessCommType).Key(key).Create()
-	return appCommodity
-}
-
-func createCommodity(accessCommType proto.CommodityDTO_CommodityType) *proto.CommodityDTO {
-	appCommodity, _ := builder.NewCommodityDTOBuilder(accessCommType).Create()
-	return appCommodity
-}
-
-func logDebug(f func(format string, a ...interface{}) (int, error), msg ...interface{}) {
+func logDebug(msg ...interface{}) {
 	if os.Getenv("TURBODIF_LOCAL_DEBUG") == "1" && glog.V(4) {
-		f("%++v\n", msg)
+		glog.Infof("%+v", msg)
 	}
 }
 
@@ -60,13 +49,13 @@ func logSupplyChainDetails(supplyChainNode *registration.SupplyChainNode) {
 		for comm := range supplyChainNode.SupportedComms {
 			expectedSoldComms = append(expectedSoldComms, fmt.Sprintf("%v", comm))
 		}
-		fmt.Printf("expectedSoldComms: %v\n", expectedSoldComms)
+		glog.V(4).Infof("expectedSoldComms: %v", expectedSoldComms)
 
 		var expectedSoldAccessComms []string
 		for comm := range supplyChainNode.SupportedAccessComms {
 			expectedSoldAccessComms = append(expectedSoldAccessComms, fmt.Sprintf("%v", comm))
 		}
-		fmt.Printf("expectedSoldAccessComms: %v\n", expectedSoldAccessComms)
+		glog.V(4).Infof("expectedSoldAccessComms: %v", expectedSoldAccessComms)
 
 		expectedBought := make(map[string][]string)
 		for provider, bought := range supplyChainNode.SupportedBoughtComms {
@@ -76,7 +65,7 @@ func logSupplyChainDetails(supplyChainNode *registration.SupplyChainNode) {
 			}
 			expectedBought[fmt.Sprintf("%v", provider)] = comms
 		}
-		fmt.Printf("expectedBought: %v\n", expectedBought)
+		glog.V(4).Infof("expectedBought: %v", expectedBought)
 
 		expectedAccessBought := make(map[string][]string)
 		for provider, bought := range supplyChainNode.SupportedBoughtAccessComms {
@@ -86,13 +75,13 @@ func logSupplyChainDetails(supplyChainNode *registration.SupplyChainNode) {
 			}
 			expectedAccessBought[fmt.Sprintf("%v", provider)] = comms
 		}
-		fmt.Printf("expectedAccessBought: %v\n", expectedAccessBought)
+		glog.V(4).Infof("expectedAccessBought: %v", expectedAccessBought)
 
 		hostedByProviderType := supplyChainNode.ProviderByProviderType
 		expectedHostedByProviderType := make(map[string]string)
 		for provider, hostingType := range hostedByProviderType {
 			expectedHostedByProviderType[fmt.Sprintf("%v", provider)] = hostingType
 		}
-		fmt.Printf("expectedHostedByProviderType: %v\n", expectedHostedByProviderType)
+		glog.V(4).Infof("expectedHostedByProviderType: %v", expectedHostedByProviderType)
 	}
 }
