@@ -82,7 +82,7 @@ func TestCommodity(t *testing.T) {
 		metricName := data.DIFMetricToTemplateCommodityStringMap[metricKey]
 		commodityType := registration.TemplateCommodityTypeMap[metricName]
 
-		commodities, err := cb.convertFromMetricValueListToCommodityList(commodityType, metricList)
+		commodities, err := convertFromMetricValueListToCommodityList(commodityType, metricList)
 		if err != nil {
 			fmt.Printf("%v\n", err)
 		}

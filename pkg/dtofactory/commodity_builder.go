@@ -27,12 +27,12 @@ func (cb *GenericCommodityBuilder) BuildCommodity() (map[proto.CommodityDTO_Comm
 		metricName := data.DIFMetricToTemplateCommodityStringMap[metricKey]
 		commodityType, exists := registration.TemplateCommodityTypeMap[metricName]
 		if !exists {
-			glog.Errorf("%s:%s data has unsupported metric %s\n",
+			glog.Errorf("%s:%s data has unsupported metric %s",
 				cb.entity.Type, cb.entity.UID, metricName)
 			continue
 		}
 
-		commodities, err := cb.convertFromMetricValueListToCommodityList(commodityType, metricList)
+		commodities, err := convertFromMetricValueListToCommodityList(commodityType, metricList)
 
 		if err != nil {
 			glog.Errorf("%v", err)
@@ -40,18 +40,17 @@ func (cb *GenericCommodityBuilder) BuildCommodity() (map[proto.CommodityDTO_Comm
 
 		result[commodityType] = commodities
 	}
-
 	return result, nil
 }
 
-func (cb *GenericCommodityBuilder) convertFromMetricValueListToCommodityList(commType proto.CommodityDTO_CommodityType,
+func convertFromMetricValueListToCommodityList(commType proto.CommodityDTO_CommodityType,
 	responseMetrics []*difdata.DIFMetricVal) ([]*builder.CommodityDTOBuilder, error) { //([]*proto.CommodityDTO, error) {
 
 	var commodityList []*builder.CommodityDTOBuilder //[]*proto.CommodityDTO
 
 	for _, responseMetric := range responseMetrics {
 		if responseMetric.Average == nil {
-			return nil, fmt.Errorf("Invalid commodity, missing average value for %v\n", commType)
+			return nil, fmt.Errorf("invalid commodity, missing average value for %v", commType)
 		}
 		commBuilder := builder.NewCommodityDTOBuilder(commType)
 		if responseMetric.Capacity != nil {
@@ -68,13 +67,40 @@ func (cb *GenericCommodityBuilder) convertFromMetricValueListToCommodityList(com
 		}
 
 		commodityList = append(commodityList, commBuilder)
-		//commodity, err := commBuilder.Create()
-		//if err != nil {
-		//	glog.Errorf("%v", err)
-		//	return nil, err
-		//}
-		//
-		//commodityList = append(commodityList, commodity)
 	}
 	return commodityList, nil
+}
+
+func setResizable(entityType proto.EntityDTO_EntityType,
+	commMap map[proto.CommodityDTO_CommodityType][]*builder.CommodityDTOBuilder) {
+	// We must explicitly set resizable to false on an non-resizable commodity
+	for _, nonResizableCommodity := range registration.NonResizableCommodities {
+		if commList, found := commMap[nonResizableCommodity]; found {
+			for _, comm := range commList {
+				comm.Resizable(false)
+			}
+		}
+	}
+	switch entityType {
+	case proto.EntityDTO_APPLICATION_COMPONENT:
+		if commList, foundHeap := commMap[proto.CommodityDTO_HEAP]; foundHeap {
+			resizable := false
+			if _, foundGC := commMap[proto.CommodityDTO_REMAINING_GC_CAPACITY]; foundGC {
+				resizable = true
+			}
+			for _, comm := range commList {
+				comm.Resizable(resizable)
+			}
+		}
+	case proto.EntityDTO_DATABASE_SERVER:
+		if commList, foundHeap := commMap[proto.CommodityDTO_DB_MEM]; foundHeap {
+			resizable := false
+			if _, foundGC := commMap[proto.CommodityDTO_DB_CACHE_HIT_RATE]; foundGC {
+				resizable = true
+			}
+			for _, comm := range commList {
+				comm.Resizable(resizable)
+			}
+		}
+	}
 }
