@@ -12,8 +12,9 @@ type IsDIFEntity interface {
 }
 
 type BasicDIFEntity struct {
-	EntityId   string
-	EntityType DIFEntityType
+	EntityId    string
+	DisplayName string
+	EntityType  DIFEntityType
 	// list of entities created from multiple DIF JSON entities
 	entityList []*data.DIFEntity
 	// Map of internal providers
@@ -24,12 +25,13 @@ type BasicDIFEntity struct {
 	HostsByUUID map[DIFEntityType]map[string][]*data.DIFEntity //host type, host uuid,
 }
 
-func NewBasicDIFEntity(entityType DIFEntityType, entityId string) *BasicDIFEntity {
+func NewBasicDIFEntity(entityType DIFEntityType, entityId, displayName string) *BasicDIFEntity {
 	return &BasicDIFEntity{
-		EntityId:   entityId,
-		EntityType: entityType,
-		entityList: []*data.DIFEntity{},
-		Providers:  make(map[DIFEntityType][]string),
+		EntityId:    entityId,
+		DisplayName: displayName,
+		EntityType:  entityType,
+		entityList:  []*data.DIFEntity{},
+		Providers:   make(map[DIFEntityType][]string),
 		// Example:
 		// map[virtualMachine: map[1.1.1.1:[...]]]
 		HostsByIP:   make(map[DIFEntityType]map[string][]*data.DIFEntity),
