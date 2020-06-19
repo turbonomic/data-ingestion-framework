@@ -169,11 +169,9 @@ var (
 		"   mergedEntityMetaData:\n" +
 		"     keepStandalone: false\n" +
 		"     matchingMetadata:\n" +
-		"       returnType: STRING\n" +
 		"       matchingData:\n" +
 		"         - matchingProperty:\n" +
 		"             propertyName: IP\n" +
-		"       externalEntityReturnType: LIST_STRING\n" +
 		"       externalEntityMatchingProperty:\n" +
 		"         - matchingProperty:\n" +
 		"             propertyName: IP\n" +
@@ -235,8 +233,6 @@ var NodeBoughtMap = map[string]*CommodityBoughtConfig{
 var NodeMergedEntityMetadata = &MergedEntityMetaDataConfig{
 	KeepInTopology: false,
 	MatchingMetadata: &MatchingMetadataConfig{
-		ReturnType:               STRING,
-		ExternalEntityReturnType: LIST_STRING,
 		MatchingDataList: []*MatchingDataConfig{
 			{
 				MatchingProperty: &MatchingPropertyConfig{
@@ -305,8 +301,6 @@ func TestSupplyChainBoughtComms(t *testing.T) {
 	assert.EqualValues(t, m.CommoditiesBought, NodeMergedEntityMetadata.CommoditiesBought)
 	assert.EqualValues(t, m.KeepInTopology, NodeMergedEntityMetadata.KeepInTopology)
 	assert.True(t, m.MatchingMetadata != nil)
-	assert.EqualValues(t, m.MatchingMetadata.ReturnType, NodeMergedEntityMetadata.MatchingMetadata.ReturnType)
-	assert.EqualValues(t, m.MatchingMetadata.ExternalEntityReturnType, NodeMergedEntityMetadata.MatchingMetadata.ExternalEntityReturnType)
 
 	assert.EqualValues(t, len(m.MatchingMetadata.MatchingDataList), 1)
 	md := m.MatchingMetadata.MatchingDataList[0]

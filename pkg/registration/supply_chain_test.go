@@ -40,17 +40,26 @@ func TestSupplyChainNode(t *testing.T) {
 	expectedSoldComms := []proto.CommodityDTO_CommodityType{
 		proto.CommodityDTO_TRANSACTION,
 		proto.CommodityDTO_RESPONSE_TIME,
-		proto.CommodityDTO_COLLECTION_TIME,
+		proto.CommodityDTO_REMAINING_GC_CAPACITY,
 		proto.CommodityDTO_THREADS,
 		proto.CommodityDTO_HEAP,
+		proto.CommodityDTO_KPI,
+	}
+	expectedSoldAccessComms := []proto.CommodityDTO_CommodityType{
+		proto.CommodityDTO_APPLICATION,
 	}
 
 	var soldCommsList []proto.CommodityDTO_CommodityType
+	var soldAccessCommsList []proto.CommodityDTO_CommodityType
 	for key := range appNode.SupportedComms {
 		soldCommsList = append(soldCommsList, key)
 	}
+	for key := range appNode.SupportedAccessComms {
+		soldAccessCommsList = append(soldAccessCommsList, key)
+	}
 
 	assert.ElementsMatch(t, expectedSoldComms, soldCommsList)
+	assert.ElementsMatch(t, expectedSoldAccessComms, soldAccessCommsList)
 
 	expectedProviders := []proto.EntityDTO_EntityType{
 		proto.EntityDTO_VIRTUAL_MACHINE,

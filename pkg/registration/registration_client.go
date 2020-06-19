@@ -25,7 +25,7 @@ type DIFRegistrationClient struct {
 func NewDIFRegistrationClient(supplyChainConfig *conf.SupplyChainConfig, targetTypeSuffix string) (*DIFRegistrationClient, error) {
 	supplyChain, err := NewSupplyChain(supplyChainConfig)
 	if err != nil {
-		return nil, fmt.Errorf("Error parsing supply chain %v", err)
+		return nil, fmt.Errorf("error parsing supply chain %v", err)
 
 	}
 	return &DIFRegistrationClient{
@@ -43,7 +43,8 @@ func (p *DIFRegistrationClient) GetSupplyChainDefinition() []*proto.TemplateDTO 
 	templateDtoMap := p.supplyChain.CreateSupplyChainNodeTemplates()
 
 	for _, templateDto := range templateDtoMap {
-		glog.Infof("Template DTO for %s : \n		%++v\n", templateDto.TemplateClass, protobuf.MarshalTextString(templateDto))
+		glog.V(4).Infof("Template DTO for %s:", templateDto.TemplateClass)
+		glog.V(4).Infof("%s", protobuf.MarshalTextString(templateDto))
 		templateDtos = append(templateDtos, templateDto)
 	}
 

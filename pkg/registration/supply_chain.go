@@ -2,6 +2,7 @@ package registration
 
 import (
 	"fmt"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/golang/glog"
 	"github.com/turbonomic/data-ingestion-framework/pkg/conf"
 	"github.com/turbonomic/turbo-go-sdk/pkg/builder"
@@ -92,7 +93,7 @@ func parseNodeConfig(nodeConfig *conf.NodeConfig) (*SupplyChainNode, error) {
 	nodeType, exists := TemplateEntityTypeMap[nodeConfig.TemplateClass]
 
 	if !exists {
-		return nil, fmt.Errorf("Unknown supply chain node %s", nodeConfig.TemplateClass)
+		return nil, fmt.Errorf("unknown supply chain node %s", nodeConfig.TemplateClass)
 	}
 
 	node := &SupplyChainNode{
@@ -114,7 +115,7 @@ func parseNodeConfig(nodeConfig *conf.NodeConfig) (*SupplyChainNode, error) {
 
 func parseSoldComms(nodeConfig *conf.NodeConfig, node *SupplyChainNode) error {
 	if nodeConfig.CommoditySoldList == nil {
-		glog.Infof("%s: no sold commodities\n", nodeConfig.TemplateClass)
+		glog.Infof("%s: no sold commodities", nodeConfig.TemplateClass)
 		return nil
 	}
 	supportedComms := make(map[proto.CommodityDTO_CommodityType]DefaultValue)
@@ -128,18 +129,21 @@ func parseSoldComms(nodeConfig *conf.NodeConfig, node *SupplyChainNode) error {
 			continue
 		}
 		soldComm := *sold.CommodityType
-		if _, exists := TemplateCommodityTypeMap[soldComm]; exists {
-			commType := TemplateCommodityTypeMap[soldComm]
-			supportedComms[commType] = DefaultValue{Key: sold.Key}
-			glog.V(3).Infof("%s Sold comm %s::%v\n", nodeConfig.TemplateClass, soldComm, commType)
-		} else {
-			glog.Warningf("%s: Invalid sold commodity type %s", nodeConfig.TemplateClass, soldComm)
-		}
-
-		if _, exists := AccessTemplateCommodityTypeMap[soldComm]; exists {
-			commType := AccessTemplateCommodityTypeMap[soldComm]
+		// Add access commodity first
+		commType, exists := AccessTemplateCommodityTypeMap[soldComm]
+		if exists {
 			supportedAccessComms[commType] = DefaultValue{Key: sold.Key}
+			glog.V(3).Infof("%s Sold access comm %s::%v", nodeConfig.TemplateClass, soldComm, commType)
+			continue
 		}
+		// Add non-access commodity next
+		commType, exists = TemplateCommodityTypeMap[soldComm]
+		if exists {
+			supportedComms[commType] = DefaultValue{Key: sold.Key}
+			glog.V(3).Infof("%s Sold comm %s::%v", nodeConfig.TemplateClass, soldComm, commType)
+			continue
+		}
+		glog.Warningf("%s: Invalid sold commodity type %s", nodeConfig.TemplateClass, soldComm)
 	}
 	node.SupportedComms = supportedComms
 	node.SupportedAccessComms = supportedAccessComms
@@ -153,7 +157,7 @@ func parseSoldComms(nodeConfig *conf.NodeConfig, node *SupplyChainNode) error {
 
 func parseBoughtComms(nodeConfig *conf.NodeConfig, node *SupplyChainNode) error {
 	if nodeConfig.CommodityBoughtList == nil {
-		glog.Infof("%s: no bought commodities\n", nodeConfig.TemplateClass)
+		glog.V(4).Infof("%s has no bought commodities", nodeConfig.TemplateClass)
 		return nil
 	}
 	// PROVIDER AND BOUGHT COMM CONFIG
@@ -178,14 +182,14 @@ func parseBoughtComms(nodeConfig *conf.NodeConfig, node *SupplyChainNode) error 
 		}
 
 		providerType := TemplateEntityTypeMap[providerClass]
-		glog.V(3).Infof("%s : provider type %v\n", nodeConfig.TemplateClass, providerType)
+		glog.V(3).Infof("%s : provider type %v", nodeConfig.TemplateClass, providerType)
 		if bought.Comms == nil || len(bought.Comms) == 0 {
 			return fmt.Errorf("%s: Missing bought commodities for provider %s",
 				nodeConfig.TemplateClass, providerClass)
 		}
 
 		hostedByProviderType[providerType] = *bought.Provider.ProviderType
-		glog.V(3).Infof("%s : provider relationship  %v\n", nodeConfig.TemplateClass, *bought.Provider.ProviderType)
+		glog.V(3).Infof("%s : provider relationship  %v", nodeConfig.TemplateClass, *bought.Provider.ProviderType)
 
 		accessCommMap := make(map[proto.CommodityDTO_CommodityType]DefaultValue)
 		commMap := make(map[proto.CommodityDTO_CommodityType]DefaultValue)
@@ -195,21 +199,26 @@ func parseBoughtComms(nodeConfig *conf.NodeConfig, node *SupplyChainNode) error 
 				continue
 			}
 			boughtComm := *comm.CommodityType
-			if _, exists := TemplateCommodityTypeMap[boughtComm]; exists {
-				commType := TemplateCommodityTypeMap[boughtComm]
-				glog.V(3).Infof("%s --> %s Bought comm %s::%s\n", nodeConfig.TemplateClass, providerClass,
-					boughtComm, commType)
-				commMap[commType] = DefaultValue{Key: comm.Key}
-			} else {
-				glog.Warningf("%s: Invalid bought commodity type %s", nodeConfig.TemplateClass, boughtComm)
-			}
-			if _, exists := AccessTemplateCommodityTypeMap[boughtComm]; exists {
-				commType := AccessTemplateCommodityTypeMap[boughtComm]
+			// Add access commodity first
+			commType, exists := AccessTemplateCommodityTypeMap[boughtComm]
+			if exists {
 				accessCommMap[commType] = DefaultValue{Key: comm.Key}
+				glog.V(3).Infof("%s --> %s Bought access comm %s::%s", nodeConfig.TemplateClass, providerClass,
+					boughtComm, commType)
+				continue
 			}
+			// Add non-access commodity next
+			commType, exists = TemplateCommodityTypeMap[boughtComm]
+			if exists {
+				commMap[commType] = DefaultValue{Key: comm.Key}
+				glog.V(3).Infof("%s --> %s Bought comm %s::%s", nodeConfig.TemplateClass, providerClass,
+					boughtComm, commType)
+				continue
+			}
+			glog.Warningf("%s: Invalid bought commodity type %s", nodeConfig.TemplateClass, boughtComm)
 		}
-		if len(commMap) == 0 {
-			return fmt.Errorf("%s: Missing bought commodities for provider %s\n",
+		if len(commMap) == 0 && len(accessCommMap) == 0 {
+			return fmt.Errorf("%s: Missing bought commodities for provider %s",
 				nodeConfig.TemplateClass, providerClass)
 		}
 		supportedBoughtComms[providerType] = commMap
@@ -226,8 +235,8 @@ func parseBoughtComms(nodeConfig *conf.NodeConfig, node *SupplyChainNode) error 
 func (sn *SupplyChainNode) CreateTemplateDTO() (*proto.TemplateDTO, error) {
 	snBuilder := supplychain.NewSupplyChainNodeBuilder(sn.NodeType)
 
-	var templateType proto.TemplateDTO_TemplateType
-	if _, exists := templateTypeMapping[*sn.nodeConfig.TemplateType]; !exists {
+	templateType, exists := templateTypeMapping[*sn.nodeConfig.TemplateType]
+	if !exists {
 		glog.Warningf("missing template type for node %s", sn.nodeConfig.TemplateClass)
 		templateType = proto.TemplateDTO_BASE
 	}
@@ -242,11 +251,27 @@ func (sn *SupplyChainNode) CreateTemplateDTO() (*proto.TemplateDTO, error) {
 		}
 		if _, exists := TemplateCommodityTypeMap[*commSold.CommodityType]; exists {
 			commType := TemplateCommodityTypeMap[*commSold.CommodityType]
+			// Setting up chargedBy info
+			var chargedBy []proto.CommodityDTO_CommodityType
+			var chargedBySold []proto.CommodityDTO_CommodityType
+			for _, boughtType := range commSold.ChargedByBought {
+				if boughtCommType, found := TemplateCommodityTypeMap[boughtType]; found {
+					chargedBy = append(chargedBy, boughtCommType)
+				}
+			}
+			for _, soldType := range commSold.ChargedBySold {
+				if soldCommType, found := TemplateCommodityTypeMap[soldType]; found {
+					chargedBySold = append(chargedBySold, soldCommType)
+				}
+			}
 			commTemplate := &proto.TemplateCommodity{
 				CommodityType: &commType,
 				Key:           commSold.Key,
+				Optional:      commSold.Optional,
+				ChargedBy:     chargedBy,
+				ChargedBySold: chargedBySold,
 			}
-			glog.V(3).Infof("%s : adding sold comm %++v\n", sn.NodeType, commTemplate)
+			glog.V(3).Infof("%s: adding sold comm %+v", sn.NodeType, commTemplate)
 			snBuilder.Sells(commTemplate)
 		} else {
 			glog.Errorf("Unsupported sold commodity type %s", *commSold.CommodityType)
@@ -282,11 +307,12 @@ func (sn *SupplyChainNode) CreateTemplateDTO() (*proto.TemplateDTO, error) {
 			}
 			if _, exists := TemplateCommodityTypeMap[*comm.CommodityType]; exists {
 				commType := TemplateCommodityTypeMap[*comm.CommodityType]
-				glog.V(3).Infof("%s --> %s Bought comm %s::%s\n", sn.nodeConfig.TemplateClass, *provider.TemplateClass,
+				glog.V(3).Infof("%s --> %s Bought comm %s::%s", sn.nodeConfig.TemplateClass, *provider.TemplateClass,
 					*comm.CommodityType, commType)
 				commTemplate := &proto.TemplateCommodity{
 					CommodityType: &commType,
 					Key:           comm.Key,
+					Optional:      comm.Optional,
 				}
 				commTemplateList = append(commTemplateList, commTemplate)
 			}
@@ -306,7 +332,7 @@ func (sn *SupplyChainNode) CreateTemplateDTO() (*proto.TemplateDTO, error) {
 	// Stitching Metadata
 	metadata := sn.nodeConfig.MergedEntityMetaData
 	if metadata != nil {
-		glog.V(3).Infof("metadata %++v\n", metadata)
+		glog.V(4).Infof("metadata %+v", spew.Sdump(metadata))
 		var metadataBuilder *builder.MergedEntityMetadataBuilder
 		metadataBuilder = builder.NewMergedEntityMetadataBuilder().
 			KeepInTopology(metadata.KeepInTopology)
@@ -325,14 +351,8 @@ func (sn *SupplyChainNode) CreateTemplateDTO() (*proto.TemplateDTO, error) {
 		}
 		matchingData := metadata.MatchingMetadata
 		if matchingData != nil {
-			glog.V(3).Infof("matchingData %++v\n", matchingData)
-			returnType := returnTypeMapping[matchingData.ReturnType]
-			extReturnType := returnTypeMapping[matchingData.ExternalEntityReturnType]
-			metadataBuilder.InternalMatchingType(returnType).
-				ExternalMatchingType(extReturnType)
-
 			for _, md := range matchingData.MatchingDataList {
-				glog.V(3).Infof("internal md %++v\n", md)
+				glog.V(4).Infof("Internal matchingData %+v", spew.Sdump(md))
 				if md.Delimiter == "" {
 					metadataBuilder.InternalMatchingProperty(md.MatchingProperty.PropertyName)
 				} else {
@@ -341,7 +361,7 @@ func (sn *SupplyChainNode) CreateTemplateDTO() (*proto.TemplateDTO, error) {
 			}
 
 			for _, md := range matchingData.ExternalEntityMatchingPropertyList {
-				glog.V(3).Infof("external md %++v\n", md)
+				glog.V(4).Infof("external matchingData %+v", spew.Sdump(md))
 				if md.MatchingProperty != nil {
 					if md.Delimiter == "" {
 						metadataBuilder.ExternalMatchingProperty(md.MatchingProperty.PropertyName)
