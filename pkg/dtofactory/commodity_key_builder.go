@@ -1,64 +1,115 @@
 package dtofactory
 
 import (
+	"github.com/golang/glog"
 	"github.com/turbonomic/data-ingestion-framework/pkg/data"
 	"github.com/turbonomic/data-ingestion-framework/pkg/registration"
 	"github.com/turbonomic/turbo-go-sdk/pkg/proto"
-	"strings"
 )
 
 type CommodityKeyBuilder struct {
 	entityType proto.EntityDTO_EntityType
 	difEntity  *data.BasicDIFEntity
+	scope      string
 }
 
-func NewCommodityKeyBuilder(entityType proto.EntityDTO_EntityType,
-	difEntity *data.BasicDIFEntity) *CommodityKeyBuilder {
+func NewCommodityKeyBuilder(
+	entityType proto.EntityDTO_EntityType, difEntity *data.BasicDIFEntity) *CommodityKeyBuilder {
 	return &CommodityKeyBuilder{
 		entityType: entityType,
 		difEntity:  difEntity,
 	}
 }
 
-func (kb *CommodityKeyBuilder) GetKey() *string {
+func (kb *CommodityKeyBuilder) SetScope(scope string) *CommodityKeyBuilder {
+	kb.scope = scope
+	return kb
+}
 
-	if _, exists := registration.KeySupplierMapping[kb.entityType]; !exists {
-		return nil
-	}
-
-	difEntity := kb.difEntity
-
-	keySupplierType := registration.KeySupplierMapping[kb.entityType]
-	if keySupplierType == kb.entityType {
-		return &difEntity.EntityId
-	}
-
-	// check in provider connections
-	for pType, pIds := range difEntity.GetProviders() {
-		eType := EntityType(pType)
-		if eType == nil {
-			continue
+func (kb *CommodityKeyBuilder) GetSoldCommKey() (keys []string) {
+	defer func() {
+		if len(keys) == 0 {
+			keys = append(keys, "")
 		}
-
-		// Key should come from the provider of this type
-		if keySupplierType == *eType {
-			key := strings.Join(pIds, ",")
-			return &key
-		}
+		glog.V(4).Infof("Getting sold commodity key for %v %v: %v",
+			kb.difEntity.EntityType, kb.difEntity.EntityId, keys)
+	}()
+	keySupplierTypes, exists := registration.SoldCommKeySupplierMapping[kb.entityType]
+	if !exists || keySupplierTypes.Cardinality() == 0 {
+		keys = append(keys, kb.difEntity.EntityId)
+		return
 	}
-
-	// check in consumer connections
-	for cType, cIds := range difEntity.GetConsumers() {
+	// Check consumers
+	for cType, cIds := range kb.difEntity.GetConsumers() {
 		eType := EntityType(cType)
 		if eType == nil {
 			continue
 		}
-		// Key should come from the provider of this type
-		if keySupplierType == *eType {
-			key := strings.Join(cIds, ",")
-			return &key
+		// Key should come from the consumer of this type
+		if keySupplierTypes.Contains(*eType) {
+			keys = append(keys, cIds...)
 		}
 	}
+	return
+}
 
-	return nil
+func (kb *CommodityKeyBuilder) GetBoughtCommKey(internalProvider bool) (keys []string) {
+	defer func() {
+		if len(keys) == 0 {
+			keys = append(keys, "")
+		}
+		if internalProvider {
+			glog.V(4).Infof("Getting bought commodity key for internal provider %v %v: %v",
+				kb.difEntity.EntityType, kb.difEntity.EntityId, keys)
+		} else {
+			glog.V(4).Infof("Getting bought commodity key for external provider %v %v: %v",
+				kb.difEntity.EntityType, kb.difEntity.EntityId, keys)
+		}
+	}()
+	keySupplierTypes, exists := registration.BoughtCommKeySupplierMapping[kb.entityType]
+	if !exists || keySupplierTypes.Cardinality() == 0 {
+		keys = append(keys, kb.difEntity.EntityId)
+		return
+	}
+	if internalProvider {
+		// Check providers
+		for pType, pIds := range kb.difEntity.GetProviders() {
+			eType := EntityType(pType)
+			if eType == nil {
+				continue
+			}
+			// Key should come from the provider of this type
+			if keySupplierTypes.Contains(*eType) {
+				keys = append(keys, pIds...)
+			}
+		}
+		return
+	}
+	// Check external providers by IP
+	for pType, pMap := range kb.difEntity.HostsByIP {
+		eType := EntityType(pType)
+		if eType == nil {
+			continue
+		}
+		if keySupplierTypes.Contains(*eType) {
+			for pId := range pMap {
+				id := getEntityId(*eType, pId, kb.scope)
+				keys = append(keys, id)
+			}
+		}
+	}
+	// Check external providers by UUID
+	for pType, pMap := range kb.difEntity.HostsByUUID {
+		eType := EntityType(pType)
+		if eType == nil {
+			continue
+		}
+		if keySupplierTypes.Contains(*eType) {
+			for pId := range pMap {
+				id := getEntityId(*eType, pId, kb.scope)
+				keys = append(keys, id)
+			}
+		}
+	}
+	return
 }

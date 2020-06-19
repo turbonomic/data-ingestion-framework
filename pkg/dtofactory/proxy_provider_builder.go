@@ -1,7 +1,6 @@
 package dtofactory
 
 import (
-	"fmt"
 	"github.com/golang/glog"
 	protobuf "github.com/golang/protobuf/proto"
 	"github.com/turbonomic/data-ingestion-framework/pkg/registration"
@@ -33,7 +32,7 @@ func (eb *ProxyProviderEntityBuilder) BuildEntity() (*proto.EntityDTO, error) {
 	var dto *proto.EntityDTO
 
 	id := getEntityId(eb.entityType, eb.entityId, eb.scope)
-	glog.Infof("****** building proxy provider ... %s", id)
+	glog.Infof("Building proxy provider %s", id)
 	entityBuilder := builder.NewEntityDTOBuilder(eb.entityType, id).
 		DisplayName(eb.entityId)
 
@@ -52,16 +51,26 @@ func (eb *ProxyProviderEntityBuilder) BuildEntity() (*proto.EntityDTO, error) {
 
 	var soldCommodities []*proto.CommodityDTO
 	for commType, commVal := range supportedComms {
+		commBuilder := builder.NewCommodityDTOBuilder(commType)
 		if commVal.Key != nil {
-			key := id //using the provider id as the key
-			soldCommodities = append(soldCommodities, createCommodityWithKey(commType, key))
-		} else {
-			soldCommodities = append(soldCommodities, createCommodity(commType))
+			commBuilder.Key(id)
 		}
+		soldCommodity, err := commBuilder.Create()
+		if err != nil {
+			glog.Errorf("Failed to create sold commodity %v for %v: %v", commType, id, err)
+			continue
+		}
+		soldCommodities = append(soldCommodities, soldCommodity)
 	}
+
 	for commType := range supportedAccessComms {
-		key := id //using the provider id as the key
-		soldCommodities = append(soldCommodities, createCommodityWithKey(commType, key))
+		//using the provider id as the key
+		soldCommodity, err := builder.NewCommodityDTOBuilder(commType).Key(id).Create()
+		if err != nil {
+			glog.Errorf("Failed to create sold commodity %v for %v: %v", commType, id, err)
+			continue
+		}
+		soldCommodities = append(soldCommodities, soldCommodity)
 	}
 	entityBuilder.SellsCommodities(soldCommodities)
 
@@ -77,9 +86,9 @@ func (eb *ProxyProviderEntityBuilder) BuildEntity() (*proto.EntityDTO, error) {
 	if err != nil {
 		return nil, err
 	}
-	logDebug(fmt.Printf, protobuf.MarshalTextString(dto))
+	logDebug(protobuf.MarshalTextString(dto))
 
-	glog.Infof("proxy provider dto: %++v\n", dto)
+	glog.Infof("Proxy provider DTO: %+v", dto)
 
 	return dto, nil
 }
