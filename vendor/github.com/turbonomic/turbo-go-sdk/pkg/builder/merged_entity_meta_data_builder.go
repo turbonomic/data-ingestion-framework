@@ -1,23 +1,10 @@
 package builder
 
 import (
-	"fmt"
 	"github.com/turbonomic/turbo-go-sdk/pkg/proto"
 )
 
 type ReturnType string
-
-const (
-	MergedEntityMetadata_STRING      ReturnType = "String"
-	MergedEntityMetadata_LIST_STRING ReturnType = "List"
-)
-
-var (
-	returnTypeMapping = map[ReturnType]proto.MergedEntityMetadata_ReturnType{
-		MergedEntityMetadata_STRING:      proto.MergedEntityMetadata_STRING,
-		MergedEntityMetadata_LIST_STRING: proto.MergedEntityMetadata_LIST_STRING,
-	}
-)
 
 // ============================ MergedEntityMetadata_MatchingMetadata ==============================
 // matchingData is structure to hold all the fields of the MatchingData proto message.
@@ -104,26 +91,7 @@ func newMatchingMetadataBuilder() *matchingMetadataBuilder {
 }
 
 func (builder *matchingMetadataBuilder) build() (*proto.MergedEntityMetadata_MatchingMetadata, error) {
-	// validate internal property return type
-	if builder.internalReturnType == "" {
-		return nil, fmt.Errorf("internal entity metadata return type not set")
-	}
-	internalReturnType, exists := returnTypeMapping[builder.internalReturnType]
-	if !exists {
-		return nil, fmt.Errorf("unknown internal entity metadata return type")
-	}
-	// validate external property return type
-	if builder.externalReturnType == "" {
-		return nil, fmt.Errorf("external entity metadata return type not set")
-	}
-	externalReturnType, exists := returnTypeMapping[builder.externalReturnType]
-	if !exists {
-		return nil, fmt.Errorf("unknown external entity metadata return type")
-	}
-	matchingMetadata := &proto.MergedEntityMetadata_MatchingMetadata{
-		ReturnType:               &internalReturnType,
-		ExternalEntityReturnType: &externalReturnType,
-	}
+	matchingMetadata := &proto.MergedEntityMetadata_MatchingMetadata{}
 	// create internal property matching data
 	for _, internalData := range builder.internalMatchingData {
 		matchingMetadata.MatchingData =

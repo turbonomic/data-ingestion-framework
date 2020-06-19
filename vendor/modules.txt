@@ -17,7 +17,7 @@ github.com/tamerh/jsparser
 # github.com/turbonomic/turbo-api v0.0.0-20200413140231-3bef8fb11708
 github.com/turbonomic/turbo-api/pkg/api
 github.com/turbonomic/turbo-api/pkg/client
-# github.com/turbonomic/turbo-go-sdk v0.0.0-20200507163116-7a61dabb1b3e
+# github.com/turbonomic/turbo-go-sdk v0.0.0-20200619031438-0fd6c38a54e7
 github.com/turbonomic/turbo-go-sdk/pkg
 github.com/turbonomic/turbo-go-sdk/pkg/builder
 github.com/turbonomic/turbo-go-sdk/pkg/dataingestionframework/data

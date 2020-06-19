@@ -1,6 +1,14 @@
 package builder
 
-import "github.com/turbonomic/turbo-go-sdk/pkg/proto"
+import (
+	"fmt"
+	"github.com/turbonomic/turbo-go-sdk/pkg/proto"
+	"math"
+)
+
+const (
+	OneHundredPercent = 100.0
+)
 
 type CommodityDTOBuilder struct {
 	commodityType           *proto.CommodityDTO_CommodityType
@@ -20,15 +28,12 @@ type CommodityDTOBuilder struct {
 	isUsedPct               *bool
 	utilizationThresholdPct *float64
 	pricingMetadata         *proto.CommodityDTO_PricingMetadata
-
-	storageLatencyData    *proto.CommodityDTO_StorageLatencyData
-	storageAccessData     *proto.CommodityDTO_StorageAccessData
-	vstoragePartitionData *proto.VStoragePartitionData
-
-	utilizationData *proto.CommodityDTO_UtilizationData
-
-	vMemData *proto.CommodityDTO_VMemData
-	vCpuData *proto.CommodityDTO_VCpuData
+	storageLatencyData      *proto.CommodityDTO_StorageLatencyData
+	storageAccessData       *proto.CommodityDTO_StorageAccessData
+	vstoragePartitionData   *proto.VStoragePartitionData
+	utilizationData         *proto.CommodityDTO_UtilizationData
+	vMemData                *proto.CommodityDTO_VMemData
+	vCpuData                *proto.CommodityDTO_VCpuData
 
 	err error
 }
@@ -42,6 +47,9 @@ func NewCommodityDTOBuilder(commodityType proto.CommodityDTO_CommodityType) *Com
 func (cb *CommodityDTOBuilder) Create() (*proto.CommodityDTO, error) {
 	if cb.err != nil {
 		return nil, cb.err
+	}
+	if err := cb.validateAndConvert(); err != nil {
+		return nil, err
 	}
 	commodityDTO := &proto.CommodityDTO{
 		CommodityType:   cb.commodityType,
@@ -146,16 +154,36 @@ func (cb *CommodityDTOBuilder) UtilizationData(points []float64, lastPointTimest
 	return cb
 }
 
-func buildPropertyMap(propMap map[string][]string) []*proto.CommodityDTO_PropertiesList {
-	if propMap == nil {
-		return nil
+func (cb *CommodityDTOBuilder) validateAndConvert() error {
+	// Access commodities could have nil used value.
+	if cb.used != nil && *cb.used < 0 {
+		return fmt.Errorf("commodity %v has negative used value", cb.commodityType)
 	}
-	propList := []*proto.CommodityDTO_PropertiesList{}
+	switch *cb.commodityType {
+	case proto.CommodityDTO_THREADS, proto.CommodityDTO_CONNECTION:
+		if cb.capacity == nil {
+			return fmt.Errorf("commodity %v has nil capacity", cb.commodityType)
+		}
+	case proto.CommodityDTO_REMAINING_GC_CAPACITY:
+		// The garbage collection time (gcTime) is in percentage, and is transformed to a commodity
+		// with a capacity 100 [percent] and a used value that is 100 - gcTime.
+		if cb.used == nil {
+			return fmt.Errorf("commodity %v has nil used value", cb.commodityType)
+		}
+		used := math.Max(0.0, OneHundredPercent-*cb.used)
+		cb.Used(used).Capacity(OneHundredPercent)
+	case proto.CommodityDTO_DB_CACHE_HIT_RATE:
+		cb.Capacity(OneHundredPercent)
+	}
+	return nil
+}
+
+func buildPropertyMap(propMap map[string][]string) (propList []*proto.CommodityDTO_PropertiesList) {
 	for name, values := range propMap {
 		propList = append(propList, &proto.CommodityDTO_PropertiesList{
 			Name:   &name,
 			Values: values,
 		})
 	}
-	return propList
+	return
 }

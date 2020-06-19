@@ -4,11 +4,12 @@ go 1.13
 
 require (
 	github.com/davecgh/go-spew v1.1.1
+	github.com/deckarep/golang-set v1.7.1
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b
 	github.com/golang/protobuf v1.4.0
 	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/stretchr/testify v1.3.0
 	github.com/tamerh/jsparser v1.2.0
-	github.com/turbonomic/turbo-go-sdk v0.0.0-20200507163116-7a61dabb1b3e
+	github.com/turbonomic/turbo-go-sdk v0.0.0-20200619031438-0fd6c38a54e7
 	gopkg.in/yaml.v2 v2.2.8
 )
