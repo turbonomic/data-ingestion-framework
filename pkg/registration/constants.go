@@ -235,3 +235,9 @@ var BoughtCommKeySupplierMapping = map[proto.EntityDTO_EntityType]set.Set{
 	proto.EntityDTO_APPLICATION_COMPONENT: set.NewSet(proto.EntityDTO_VIRTUAL_MACHINE, proto.EntityDTO_CONTAINER),
 	proto.EntityDTO_DATABASE_SERVER:       set.NewSet(proto.EntityDTO_VIRTUAL_MACHINE),
 }
+
+var NonResizableCommodities = []proto.CommodityDTO_CommodityType{
+	proto.CommodityDTO_APPLICATION,
+	proto.CommodityDTO_DB_CACHE_HIT_RATE,
+	proto.CommodityDTO_REMAINING_GC_CAPACITY,
+}

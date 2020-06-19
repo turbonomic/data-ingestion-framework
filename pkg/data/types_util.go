@@ -80,7 +80,7 @@ var DIFMetricToTemplateCommodityStringMap = map[string]string{
 	"dbMem":          "DB_MEM",
 	"transactionLog": "TRANSACTION_LOG",
 	"dbCacheHitRate": "DB_CACHE_HIT_RATE",
-	"collectionTime": "COLLECTION_TIME",
+	"collectionTime": "REMAINING_GC_CAPACITY",
 	"heap":           "HEAP",
 	"kpi":            "KPI",
 }

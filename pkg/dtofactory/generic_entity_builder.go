@@ -200,6 +200,9 @@ func (eb *GenericEntityBuilder) soldCommodities(
 	scSupportedComms := eb.supplyChainNode.SupportedComms // map of associated comms
 	scSupportedAccessComms := eb.supplyChainNode.SupportedAccessComms
 
+	// Set resize of commodities
+	setResizable(eb.entityType, commoditiesMap)
+
 	kb := NewCommodityKeyBuilder(eb.entityType, eb.difEntity)
 	soldCommKey := kb.GetKey()
 
