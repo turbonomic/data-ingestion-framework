@@ -70,7 +70,7 @@ type DIFRepository struct {
 	//
 	ExternalProvidersMapByUUID map[DIFEntityType]map[string]ExternalProviderMap
 
-	// Map of external providers without any DIF Json data - used to create proxy entity DTOs by the DiscoveryCliebt
+	// Map of external providers without any DIF Json data - used to create proxy entity DTOs by the DiscoveryClient
 	ExternalProxyProvidersByIP   map[DIFEntityType][]string
 	ExternalProxyProvidersByUUID map[DIFEntityType][]string
 }
@@ -123,7 +123,7 @@ func (r *DIFRepository) addEntities(parsedEntities []*difdata.DIFEntity) {
 
 		var difEntity *BasicDIFEntity
 		if _, exists := eMap[eId]; !exists {
-			eMap[eId] = NewBasicDIFEntity(eType, eId)
+			eMap[eId] = NewBasicDIFEntity(eType, eId, entity.Name)
 		} else {
 			glog.V(4).Infof("Adding parsed entity to an existing entity %s:%s ---> %v", eType, eId, eMap[eId])
 		}
@@ -235,7 +235,7 @@ func (r *DIFRepository) addEntityConnections() {
 	}
 }
 
-// Go over the external providers map and add the providers in the entitities
+// Go over the external providers map and add the providers in the entities
 func (r *DIFRepository) addHostedByConnections() {
 	r.addExternalProvider(true)
 	r.addExternalProvider(false)
@@ -276,8 +276,8 @@ func (r *DIFRepository) addExternalProvider(byIP bool) {
 func (r *DIFRepository) getProxyProviders() {
 	r.getProxyProviderByIP()
 	r.getProxyProviderByUUID()
-	glog.V(3).Infof("ExternalProxyProvidersByIP: %v\n", r.ExternalProxyProvidersByIP)
-	glog.V(3).Infof("ExternalProxyProvidersByUUID: %v\n", r.ExternalProxyProvidersByUUID)
+	glog.V(3).Infof("ExternalProxyProvidersByIP: %v", r.ExternalProxyProvidersByIP)
+	glog.V(3).Infof("ExternalProxyProvidersByUUID: %v", r.ExternalProxyProvidersByUUID)
 
 }
 

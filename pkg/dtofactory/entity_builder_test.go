@@ -16,12 +16,12 @@ func createSupplyChainTemplates() (map[proto.EntityDTO_EntityType]*registration.
 	supplyChainConf := "../../configs/app-supply-chain-config.yaml"
 	supplyChainConfig, err := conf.LoadSupplyChain(supplyChainConf)
 	if err != nil {
-		return nil, fmt.Errorf("Error while parsing the supply chain config file %s: %++v", supplyChainConf, err)
+		return nil, fmt.Errorf("error while parsing the supply chain config file %s: %+v", supplyChainConf, err)
 	}
 
 	supplyChain, err := registration.NewSupplyChain(supplyChainConfig)
 	if err != nil {
-		return nil, fmt.Errorf("Error while parsing the supply chain config %++v", err)
+		return nil, fmt.Errorf("error while parsing the supply chain config %+v", err)
 	}
 	supplyChainNodeMap := supplyChain.GetSupplyChainNodes()
 
@@ -57,7 +57,6 @@ func TestEntityBuilder(t *testing.T) {
 			"}"
 
 	parsedDifEntity := parseEntity(ENTITY)
-	//glog.V(2).Infof("%++v", entity)
 	eType := data.ParseEntityType(parsedDifEntity.Type)
 	if eType == "" {
 		t.Errorf("Invalid entity type for entity: %v", parsedDifEntity)
@@ -68,7 +67,7 @@ func TestEntityBuilder(t *testing.T) {
 		t.Errorf("Invalid entity ID for entity: %v", parsedDifEntity)
 	}
 
-	difEntity := data.NewBasicDIFEntity(eType, eId)
+	difEntity := data.NewBasicDIFEntity(eType, eId, eId)
 	difEntity.SetDIFEntities([]*difdata.DIFEntity{parsedDifEntity})
 
 	vmHost := make(map[string][]*difdata.DIFEntity)
@@ -86,7 +85,6 @@ func TestEntityBuilder(t *testing.T) {
 	if err != nil {
 		t.Errorf("DTO BUILD ERROR %v", err)
 	}
-
 	// created from the built DTO
 	testEntity := entityDTOToTestEntity(dto)
 	var sold1 []proto.CommodityDTO_CommodityType
@@ -118,9 +116,7 @@ func TestEntityBuilder(t *testing.T) {
 
 	comms := make(map[proto.CommodityDTO_CommodityType]*proto.CommodityDTO)
 	expectedTestEntity.boughtComms[proto.EntityDTO_VIRTUAL_MACHINE] = comms
-	comms[proto.CommodityDTO_VCPU] = &proto.CommodityDTO{}
-	comms[proto.CommodityDTO_VMEM] = &proto.CommodityDTO{}
-
+	comms[proto.CommodityDTO_APPLICATION] = &proto.CommodityDTO{}
 	var sold2 []proto.CommodityDTO_CommodityType
 	for s := range expectedTestEntity.soldComms {
 		sold2 = append(sold2, s)
@@ -218,7 +214,7 @@ func TestMergingMetadataProperty(t *testing.T) {
 	}
 
 	entityType := EntityType(eType)
-	difEntity := data.NewBasicDIFEntity(eType, eId)
+	difEntity := data.NewBasicDIFEntity(eType, eId, eId)
 	difEntity.SetDIFEntities([]*difdata.DIFEntity{parsedDifEntity})
 
 	eb := NewGenericEntityBuilder(*entityType, difEntity,
@@ -275,7 +271,7 @@ func TestExternalLinkMetadataProperty(t *testing.T) {
 		t.Errorf("Invalid entity ID for entity: %v", parsedDifEntity)
 	}
 
-	difEntity := data.NewBasicDIFEntity(eType, eId)
+	difEntity := data.NewBasicDIFEntity(eType, eId, eId)
 	difEntity.SetDIFEntities([]*difdata.DIFEntity{parsedDifEntity})
 
 	hostIP := parsedDifEntity.HostedOn.IPAddress

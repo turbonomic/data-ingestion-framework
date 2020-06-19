@@ -3,6 +3,7 @@ package conf
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/davecgh/go-spew/spew"
 	"io/ioutil"
 	"os"
 
@@ -74,19 +75,19 @@ func NewDIFConf(configFilePath string) (*DIFConf, error) {
 func readConfig(path string) (*DIFConf, error) {
 	file, err := ioutil.ReadFile(path)
 	if err != nil {
-		glog.Errorf("File error: %v\n", err)
+		glog.Errorf("File error: %v", err)
 		return nil, err
 	}
-	glog.Infoln(string(file))
+	glog.V(4).Info(string(file))
 
 	var config DIFConf
 	err = json.Unmarshal(file, &config)
 
 	if err != nil {
-		glog.Errorf("Unmarshal error :%v\n", err)
+		glog.Errorf("Unmarshal error :%v", err)
 		return nil, err
 	}
-	glog.Infof("Results: %+v\n", config)
+	glog.V(4).Infof("Results: %+v", spew.Sdump(config))
 
 	return &config, nil
 }
