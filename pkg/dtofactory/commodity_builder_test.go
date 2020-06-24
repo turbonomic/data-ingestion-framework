@@ -113,21 +113,18 @@ var CONNECTION = "    	  \"connection\": [" +
 	"		          \"average\": 33.2," +
 	"		          \"unit\": \"tps\"" +
 	"			}"
-	//"	    ]"
 
 var RESPONSE_TIME = "    	  \"responseTime\": [" +
 	"			{" +
 	"		          \"average\": 33.2," +
 	"		          \"unit\": \"tps\"" +
 	"			}"
-	//"	        ]"
 
 var TRANSACTION = "    	  \"transaction\": [" +
 	"			{" +
 	"		          \"average\": 33.2," +
 	"		          \"unit\": \"tps\"" +
 	"			}"
-	//"	        ]"
 
 var HEAP_ARRAY = "\"heap\":[" +
 	"	{" +
@@ -140,7 +137,22 @@ var HEAP_ARRAY = "\"heap\":[" +
 	"		\"unit\":\"\"," +
 	"		\"key\":\"\"" +
 	"	}"
-	//"]"
+
+var DBMEM_RESIZE = "\"dbMem\":[" +
+	"	{" +
+	"		\"average\":100," +
+	"		\"resizable\":false" +
+	"	}"
+
+var DBMEM = "\"dbMem\":[" +
+	"	{" +
+	"		\"average\":100" +
+	"	}"
+
+var DBCACHEHITRATE = "\"dbCacheHitRate\":[" +
+	"	{" +
+	"		\"average\":100" +
+	"	}"
 
 var KPI_ARRAY = "\"kpi\":[" +
 	"	{" +
@@ -292,5 +304,71 @@ func TestCommodityMissingMetrics(t *testing.T) {
 
 	for _, commList := range commMap {
 		assert.True(t, len(commList) == 0, "Pass: Commmodity with missing used value is not created")
+	}
+}
+
+func TestCommodityResizableDefault(t *testing.T) {
+	ENTITY =
+		"{" +
+			"	\"type\": \"databaseServer\"," +
+			"	\"uniqueId\": \"456\"," +
+			"	\"name\": \"My App Name\"," +
+			"	\"metrics\" : {" +
+			DBMEM +
+			"       ]," +
+			DBCACHEHITRATE +
+			"		]" +
+			"     }" +
+			"}"
+	entityType := proto.EntityDTO_DATABASE_SERVER
+	commType := proto.CommodityDTO_DB_MEM
+	difEntity := parseEntity(ENTITY)
+	cb := NewGenericCommodityBuilder(difEntity)
+	commMap, err := cb.BuildCommodity()
+	if err != nil {
+		log.Fatalf("error: %v", err)
+	}
+	setResizable(entityType, commMap)
+	for _, commList := range commMap {
+		for _, cb := range commList {
+			comm, _ := cb.Create()
+			if comm.GetCommodityType() != commType {
+				continue
+			}
+			assert.True(t, comm.GetResizable())
+		}
+	}
+}
+
+func TestCommodityResizableJSONOverrideDefault(t *testing.T) {
+	ENTITY =
+		"{" +
+			"	\"type\": \"databaseServer\"," +
+			"	\"uniqueId\": \"456\"," +
+			"	\"name\": \"My App Name\"," +
+			"	\"metrics\" : {" +
+			DBMEM_RESIZE +
+			"       ]," +
+			DBCACHEHITRATE +
+			"		]" +
+			"     }" +
+			"}"
+	entityType := proto.EntityDTO_DATABASE_SERVER
+	commType := proto.CommodityDTO_DB_MEM
+	difEntity := parseEntity(ENTITY)
+	cb := NewGenericCommodityBuilder(difEntity)
+	commMap, err := cb.BuildCommodity()
+	if err != nil {
+		log.Fatalf("error: %v", err)
+	}
+	setResizable(entityType, commMap)
+	for _, commList := range commMap {
+		for _, cb := range commList {
+			comm, _ := cb.Create()
+			if comm.GetCommodityType() != commType {
+				continue
+			}
+			assert.False(t, comm.GetResizable())
+		}
 	}
 }

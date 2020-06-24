@@ -126,8 +126,7 @@ func (eb *GenericEntityBuilder) BuildEntity() (*proto.EntityDTO, error) {
 
 func (eb *GenericEntityBuilder) externalProviders(supplyChainNode *registration.SupplyChainNode,
 	providers map[data.DIFEntityType]map[string][]*sdkdata.DIFEntity,
-	entityID string, entityBuilder *builder.EntityDTOBuilder,
-	commoditiesMap map[proto.CommodityDTO_CommodityType][]*builder.CommodityDTOBuilder) {
+	entityID string, entityBuilder *builder.EntityDTOBuilder, commoditiesMap CommoditiesByType) {
 	// Map of external provider type and hosting relationship
 	scHostedByProviderType := supplyChainNode.ProviderByProviderType
 	for pType, pMap := range providers {
@@ -162,8 +161,7 @@ func (eb *GenericEntityBuilder) externalProviders(supplyChainNode *registration.
 	}
 }
 
-func (eb *GenericEntityBuilder) soldCommodities(
-	commoditiesMap map[proto.CommodityDTO_CommodityType][]*builder.CommodityDTOBuilder) []*proto.CommodityDTO {
+func (eb *GenericEntityBuilder) soldCommodities(commoditiesMap CommoditiesByType) []*proto.CommodityDTO {
 	var soldCommodities []*proto.CommodityDTO
 
 	// SOLD COMM CONFIG
@@ -219,9 +217,8 @@ func (eb *GenericEntityBuilder) soldCommodities(
 
 // Select the commodities from the metrics in the json file as commodities bought from the given provider.
 // Commodity types are selected based on the supply chain specification for the entity type
-func (eb *GenericEntityBuilder) boughtCommodities(pType data.DIFEntityType,
-	commoditiesMap map[proto.CommodityDTO_CommodityType][]*builder.CommodityDTOBuilder,
-) (*proto.EntityDTO_EntityType, []*proto.CommodityDTO) {
+func (eb *GenericEntityBuilder) boughtCommodities(
+	pType data.DIFEntityType, commoditiesMap CommoditiesByType) (*proto.EntityDTO_EntityType, []*proto.CommodityDTO) {
 
 	var providerType proto.EntityDTO_EntityType
 	var boughtCommodities []*proto.CommodityDTO
@@ -285,9 +282,8 @@ func (eb *GenericEntityBuilder) boughtCommodities(pType data.DIFEntityType,
 
 // Select the commodities from the metrics in the json file as commodities bought from the given external provider.
 // Commodity types are selected based on the commodities bought section in the supply chain specification for the entity type
-func (eb *GenericEntityBuilder) externalBoughtCommodities(eType proto.EntityDTO_EntityType,
-	commoditiesMap map[proto.CommodityDTO_CommodityType][]*builder.CommodityDTOBuilder,
-) []*proto.CommodityDTO {
+func (eb *GenericEntityBuilder) externalBoughtCommodities(
+	eType proto.EntityDTO_EntityType, commoditiesMap CommoditiesByType) []*proto.CommodityDTO {
 	var boughtCommodities []*proto.CommodityDTO
 
 	scHostedByBoughtComms := eb.supplyChainNode.SupportedBoughtComms
