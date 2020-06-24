@@ -14,12 +14,14 @@ type GenericCommodityBuilder struct {
 	entity *difdata.DIFEntity
 }
 
+type CommoditiesByType map[proto.CommodityDTO_CommodityType][]*builder.CommodityDTOBuilder
+
 func NewGenericCommodityBuilder(entity *difdata.DIFEntity) *GenericCommodityBuilder {
 	return &GenericCommodityBuilder{entity: entity}
 }
 
-func (cb *GenericCommodityBuilder) BuildCommodity() (map[proto.CommodityDTO_CommodityType][]*builder.CommodityDTOBuilder, error) {
-	result := make(map[proto.CommodityDTO_CommodityType][]*builder.CommodityDTOBuilder)
+func (cb *GenericCommodityBuilder) BuildCommodity() (CommoditiesByType, error) {
+	result := make(CommoditiesByType)
 
 	metrics := cb.entity.Metrics
 	for metricKey, metricList := range metrics { // Metrics is array of metric map [name,metric Value]
@@ -65,14 +67,16 @@ func convertFromMetricValueListToCommodityList(commType proto.CommodityDTO_Commo
 			commKey := *responseMetric.Key
 			commBuilder.Key(commKey)
 		}
+		if responseMetric.Resizable != nil {
+			commBuilder.Resizable(*responseMetric.Resizable)
+		}
 
 		commodityList = append(commodityList, commBuilder)
 	}
 	return commodityList, nil
 }
 
-func setResizable(entityType proto.EntityDTO_EntityType,
-	commMap map[proto.CommodityDTO_CommodityType][]*builder.CommodityDTOBuilder) {
+func setResizable(entityType proto.EntityDTO_EntityType, commMap CommoditiesByType) {
 	// We must explicitly set resizable to false on an non-resizable commodity
 	for _, nonResizableCommodity := range registration.NonResizableCommodities {
 		if commList, found := commMap[nonResizableCommodity]; found {
@@ -89,7 +93,9 @@ func setResizable(entityType proto.EntityDTO_EntityType,
 				resizable = true
 			}
 			for _, comm := range commList {
-				comm.Resizable(resizable)
+				if !comm.HasResizable() {
+					comm.Resizable(resizable)
+				}
 			}
 		}
 	case proto.EntityDTO_DATABASE_SERVER:
@@ -99,7 +105,9 @@ func setResizable(entityType proto.EntityDTO_EntityType,
 				resizable = true
 			}
 			for _, comm := range commList {
-				comm.Resizable(resizable)
+				if !comm.HasResizable() {
+					comm.Resizable(resizable)
+				}
 			}
 		}
 	}
