@@ -142,6 +142,10 @@ func (cb *CommodityDTOBuilder) Resizable(resizable bool) *CommodityDTOBuilder {
 	return cb
 }
 
+func (cb *CommodityDTOBuilder) HasResizable() bool {
+	return cb.resizable != nil
+}
+
 func (cb *CommodityDTOBuilder) UtilizationData(points []float64, lastPointTimestampMs int64, intervalMs int32) *CommodityDTOBuilder {
 	if cb.err != nil {
 		return cb
