@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="{{ page.lang | default: site.lang | default: "en" }}">
+  
+  <!-- Page title set in pageTitle directive -->
+  <title page-title>{{ site.title }}</title>
+  
+  {% if site.github.pages_hostname == "github.io" %}
+      <link href="{{ site.github.baseurl }}{{ '/css/FourD_CSS/vmtHelp.css' | absolute_url }}" rel="stylesheet" type="text/css"/>
+  {% else %}
+      <link href="{{ 'css/FourD_CSS/vmtHelp.css' | absolute_url }}" rel="stylesheet" type="text/css"/>
+  {% endif %}
+  
+  
+  <!--
+  <link href="{{ site.github.baseurl }}{{ '/css/FourD_CSS/vmtHelp.css' | absolute_url }}" rel="stylesheet" type="text/css"/>
+  <link href="./css/FourD_CSS/vmtHelp.css" rel="stylesheet" type="text/css"/>
+  <link href="./css/FourD_CSS/ui.fancytree.css" rel="stylesheet" type="text/css"/>
+  -->
+
+  <body>
+    
+    <div id="angularThing" ng-controller="TopicCtrl as mainCtrl">
+      <nav class='banner'>
+        <div class="bannerbar" >
+          
+          {% if site.github.pages_hostname == "github.io" %}
+          <img src="{{ site.github.baseurl }}{{ 'assets/logos/logoInv.png' | relative_url }}" id="logo_image" 
+            style="width: 80%; max-width: 100px;"/>
+          {% else %}
+          <img src="{{ 'assets/logos/logoInv.png' | relative_url }}" id="logo_image" style="width: 80%; max-width: 100px;"/>
+          {% endif %}
+          <!--
+          <img src="{{ site.github.baseurl }}{{ 'assets/logos/logoInv.png' | relative_url }}" id="logo_image" 
+            style="width: 80%; max-width: 100px;"/>
+            
+          <img src="./assets/logos/logoInv.png" id="logo_image" style="width: 80%; max-width: 100px;"/>
+          -->
+          <div class="titleHead">
+            <h4 class="revision"><font color="white">{{ site.title }}</span></font></h4>
+          </div>
+        </div>
+      </nav>
+      
+      
+      <div id="topicDiv">
+        <article id ='topicArt' class="topic">
+          <h1>{{ page.title }}</h1>
+          
+          <div style="font-size: 10px;">
+          <p>site.github.baseurl is: {{ site.github.baseurl }}</p>
+          
+          {% if site.github.pages_hostname == "github.io" %}
+          <p>CSS LINK IS: {{ site.github.baseurl }}{{ '/css/FourD_CSS/vmtHelp.css' | absolute_url }}</p>
+          {% else %}
+          <p>CSS LINK IS: {{ 'css/FourD_CSS/vmtHelp.css' | absolute_url }}</p>
+          {% endif %}
+          
+          {% if site.github.pages_hostname == "github.io" %}
+          <p>LOGO LINK IS: {{ site.github.baseurl }}{{ 'assets/logos/logoInv.png' | relative_url }}</p>
+          {% else %}
+          <p>LOGO LINK IS: {{ 'assets/logos/logoInv.png' | relative_url }}</p>
+          {% endif %}
+          
+          
+          {% if site.github.pages_hostname == "github.io" %}
+          <p>DOC HOME LINK: {{ site.github.baseurl }}{{ 'index.html' | relative_url }}</p>
+          {% else %}
+          <p>DOC HOME LINK: {{ 'index.html' | absolute_url }}</p>
+          {% endif %}
+          
+          <p>REPOS URL IS: {{ site.github.repository_url }}</p>
+          </div>
+          
+          {{ content }}
+          
+        </article>
+      </div>
+      </section>
+      
+      <div id="navList">
+        
+        <h4>Contents:</h4>
+        <span>
+          <div id="toc">
+            
+            <article class="navList">
+              <div id="tocresult" tabIdex="-1" >
+                <ul>
+                  
+                  {% if site.github.pages_hostname == "github.io" %}
+                  <h5><a href="{{ site.github.baseurl }}{{ 'index.html' | relative_url }}">DOCUMENTATION HOME</a></h5>
+                  {% else %}
+                  <h5><a href="{{ 'index.html' | absolute_url }}">DOCUMENTATION HOME</a></h5>
+                  {% endif %}
+                  <!--
+                  <h5><a href="index.html">HOME PAGE</a></h5>
+                  -->
+                  {% for item in site.data.nav.toc %}
+                  <h5>{{ item.title }}</h5>
+                  <ul>
+                    {% for entry in item.subItems %}
+                    
+                    
+                    {% if site.github.pages_hostname == "github.io" %}
+                    <li><a href="{{ site.github.baseurl }}{{ entry.dir | relative_url }}">{{ site.github.baseurl }}{{ entry.dir  | relative_url }} | relative</a></li>
+                    {% else %}
+                    <li><a href="{{ entry.dir | absolute_url }}">{{ entry.dir  | relative_url }} | relative</a></li>
+                    {% endif %}
+                    
+                    
+                    <!--
+                    <li><a href="{{ site.github.baseurl }}{{ entry.url | relative_url }}">{{ site.github.baseurl }}{{ entry.url  | relative_url }} | relative</a></li>
+                    
+                    <li><a href="{{ site.github.baseurl }}{{ entry.dir | relative_url }}">{{ site.github.baseurl }}{{ entry.dir  | relative_url }} | relative</a></li>
+                    -->
+                    <!--
+                    <li><a href="{{ site.github.baseurl }}{{ entry.url | relative_url }}">{{ site.github.baseurl }}{{ entry.url  | absolute_url }} | absolute</a></li>
+                    <li><a href="{{ site.github.baseurl }}{{ entry.dir | relative_url }}">{{ site.github.baseurl }}{{ entry.dir  | absolute_url }} | absolute</a></li>
+                    <li><a href="{{ site.github.baseurl }}{{ entry.dir }}{{ entry.url | relative_url }}">{{ entry.dir }}{{ entry.url  | relative_url }} | relative</a></li>
+                    <li><a href="/{{ entry.url }}">{{ entry.dir }}{{ entry.url }}</a></li>
+                    -->
+                    
+                    {% endfor %}
+                  </ul>
+                  {% endfor %}
+                </ul>
+              </div>
+            </article>
+          </div>
+          <!--
+          <div id="search">
+            <search-directive id="searchDiv" class="navContent" searchobj="searchobj"/>
+          </div>
+          -->
+        </span>
+      </div>
+    </div>
+      
+  </body>
+
+</html>
