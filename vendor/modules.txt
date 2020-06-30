@@ -1,3 +1,5 @@
+# github.com/avast/retry-go v2.6.0+incompatible
+github.com/avast/retry-go
 # github.com/davecgh/go-spew v1.1.1
 github.com/davecgh/go-spew/spew
 # github.com/deckarep/golang-set v1.7.1
@@ -14,10 +16,10 @@ github.com/pmezard/go-difflib/difflib
 github.com/stretchr/testify/assert
 # github.com/tamerh/jsparser v1.2.0
 github.com/tamerh/jsparser
-# github.com/turbonomic/turbo-api v0.0.0-20200413140231-3bef8fb11708
+# github.com/turbonomic/turbo-api v0.0.0-20200626181019-5fce6eb1eda1
 github.com/turbonomic/turbo-api/pkg/api
 github.com/turbonomic/turbo-api/pkg/client
-# github.com/turbonomic/turbo-go-sdk v0.0.0-20200624134510-34d8a201b20c
+# github.com/turbonomic/turbo-go-sdk v0.0.0-20200630154827-76d05e81fdab
 github.com/turbonomic/turbo-go-sdk/pkg
 github.com/turbonomic/turbo-go-sdk/pkg/builder
 github.com/turbonomic/turbo-go-sdk/pkg/dataingestionframework/data

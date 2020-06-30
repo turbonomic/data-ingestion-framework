@@ -7,7 +7,8 @@ import (
 )
 
 const (
-	OneHundredPercent = 100.0
+	OneHundredPercent           = 100.0
+	AppCommodityDefaultCapacity = 100000.0
 )
 
 type CommodityDTOBuilder struct {
@@ -178,6 +179,8 @@ func (cb *CommodityDTOBuilder) validateAndConvert() error {
 		cb.Used(used).Capacity(OneHundredPercent)
 	case proto.CommodityDTO_DB_CACHE_HIT_RATE:
 		cb.Capacity(OneHundredPercent)
+	case proto.CommodityDTO_APPLICATION:
+		cb.Capacity(AppCommodityDefaultCapacity)
 	}
 	return nil
 }

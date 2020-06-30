@@ -45,6 +45,10 @@ func (c *RESTClient) Post() *Request {
 	return c.Verb("POST")
 }
 
+func (c *RESTClient) Put() *Request {
+	return c.Verb("PUT")
+}
+
 func (c *RESTClient) Delete() *Request {
 	return c.Verb("DELETE")
 }

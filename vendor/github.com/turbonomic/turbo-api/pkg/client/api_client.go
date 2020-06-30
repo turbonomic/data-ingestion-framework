@@ -37,14 +37,16 @@ func (c *APIClient) AddTarget(target *api.Target) error {
 	if _, err := c.login(); err != nil {
 		return fmt.Errorf("failed to login: %v", err)
 	}
-
 	// Find if the target exists
-	targetExists, _ := c.findTarget(target)
-	if targetExists {
-		glog.V(2).Infof("Target %v already exists.", getTargetId(target))
-		return nil
+	existingTarget, err := c.findTarget(target)
+	if err != nil {
+		return err
 	}
-
+	// Update the target if it already exists
+	if existingTarget != nil {
+		glog.V(2).Infof("Target %v already exists.", getTargetId(target))
+		return c.updateTarget(existingTarget, target)
+	}
 	// Construct the Target required by the rest api
 	targetData, err := json.Marshal(target)
 	if err != nil {
@@ -114,7 +116,7 @@ func (c *APIClient) login() (*Result, error) {
 	return &response, nil
 }
 
-func (c *APIClient) findTarget(target *api.Target) (bool, error) {
+func (c *APIClient) findTarget(target *api.Target) (*api.Target, error) {
 	// Get a list of targets from the Turbo server
 	request := c.Get().Resource(api.Resource_Type_Targets).
 		Header("Content-Type", "application/json").
@@ -124,56 +126,72 @@ func (c *APIClient) findTarget(target *api.Target) (bool, error) {
 	response, err := request.Do()
 	if err != nil {
 		glog.Errorf("Failed to execute find target request: %s.", err)
-		return false, fmt.Errorf("failed to execute find target request: %v", err)
+		return nil, fmt.Errorf("failed to execute find target request: %v", err)
 	}
 
 	glog.V(4).Infof("Received response from find target request %v: %+v.",
 		request, response)
 
 	if response.statusCode != 200 {
-		return false, buildResponseError("find target", response.status, response.body)
+		return nil, buildResponseError("find target", response.status, response.body)
+	}
+
+	// Parse the response - list of targets
+	var targetList []api.Target
+	if err := json.Unmarshal([]byte(response.body), &targetList); err != nil {
+		return nil, fmt.Errorf("failed to unmarshall find target response: %v", err)
 	}
 
 	// The target identifier for the given target
 	targetId := getTargetId(target)
 
-	// Parse the response - list of targets
-	var targetList []interface{}
-	if err := json.Unmarshal([]byte(response.body), &targetList); err != nil {
-		return false, fmt.Errorf("failed to unmarshall find target response: %v", err)
-	}
-
 	// Iterate over the list of targets to look for the given target
 	// by comparing the category, target type and identifier fields
 	for _, tgt := range targetList {
-		targetInstance, isMap := tgt.(map[string]interface{})
-		if !isMap {
-			continue
-		}
-		var category, targetType, tgtId string
-		category, _ = targetInstance["category"].(string)
-		targetType, _ = targetInstance["type"].(string)
-		inputFields, ok := targetInstance["inputFields"].([]interface{})
-		if ok {
-			// array of InputFields
-			for _, value := range inputFields {
-				// an instance of InputField
-				inputFieldMap, isMap := value.(map[string]interface{})
-				// Get the target identifier value from the
-				// input field named 'targetIdentifier'
-				if isMap {
-					field, isNameField := inputFieldMap["name"].(string)
-					//
-					if isNameField && field == "targetIdentifier" {
-						tgtId, _ = inputFieldMap["value"].(string)
-					}
-				}
+		// array of InputFields
+		for _, inputField := range tgt.InputFields {
+			if inputField.Name == "targetIdentifier" &&
+				inputField.Value == targetId &&
+				tgt.Category == target.Category &&
+				tgt.Type == target.Type {
+				return &tgt, nil
 			}
 		}
-		glog.V(4).Infof("%s::%s::%s", category, targetType, tgtId)
-		if target.Category == category && target.Type == targetType && tgtId == targetId {
-			return true, nil
-		}
 	}
-	return false, nil
+
+	glog.V(4).Infof("target %v does not exist", targetId)
+	return nil, nil
+}
+
+func (c *APIClient) updateTarget(existing, input *api.Target) error {
+	// Update the input fields
+	existing.InputFields = input.InputFields
+	targetData, err := json.Marshal(existing)
+	if err != nil {
+		return fmt.Errorf("failed to marshall target instance: %v", err)
+	}
+
+	// Create the rest api request
+	request := c.Put().Resource(api.Resource_Type_Targets).Name(existing.UUID).
+		Header("Content-Type", "application/json").
+		Header("Accept", "application/json").
+		Header("Cookie", fmt.Sprintf("%s=%s", c.SessionCookie.Name, c.SessionCookie.Value)).
+		Data(targetData)
+
+	glog.V(4).Infof("[UpdateTarget] %v.", request)
+	glog.V(4).Infof("[UpdateTarget] Data: %s.", targetData)
+
+	// Execute the request
+	response, err := request.Do()
+	if err != nil {
+		return fmt.Errorf("request %v failed: %s", request, err)
+	}
+	glog.V(4).Infof("Response %+v.", response)
+
+	if response.statusCode != 200 {
+		return buildResponseError("target update", response.status, response.body)
+	}
+
+	glog.V(2).Infof("Successfully updated target via API service.")
+	return nil
 }
