@@ -10,6 +10,6 @@ require (
 	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/stretchr/testify v1.3.0
 	github.com/tamerh/jsparser v1.2.0
-	github.com/turbonomic/turbo-go-sdk v0.0.0-20200624134510-34d8a201b20c
+	github.com/turbonomic/turbo-go-sdk v0.0.0-20200630154827-76d05e81fdab
 	gopkg.in/yaml.v2 v2.2.8
 )
