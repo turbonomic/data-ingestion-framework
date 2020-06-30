@@ -1,0 +1,52 @@
+
+      
+      <!-- ========= Topic Content... =========== -->
+      <section id="center">
+        
+        <div id="topicDiv">
+          <article id ='topicArt' class="topic">
+            <h1>{{ page.title }}</h1>
+            {{ content }}
+          </article>
+        </div>
+      </section>
+      
+      <div id="navList">
+        
+        <h4>Contents:</h4>
+        <span>
+          <div id="toc">
+            
+            <article class="navList">
+              <div id="tocresult" tabIdex="-1" >
+                <ul>
+                  <h5><a href="index.html">HOME PAGE</a></h5>
+                  {% for item in site.data.nav.toc %}
+                  <h5>{{ item.title }}</h5>
+                  <ul>
+                    {% for entry in item.subItems %}
+                    <li><a href="{{ entry.url }}">{{ entry.page }}</a></li>
+                    {% endfor %}
+                  </ul>
+                  {% endfor %}
+                </ul>
+                <!--
+                <ul>
+                  {% for link in site.data.nav %}
+                  <li><a href="{{ link.url }}">{{ link.title }}</a></li>
+                  {% endfor %}
+                </ul>
+                -->
+              </div>
+            </article>
+          </div>
+          <!--
+          <div id="search">
+            <search-directive id="searchDiv" class="navContent" searchobj="searchobj"/>
+          </div>
+          -->
+        </span>
+      </div>
+    </div>
+    
+    

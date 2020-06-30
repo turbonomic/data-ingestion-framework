@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="{{ page.lang | default: site.lang | default: "en" }}">
+  
+  <!-- Page title set in pageTitle directive -->
+  <title page-title>{{ site.title }}</title>
+  
+  <link href="{{ 'css/FourD_CSS/vmtHelp.css' | relative_url }}" rel="stylesheet" type="text/css"/>
+  <!--
+  <link href="../css/FourD_CSS/vmtHelp.css" rel="stylesheet" type="text/css"/>
+  <link href="../css/FourD_CSS/ui.fancytree.css" rel="stylesheet" type="text/css"/>
+  -->
+
+  <body>
+    <div id="angularThing" ng-controller="TopicCtrl as mainCtrl">
+      <nav class='banner'>
+        <div class="bannerbar" >
+          <img src="{{ 'assets/logos/logoInv.png' | relative_url }}" id="logo_image" 
+            style="width: 80%; max-width: 100px;"/>
+          <!--
+          <img src="./assets/logos/logoInv.png" id="logo_image" style="width: 80%; max-width: 100px;"/>
+          -->
+          <div class="titleHead">
+            <h4 class="revision"><font color="white">{{ site.title }}</span></font></h4>
+          </div>
+        </div>
+      </nav>
+      
+      
+      <div id="topicDiv">
+        <article id ='topicArt' class="topic">
+          <h1>{{ page.title }}</h1>
+          {{ content }}
+        </article>
+      </div>
+      </section>
+      
+      <div id="navList">
+        
+        <h4>Contents:</h4>
+        <span>
+          <div id="toc">
+            
+            <article class="navList">
+              <div id="tocresult" tabIdex="-1" >
+                <ul>
+                  <h5><a href="{{ 'index.html' | relative_url }}">HOME PAGE</a></h5>
+                  {% for item in site.data.nav.toc %}
+                  <h5>{{ item.title }}</h5>
+                  <ul>
+                    {% for entry in item.subItems %}
+                    <li><a href="{{ entry.dir | relative_url }}">{{ entry.dir }} | relative</a></li>
+                    <li><a href="/{{ entry.url }}">/{{ entry.url }}</a></li>
+                    {% endfor %}
+                  </ul>
+                  {% endfor %}
+                </ul>
+              </div>
+            </article>
+          </div>
+          <!--
+          <div id="search">
+            <search-directive id="searchDiv" class="navContent" searchobj="searchobj"/>
+          </div>
+          -->
+        </span>
+      </div>
+    </div>
+      
+  </body>
+
+</html>
