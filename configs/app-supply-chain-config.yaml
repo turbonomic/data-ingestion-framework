@@ -89,11 +89,9 @@ supplyChainNode:
     mergedEntityMetaData:
       keepStandalone: false
       matchingMetadata:
-        returnType: STRING
         matchingData:
           - matchingProperty:
               propertyName: IP
-        externalEntityReturnType: STRING
         externalEntityMatchingProperty:
           - matchingField:
               fieldName: id
@@ -265,21 +263,19 @@ supplyChainNode:
     mergedEntityMetaData:
       keepStandalone: false
       matchingMetadata:
-        returnType: STRING
         matchingData:
           - matchingProperty:
               propertyName: IP
-        externalEntityReturnType: STRING
         externalEntityMatchingProperty:
           - matchingProperty:
               propertyName: IP
-        commoditiesSold:
-          - RESPONSE_TIME
-          - TRANSACTION
-          - DB_MEM
-          - DB_CACHE_HIT_RATE
-          - CONNECTION
-          - KPI
+      commoditiesSold:
+        - RESPONSE_TIME
+        - TRANSACTION
+        - DB_MEM
+        - DB_CACHE_HIT_RATE
+        - CONNECTION
+        - KPI
   - templateClass: VIRTUAL_MACHINE
     templateType: BASE
     templatePriority: -2
@@ -303,6 +299,8 @@ supplyChainNode:
                 - virtual_machine_data
               fieldName: ipAddress
             delimiter: ","
+      commoditiesSold:
+        - APPLICATION
   - templateClass: CONTAINER
     templateType: BASE
     templatePriority: -1
