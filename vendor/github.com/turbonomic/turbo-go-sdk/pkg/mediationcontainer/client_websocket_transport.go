@@ -114,11 +114,7 @@ func (wsTransport *ClientWebSocketTransport) GetConnectionId() string {
 
 // Close the WebSocket Transport point: this is called by upper module (remoteMediationClient)
 func (wsTransport *ClientWebSocketTransport) CloseTransportPoint() {
-	glog.V(4).Infof("[CloseTransportPoint] closing transport endpoint and listener routine")
 	wsTransport.closeRequested = true
-	// close listener
-	wsTransport.stopListenForMessages()
-	wsTransport.closeAndResetWebSocket()
 }
 
 // Close current WebSocket connection and set it to nil.
@@ -171,7 +167,6 @@ func (wsTransport *ClientWebSocketTransport) startPing() {
 func (wsTransport *ClientWebSocketTransport) stopListenForMessages() {
 	if wsTransport.stopListenerCh != nil {
 		glog.V(4).Infof("[StopListenForMessages] closing stopListenerCh %+v", wsTransport.stopListenerCh)
-		wsTransport.stopListenerCh <- true
 		close(wsTransport.stopListenerCh)
 		glog.V(4).Infof("[StopListenForMessages] closed stopListenerCh %+v", wsTransport.stopListenerCh)
 	}

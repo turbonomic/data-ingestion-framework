@@ -30,8 +30,8 @@ github.com/tamerh/jsparser v1.2.0 h1:TEAFLRnYx/u4nz1wE1r5hRp3dK43+gQGUj/ZaK3GYbY
 github.com/tamerh/jsparser v1.2.0/go.mod h1:Dbrn+kGS04Vak3MYe5YpN9/mwh7QWecqBLxBw3T8vSw=
 github.com/turbonomic/turbo-api v0.0.0-20200626181019-5fce6eb1eda1 h1:iUWNvQpIGi09rQQTmnQzt25S3l/G6m9pDEJQiMoIVgc=
 github.com/turbonomic/turbo-api v0.0.0-20200626181019-5fce6eb1eda1/go.mod h1:L3eNZzTD3Iw8GV+cfeJD/lfDaEGPbZZGQrtml71yG10=
-github.com/turbonomic/turbo-go-sdk v0.0.0-20200630154827-76d05e81fdab h1:BBv1gEKAtZ8jYDmo2gBQyEHgGRi2cVNxrGzgqhe2OIk=
-github.com/turbonomic/turbo-go-sdk v0.0.0-20200630154827-76d05e81fdab/go.mod h1:xXDxYTreywHuuMuXuzGeJ7wtpnHPD2E+3NPeAZQEmPI=
+github.com/turbonomic/turbo-go-sdk v0.0.0-20200709032346-ba8fc3fb6955 h1:iEs7dwEdfFWEY3wKzozb4XRxRZBzxd5yADsfNEgVIOQ=
+github.com/turbonomic/turbo-go-sdk v0.0.0-20200709032346-ba8fc3fb6955/go.mod h1:xXDxYTreywHuuMuXuzGeJ7wtpnHPD2E+3NPeAZQEmPI=
 golang.org/x/xerrors v0.0.0-20191204190536-9bdfabe68543 h1:E7g+9GITq07hpfrRu66IVDexMakfv52eLZ2CXBWiKr4=
 golang.org/x/xerrors v0.0.0-20191204190536-9bdfabe68543/go.mod h1:I/5z698sn9Ka8TeJc9MKroUUfqBBauWjQqLJ2OPfmY0=
 google.golang.org/protobuf v0.0.0-20200109180630-ec00e32a8dfd/go.mod h1:DFci5gLYBciE7Vtevhsrf46CRTquxDuWsQurQQe4oz8=

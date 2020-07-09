@@ -160,3 +160,8 @@ type IActionPolicyProvider interface {
 type IEntityMetadataProvider interface {
 	GetEntityMetadata() []*proto.EntityIdentityMetadata
 }
+
+// IActionMergePolicyProvider provides the policies for merging actions of the same type
+type IActionMergePolicyProvider interface {
+	GetActionMergePolicy() []*proto.ActionMergePolicyDTO
+}

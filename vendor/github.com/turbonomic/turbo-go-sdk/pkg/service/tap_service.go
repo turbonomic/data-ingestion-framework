@@ -27,32 +27,25 @@ func (tapService *TAPService) DisconnectFromTurbo() {
 }
 
 func (tapService *TAPService) addTarget(isRegistered chan bool) {
-	c := tapService.ProbeConfiguration
-	pinfo := c.ProbeCategory + "::" + c.ProbeType
-
-	//1. wait until probe is registered.
-	select {
-	case status := <-isRegistered:
-		if !status {
-			glog.Errorf("Probe %v registration failed.", pinfo)
-			return
-		}
-		break
-	case <-tapService.disconnectFromTurbo:
-		glog.V(2).Infof("Abort adding target: Kubeturbo service is stopped.")
+	targetInfos := tapService.GetProbeTargets()
+	if len(targetInfos) <= 0 {
+		return
+	}
+	// Block until probe is registered
+	status := <-isRegistered
+	if !status {
+		c := tapService.ProbeConfiguration
+		pInfo := c.ProbeCategory + "::" + c.ProbeType
+		glog.Errorf("Probe %v registration failed.", pInfo)
 		return
 	}
 
-	targetInfos := tapService.GetProbeTargets()
-	if len(targetInfos) > 0 {
-		//2. register the targets
-		for _, targetInfo := range targetInfos {
-			target := targetInfo.GetTargetInstance()
-			service := mediationcontainer.GetMediationService()
-			if err := tapService.turboClient.AddTarget(target, service); err != nil {
-				glog.Errorf("Failed to add target %v: %v",
-					targetInfo, err)
-			}
+	for _, targetInfo := range targetInfos {
+		target := targetInfo.GetTargetInstance()
+		service := mediationcontainer.GetMediationService()
+		if err := tapService.turboClient.AddTarget(target, service); err != nil {
+			glog.Errorf("Failed to add target %v: %v",
+				targetInfo, err)
 		}
 	}
 }
@@ -70,7 +63,7 @@ func (tapService *TAPService) ConnectToTurbo() {
 	defer close(isRegistered)
 
 	// start a separate go routine to connect to the Turbo server
-	go mediationcontainer.InitMediationContainer(isRegistered)
+	go mediationcontainer.InitMediationContainer(isRegistered, tapService.disconnectFromTurbo)
 	go tapService.addTarget(isRegistered)
 
 	// Once connected the mediation container will keep running till a disconnect message is sent to the tap service
