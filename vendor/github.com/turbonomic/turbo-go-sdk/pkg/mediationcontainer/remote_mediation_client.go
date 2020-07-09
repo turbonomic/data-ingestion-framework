@@ -55,7 +55,7 @@ func CreateRemoteMediationClient(allProbes map[string]*ProbeProperties,
 
 // Establish connection with the Turbo server -  Blocks till WebSocket connection is open
 // Complete the probe registration protocol with the server and then wait for server messages
-func (remoteMediationClient *remoteMediationClient) Init(probeRegisteredMsgCh chan bool) {
+func (remoteMediationClient *remoteMediationClient) Init(probeRegisteredMsgCh chan bool, disconnectFromTurbo chan struct{}) {
 	// TODO: Assert that the probes are registered before starting the handshake ??
 
 	//// --------- Create WebSocket Transport
@@ -81,8 +81,7 @@ func (remoteMediationClient *remoteMediationClient) Init(probeRegisteredMsgCh ch
 	// handle WebSocket creation errors
 	if err != nil { //transport.ws == nil {
 		glog.Errorf("Initialization of remote mediation client failed, null transport")
-		remoteMediationClient.Stop()
-		probeRegisteredMsgCh <- false
+		close(disconnectFromTurbo)
 		return
 	}
 
@@ -100,7 +99,7 @@ func (remoteMediationClient *remoteMediationClient) Init(probeRegisteredMsgCh ch
 	glog.V(4).Infof("Sdk client protocol completed with status %v", status)
 	if !status {
 		glog.Errorf("Registration with server failed with status %v", status)
-		probeRegisteredMsgCh <- status
+		close(disconnectFromTurbo)
 		return
 	}
 
@@ -156,6 +155,7 @@ func (remoteMediationClient *remoteMediationClient) Init(probeRegisteredMsgCh ch
 	select {
 	case <-remoteMediationClient.stopMediationClientCh:
 		glog.V(4).Infof("[Init] Exit routine *************")
+		close(disconnectFromTurbo)
 		return
 	}
 }
@@ -165,13 +165,12 @@ func (remoteMediationClient *remoteMediationClient) Stop() {
 	remoteMediationClient.stopOnce.Do(func() {
 		// First stop the transport connection monitor
 		close(remoteMediationClient.closeWatcherCh)
-		// Stop the server message listener
-		remoteMediationClient.stopMessageHandler()
+		// Note: Do NOT close stopMsgHandlerCh and stopListenerCh, as they may have been closed already
 		// Close the transport
 		if remoteMediationClient.Transport != nil {
 			remoteMediationClient.Transport.CloseTransportPoint()
 		}
-		// Notify the client to stop
+		// Notify the client to stop, this will in turn disconnect from Turbo
 		close(remoteMediationClient.stopMediationClientCh)
 	})
 }

@@ -7,16 +7,17 @@ import (
 )
 
 type ProbeBuilder struct {
-	probeConf              *ProbeConfig
-	registrationClient     TurboRegistrationClient
-	targetsToAdd           map[string]bool
-	discoveryClient        TurboDiscoveryClient
-	actionClient           TurboActionExecutorClient
-	builderError           error
-	supplyChainProvider    ISupplyChainProvider
-	accountDefProvider     IAccountDefinitionProvider
-	actionPolicyProvider   IActionPolicyProvider
-	entityMetadataProvider IEntityMetadataProvider
+	probeConf                 *ProbeConfig
+	registrationClient        TurboRegistrationClient
+	targetsToAdd              map[string]bool
+	discoveryClient           TurboDiscoveryClient
+	actionClient              TurboActionExecutorClient
+	builderError              error
+	supplyChainProvider       ISupplyChainProvider
+	accountDefProvider        IAccountDefinitionProvider
+	actionPolicyProvider      IActionPolicyProvider
+	actionMergePolicyProvider IActionMergePolicyProvider
+	entityMetadataProvider    IEntityMetadataProvider
 }
 
 func ErrorInvalidTargetIdentifier() error {
@@ -106,6 +107,10 @@ func (pb *ProbeBuilder) Create() (*TurboProbe, error) {
 		turboProbe.RegistrationClient.IActionPolicyProvider = pb.actionPolicyProvider
 	}
 
+	if pb.actionMergePolicyProvider != nil {
+		turboProbe.RegistrationClient.IActionMergePolicyProvider = pb.actionMergePolicyProvider
+	}
+
 	if pb.entityMetadataProvider != nil {
 		turboProbe.RegistrationClient.IEntityMetadataProvider = pb.entityMetadataProvider
 	}
@@ -156,6 +161,17 @@ func (pb *ProbeBuilder) WithActionPolicies(actionPolicyProvider IActionPolicyPro
 		return pb
 	}
 	pb.actionPolicyProvider = actionPolicyProvider
+
+	return pb
+}
+
+// Set the provider for the action merge policies
+func (pb *ProbeBuilder) WithActionMergePolicies(actionMergePolicyProvider IActionMergePolicyProvider) *ProbeBuilder {
+	if actionMergePolicyProvider == nil {
+		pb.builderError = ErrorInvalidRegistrationClient()
+		return pb
+	}
+	pb.actionMergePolicyProvider = actionMergePolicyProvider
 
 	return pb
 }
