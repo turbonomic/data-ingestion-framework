@@ -301,6 +301,8 @@ supplyChainNode:
             delimiter: ","
       commoditiesSold:
         - APPLICATION
+        - VCPU
+        - VMEM
   - templateClass: CONTAINER
     templateType: BASE
     templatePriority: -1
