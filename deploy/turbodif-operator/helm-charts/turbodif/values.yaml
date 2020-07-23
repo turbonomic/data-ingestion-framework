@@ -1,0 +1,37 @@
+# Default values for turbodif.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# Replace the image with desired version
+image:
+  repository: turbonomic/turbodif
+  tag: 7.22.5
+  pullPolicy: IfNotPresent
+
+#nameOverride: ""
+#fullnameOverride: ""
+
+# Turbo server version and address
+serverMeta:
+  version: 7.22
+  turboServer: https://Turbo_server_URL
+
+# Turbonomic server api user and password
+# The opsManagerUserName requires Turbo administrator role
+restAPIConfig:
+  turbonomicCredentialsSecretName: "turbonomic-credentials"
+  opsManagerUserName: Turbo_username
+  opsManagerPassword: Turbo_password
+
+# Specify a unique suffix to the DataIngestionFramework target type
+# The Target Type will appear as DataIngestionFramework-<targetTypeSuffix> on the UI
+# Do not specify Turbonomic as the targetTypeSuffix, it is reserved for internal use
+targetTypeSuffix: CustomMetricSource
+
+targetConfig:
+  keepStandalone: false
+
+args:
+  # logging level
+  logginglevel: 2
+
