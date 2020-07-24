@@ -3,10 +3,9 @@ package conf
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/davecgh/go-spew/spew"
 	"io/ioutil"
-	"os"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/golang/glog"
 	"github.com/turbonomic/turbo-go-sdk/pkg/service"
 )
@@ -42,52 +41,43 @@ type DIFTargetConf struct {
 	Name    string `json:"targetName,omitempty"`
 }
 
-func NewDIFConf(configFilePath string) (*DIFConf, error) {
-
+func NewDIFConf(configFilePath string) (config *DIFConf, err error) {
 	glog.Infof("Read TurboDIF probe configuration from %s", configFilePath)
-	config, err := readConfig(configFilePath)
-
+	config, err = readConfig(configFilePath)
 	if err != nil {
-		return nil, err
+		return
 	}
-
 	if config.Communicator == nil {
-		return nil, fmt.Errorf("unable to read the turbo communication config from %s", configFilePath)
+		err = fmt.Errorf("unable to read the turbo communication config from %s", configFilePath)
+		return
 	}
-
 	if config.TargetConf == nil {
-		return nil, fmt.Errorf("unable to read the turbo target config from %s", configFilePath)
+		// Create an empty target config
+		config.TargetConf = &DIFTargetConf{}
+		return
 	}
-
 	if len(config.TargetConf.Address) > 0 && len(config.TargetConf.Name) == 0 {
-		glog.Errorf("unspecified name for target with addressr: %s", config.TargetConf.Address)
-		os.Exit(1)
+		err = fmt.Errorf("unspecified name for target with address: %s", config.TargetConf.Address)
+		return
 	}
-
 	if len(config.TargetConf.Name) > 0 && len(config.TargetConf.Address) == 0 {
-		glog.Errorf("unspecified address for target with name: %s", config.TargetConf.Name)
-		os.Exit(1)
+		err = fmt.Errorf("unspecified address for target with name: %s", config.TargetConf.Name)
+		return
 	}
-
-	return config, nil
+	return
 }
 
 func readConfig(path string) (*DIFConf, error) {
 	file, err := ioutil.ReadFile(path)
 	if err != nil {
-		glog.Errorf("File error: %v", err)
-		return nil, err
+		return nil, fmt.Errorf("file error: %v", err)
 	}
 	glog.V(4).Info(string(file))
-
 	var config DIFConf
 	err = json.Unmarshal(file, &config)
-
 	if err != nil {
-		glog.Errorf("Unmarshal error :%v", err)
-		return nil, err
+		return nil, fmt.Errorf("unmarshal error :%v", err)
 	}
 	glog.V(4).Infof("Results: %+v", spew.Sdump(config))
-
 	return &config, nil
 }
