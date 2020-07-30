@@ -8,11 +8,11 @@ ENV APP_ROOT=/opt/turbonomic
 ENV PATH=$PATH:${APP_ROOT}/bin
 
 RUN mkdir -p ${APP_ROOT}/bin
-COPY vmturbo.linux ${APP_ROOT}/bin/vm
+COPY azureloganalytics.linux ${APP_ROOT}/bin/azureloganalytics
 RUN chmod -R ug+x ${APP_ROOT}/bin && sync && \
     chmod -R g=u ${APP_ROOT}
 
 ####### Add app-specific needs below. #######
 USER 10001
 WORKDIR ${APP_ROOT}
-ENTRYPOINT ["/opt/turbonomic/bin/vm"]
+ENTRYPOINT ["/opt/turbonomic/bin/azureloganalytics"]

@@ -1,7 +1,13 @@
 .idea
+.venv
+env
 *.iml
+*clientsecret
+*clientid
 .DS_Store
 build/turbodif*
+*azureloganalytics
+*azureloganalytics.linux
 .vscode/
 docs/_site
 docs/.sass-cache
