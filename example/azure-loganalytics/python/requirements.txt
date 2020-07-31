@@ -1,0 +1,3 @@
+azure-loganalytics
+msal
+msrest
