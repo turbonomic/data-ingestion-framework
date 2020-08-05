@@ -16,8 +16,7 @@ const (
 	url             = "https://vmturbo.atlassian.net/rest/api/2/search?jql=project='Operations%20Manager'&maxResults=0"
 	auth            = "fakeAuth"
 	cookie          = "fakeCookie"
-	appID           = "Turbonomic-turbonomic-http://prometheus-server:9090"
-	stitchingID     = "BUSINESS_APPLICATION-Turbonomic-turbonomic-http://prometheus-server:9090"
+	appID           = "Turbonomic-turbonomic-http://prometheus-server:9090" // [Name]-[Namespace]-[Source]
 	scope           = "Prometheus"
 	defaultCapacity = 60000
 )
@@ -65,8 +64,7 @@ func sendTopology(w http.ResponseWriter, r *http.Request) {
 	}
 	// Create business app entity
 	bizApp := dif.
-		NewDIFEntity(appID, "businessApplication").
-		Matching(stitchingID)
+		NewDIFEntity(appID, "businessApplication")
 	key := "Total Tickets"
 	capacity := float64(defaultCapacity)
 	bizApp.AddMetrics("kpi", []*dif.DIFMetricVal{{
@@ -86,7 +84,7 @@ func sendTopology(w http.ResponseWriter, r *http.Request) {
 			"failed to marshal %v into json: %v", topology, err))
 		return
 	}
-	glog.Infof("%v", tickets)
+	glog.Infof("%s", result)
 	// Send response
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
