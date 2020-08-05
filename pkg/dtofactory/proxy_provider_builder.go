@@ -31,9 +31,8 @@ func NewProxyProviderEntityBuilder(entityType proto.EntityDTO_EntityType, entity
 func (eb *ProxyProviderEntityBuilder) BuildEntity() (*proto.EntityDTO, error) {
 	var dto *proto.EntityDTO
 
-	id := getEntityId(eb.entityType, eb.entityId, eb.scope)
-	glog.Infof("Building proxy provider %s", id)
-	entityBuilder := builder.NewEntityDTOBuilder(eb.entityType, id).
+	glog.Infof("Building proxy provider %s", eb.entityId)
+	entityBuilder := builder.NewEntityDTOBuilder(eb.entityType, eb.entityId).
 		DisplayName(eb.entityId)
 
 	// no matching id
@@ -49,15 +48,17 @@ func (eb *ProxyProviderEntityBuilder) BuildEntity() (*proto.EntityDTO, error) {
 	supportedComms := supplyChainNode.SupportedComms
 	supportedAccessComms := supplyChainNode.SupportedAccessComms
 
+	key := getKey(eb.entityType, eb.entityId, eb.scope)
+
 	var soldCommodities []*proto.CommodityDTO
 	for commType, commVal := range supportedComms {
 		commBuilder := builder.NewCommodityDTOBuilder(commType)
 		if commVal.Key != nil {
-			commBuilder.Key(id)
+			commBuilder.Key(key)
 		}
 		soldCommodity, err := commBuilder.Create()
 		if err != nil {
-			glog.Errorf("Failed to create sold commodity %v for %v: %v", commType, id, err)
+			glog.Errorf("Failed to create sold commodity %v for %v: %v", commType, eb.entityId, err)
 			continue
 		}
 		soldCommodities = append(soldCommodities, soldCommodity)
@@ -65,9 +66,9 @@ func (eb *ProxyProviderEntityBuilder) BuildEntity() (*proto.EntityDTO, error) {
 
 	for commType := range supportedAccessComms {
 		//using the provider id as the key
-		soldCommodity, err := builder.NewCommodityDTOBuilder(commType).Key(id).Create()
+		soldCommodity, err := builder.NewCommodityDTOBuilder(commType).Key(key).Create()
 		if err != nil {
-			glog.Errorf("Failed to create sold commodity %v for %v: %v", commType, id, err)
+			glog.Errorf("Failed to create sold commodity %v for %v: %v", commType, eb.entityId, err)
 			continue
 		}
 		soldCommodities = append(soldCommodities, soldCommodity)
