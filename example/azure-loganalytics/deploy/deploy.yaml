@@ -15,7 +15,7 @@ spec:
         app: azure-loganalytics
     spec:
       containers:
-        - image: <IMAGE>
+        - image: turbonomic/azure-loganalytics-python
           imagePullPolicy: Always
           name: azure-loganalytics
           env:
