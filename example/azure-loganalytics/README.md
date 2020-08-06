@@ -23,7 +23,7 @@ Make sure your Azure Active Directory App has required permission to access the 
 * The IDs of the log analytics workspaces that are connected to the virtual machines for which you want to get the memory metrics. 
 
 ### Deploy the metric server
-It is recommend to deploy the metric server in the same cluster where your `turbodif` probe is running. The [deploy](https://github.com/turbonomic/data-ingestion-framework/tree/azure-loganalytics/example/azure-loganalytics/deploy) subddirectory provides a sample yaml to create a deployment and a service:
+It is recommend to deploy the metric server in the same cluster where your `turbodif` probe is running. The [deploy](https://github.com/turbonomic/data-ingestion-framework/tree/master/example/azure-loganalytics/deploy) subddirectory provides a sample yaml to create a deployment and a service:
 
 #### Create an `azure` kubernetes secret object that contains the azure account information:
 * Create an `azure-target` file with the required azure target account information:
@@ -50,7 +50,7 @@ kind: Secret
 If there is already an `azure` kubernetes secret object created for the `mediation-azure` probe in your cluster, it can be used directly, and the above two steps can be ignored. You must identify the target ID from the `data` field of the secret. 
 
 #### Create the deployment and service
-* Update the [deployment.yaml](https://github.com/turbonomic/data-ingestion-framework/tree/azure-loganalytics/example/azure-loganalytics/deploy/deployment.yaml), and replace the following fields:
+* Update the [deployment.yaml](https://github.com/turbonomic/data-ingestion-framework/tree/master/example/azure-loganalytics/deploy/deployment.yaml), and replace the following fields:
   * `<WORKSPACE_IDS_SEPARATED_BY_COMMA>`
   * If you are using an existing `azure` secret object, replace the `azure-target` value with the appropriate target ID
 
@@ -72,4 +72,4 @@ azure-loganalytics          ClusterIP      10.233.52.141   <none>          8081/
 ![image](https://user-images.githubusercontent.com/10012486/89074115-c3d7e200-d349-11ea-9043-08d02cd1a5e7.png)
 
 ## Source Code
-For your convenience, this example provides reference implementations in two languages: [Golang](https://github.com/turbonomic/data-ingestion-framework/tree/azure-loganalytics/example/azure-loganalytics/golang) (1.14+) and [Python](https://github.com/turbonomic/data-ingestion-framework/tree/azure-loganalytics/example/azure-loganalytics/python) (3.5.3+). Follow the instructions in the individual subdirectory if would like to customize the code, and build your own docker images.
+For your convenience, this example provides reference implementations in two languages: [Golang](https://github.com/turbonomic/data-ingestion-framework/tree/master/example/azure-loganalytics/golang) (1.14+) and [Python](https://github.com/turbonomic/data-ingestion-framework/tree/master/example/azure-loganalytics/python) (3.5.3+). Follow the instructions in the individual subdirectory if would like to customize the code, and build your own docker images.
