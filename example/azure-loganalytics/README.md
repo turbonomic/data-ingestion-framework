@@ -50,7 +50,7 @@ kind: Secret
 If there is already an `azure` kubernetes secret object created for the `mediation-azure` probe in your cluster, it can be used directly, and the above two steps can be ignored. You must identify the target ID from the `data` field of the secret. 
 
 #### Create the deployment and service
-* Update the [deployment.yaml](https://github.com/turbonomic/data-ingestion-framework/tree/master/example/azure-loganalytics/deploy/deployment.yaml), and replace the following fields:
+* Update the [deploy.yaml](https://github.com/turbonomic/data-ingestion-framework/tree/master/example/azure-loganalytics/deploy/deploy.yaml), and replace the following fields:
   * `<WORKSPACE_IDS_SEPARATED_BY_COMMA>`
   * If you are using an existing `azure` secret object, replace the `azure-target` value with the appropriate target ID
 
