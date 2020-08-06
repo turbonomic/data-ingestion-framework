@@ -93,8 +93,8 @@ func (kb *CommodityKeyBuilder) GetBoughtCommKey(internalProvider bool) (keys []s
 		}
 		if keySupplierTypes.Contains(*eType) {
 			for pId := range pMap {
-				id := getEntityId(*eType, pId, kb.scope)
-				keys = append(keys, id)
+				key := getKey(*eType, pId, kb.scope)
+				keys = append(keys, key)
 			}
 		}
 	}
@@ -106,8 +106,8 @@ func (kb *CommodityKeyBuilder) GetBoughtCommKey(internalProvider bool) (keys []s
 		}
 		if keySupplierTypes.Contains(*eType) {
 			for pId := range pMap {
-				id := getEntityId(*eType, pId, kb.scope)
-				keys = append(keys, id)
+				key := getKey(*eType, pId, kb.scope)
+				keys = append(keys, key)
 			}
 		}
 	}

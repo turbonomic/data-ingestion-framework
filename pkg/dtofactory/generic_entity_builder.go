@@ -34,7 +34,7 @@ func NewGenericEntityBuilder(entityType proto.EntityDTO_EntityType,
 func (eb *GenericEntityBuilder) BuildEntity() (*proto.EntityDTO, error) {
 	var dto *proto.EntityDTO
 
-	entityID := getEntityId(eb.entityType, eb.difEntity.EntityId, eb.scope)
+	entityID := eb.difEntity.EntityId
 	glog.V(3).Infof("Building %s", entityID)
 
 	entityBuilder := builder.
@@ -88,10 +88,9 @@ func (eb *GenericEntityBuilder) BuildEntity() (*proto.EntityDTO, error) {
 		}
 		// Adding the provider and associated bought commodities to the entity builder
 		for _, pId := range providerIds {
-			providerId := getEntityId(*providerType, pId, eb.scope)
-			glog.V(3).Infof("%s --> adding internal provider %s", entityID, providerId)
+			glog.V(3).Infof("%s --> adding internal provider %s", entityID, pId)
 			entityBuilder.
-				Provider(builder.CreateProvider(*providerType, providerId)).
+				Provider(builder.CreateProvider(*providerType, pId)).
 				BuysCommodities(boughtCommodities)
 		}
 	}
@@ -140,7 +139,7 @@ func (eb *GenericEntityBuilder) externalProviders(supplyChainNode *registration.
 		// Construct the IDs of the external providers
 		var providerIds []string
 		for pId := range pMap {
-			providerIds = append(providerIds, getEntityId(*eType, pId, eb.scope))
+			providerIds = append(providerIds, pId)
 		}
 		// Make sure for HOSTING provider type, there is no more than 1 providers
 		if scHostedByProviderType[*eType] == "HOSTING" && len(pMap) > 1 {

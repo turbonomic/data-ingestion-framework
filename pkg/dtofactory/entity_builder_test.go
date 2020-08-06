@@ -102,7 +102,7 @@ func TestEntityBuilder(t *testing.T) {
 
 	// expected entity properties
 	expectedTestEntity := &TestEntity{
-		id:          getEntityId(entityType, difEntity.EntityId, scope),
+		id:          difEntity.EntityId,
 		displayName: difEntity.EntityId,
 		eType:       entityType,
 		soldComms:   make(map[proto.CommodityDTO_CommodityType]*proto.CommodityDTO),

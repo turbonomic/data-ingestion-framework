@@ -19,9 +19,8 @@ func EntityType(difType data.DIFEntityType) *proto.EntityDTO_EntityType {
 	return &eType
 }
 
-func getEntityId(entityType proto.EntityDTO_EntityType, entityName, scope string) string {
+func getKey(entityType proto.EntityDTO_EntityType, entityName, scope string) string {
 	eType := proto.EntityDTO_EntityType_name[int32(entityType)]
-
 	return fmt.Sprintf("%s-%s-%s", eType, entityName, scope)
 }
 
