@@ -14,29 +14,53 @@ To do so, navigate to your workspace, click **Advanced Settings**, **Data**. For
 Make sure your Azure Active Directory App has required permission to access the Log Analytics API. For more details, refer to [Azure Log Analytics Search API](https://dev.loganalytics.io/documentation/1-Tutorials/Direct-API).
 
 ### Collect the following required information
-The following information is required to authenticate with Azure service, and query the specific workspaces that are connected to your virtual machines. You must set them as environment variables to be picked up by the metric server:
+* The following information is required to authenticate with Azure service, and query the specific workspaces that are connected to your virtual machines:
 
-* `AZURE_TENANT_ID`
-* `AZURE_CLIENT_ID`
-* `AZURE_CLIENT_SECRET`
-* `AZURE_LOG_ANALYTICS_WORKSPACES`: 
-This is a list of workspace IDs, separated by comma
+  * `AZURE_TENANT_ID`
+  * `AZURE_CLIENT_ID`
+  * `AZURE_CLIENT_SECRET`
+
+* The IDs of the log analytics workspaces that are connected to the virtual machines for which you want to get the memory metrics. 
 
 ### Build and deploy the metric server
 For your convenience, this example provides reference implementations in two languages: [Golang](https://github.com/turbonomic/data-ingestion-framework/tree/azure-loganalytics/example/azure-loganalytics/golang) (1.14+) and [Python](https://github.com/turbonomic/data-ingestion-framework/tree/azure-loganalytics/example/azure-loganalytics/python) (3.5.3+). Follow the instructions in the individual subdirectory to build and generate docker images.
 
 It is recommend to deploy the metric server in the same cluster where your `turbodif` probe is running. The [deploy](https://github.com/turbonomic/data-ingestion-framework/tree/azure-loganalytics/example/azure-loganalytics/deploy) subddirectory provides a sample yaml to create a deployment and a service:
 
-* Create the `clientid` and `clientsecret` as kubernetes secret object:
+#### Create an `azure` kubernetes secret object that contains the azure account information:
+* Create an `azure-target` file with the required azure target account information:
+```
+tenant: <AZURE_TENANT_ID>
+client: <AZURE_CLIENT_ID>
+key: <AZURE_CLIENT_SECRET>
+```
+
+* Create an `azure` kubernetes secret object from the above file:
+```
+$ kubectl create secret generic azure --from-file=./azure-target
+secret/azure created
+```
+The `azure-target` is the target ID:
+```
+$ kubectl get secret azure -o yaml
+apiVersion: v1
+data:
+  azure-target: Y2xpZW50OiBkMTk5MDY1Yi1mZmMxLTQyN2YtOWZkMi0zNWRlOGI3YTBiZmQKa2V5OiAuUGEyMz06PVhVT1kwWEgxeUVAN04udG1FRV9HZC1KQQp0ZW5hbnQ6IDhlNGYwNzEzLTVlZWEtNGRhMC05OWMwLWY3ZTQxNzk0YmU0YQo=
+kind: Secret
 
 ```
-$ kubectl create secret generic azure-loganalytics-clientid --from-file=./clientid
-secret/azure-loganalytics-clientid created
+If there is already an `azure` kubernetes secret object created for the `mediation-azure` probe in your cluster, it can be used directly, and the above two steps can be ignored. You must identify the target ID from the `data` field of the secret. 
 
-$ kubectl create secret generic azure-loganalytics-clientsecret --from-file=./clientsecret 
-secret/azure-loganalytics-clientsecret created
+#### Create the deployment and service
+* Update the [deployment.yaml](https://github.com/turbonomic/data-ingestion-framework/tree/azure-loganalytics/example/azure-loganalytics/deploy/deployment.yaml), and replace the following fields:
+  * `<IMAGE>`
+  * `<WORKSPACE_IDS_SEPARATED_BY_COMMA>`
+  * If you are using an existing `azure` secret object, replace the `azure-target` value with the appropriate target ID
+
+* Create the deployment
 ```
-* Update the [deployment.yaml](https://github.com/turbonomic/data-ingestion-framework/tree/azure-loganalytics/example/azure-loganalytics/deploy/deployment.yaml), and replace the `<IMAGE>`, `<WORKSPACE_IDS_SEPARATED_BY_COMMA>` and `<TENANT_ID>`, and create the deployment
+$ kubectl create -f deployment.yaml
+```
 
 * Make sure the pod and service are started:
 ```

@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/davecgh/go-spew/spew"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -14,19 +13,22 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/golang/glog"
 	dif "github.com/turbonomic/turbo-go-sdk/pkg/dataingestionframework/data"
+	"gopkg.in/yaml.v2"
 )
 
 const (
-	metricPath         = "/metrics"
-	port               = 8081
-	baseLoginURL       = "https://login.microsoftonline.com/"
-	baseQueryURL       = "https://api.loganalytics.io/"
-	defaultResource    = "https://api.loganalytics.io"
-	defaultRedirectURI = "http://localhost:3000/login"
-	defaultGrantType   = "client_credentials"
-	queryComputer      = `
+	metricPath                = "/metrics"
+	port                      = 8081
+	baseLoginURL              = "https://login.microsoftonline.com/"
+	baseQueryURL              = "https://api.loganalytics.io/"
+	defaultResource           = "https://api.loganalytics.io"
+	defaultRedirectURI        = "http://localhost:3000/login"
+	defaultGrantType          = "client_credentials"
+	defaultTargetInfoLocation = "/etc/targets"
+	queryComputer             = `
 Heartbeat | summarize arg_max(TimeGenerated, *) by Computer | project Computer, ComputerIP`
 	queryMemory = `
 Perf
@@ -93,6 +95,12 @@ type AccessToken struct {
 	AccessToken string `json:"access_token"`
 }
 
+type TargetInfo struct {
+	ClientID     string `yaml:"client"`
+	TenantID     string `yaml:"tenant"`
+	ClientSecret string `yaml:"key"`
+}
+
 func init() {
 	_ = flag.Set("alsologtostderr", "true")
 	_ = flag.Set("stderrthreshold", "INFO")
@@ -103,17 +111,35 @@ func init() {
 		glog.Fatalf("AZURE_LOG_ANALYTICS_WORKSPACES is missing.")
 	}
 	workspaces = strings.Split(workspaceIDs, ",")
-	tenantID = os.Getenv("AZURE_TENANT_ID")
+	targetInfoLocation := os.Getenv("TARGET_INFO_LOCATION")
+	if targetInfoLocation == "" {
+		targetInfoLocation = defaultTargetInfoLocation
+	}
+	targetID := os.Getenv("TARGET_ID")
+	if targetID == "" {
+		glog.Fatalf("TARGET_ID is missing.")
+	}
+	targetInfoFilePath := path.Join(targetInfoLocation, targetID)
+	targetInfoFile, err := ioutil.ReadFile(targetInfoFilePath)
+	if err != nil {
+		glog.Fatalf("Failed to read target info from file %v: %v", targetInfoFilePath, err)
+	}
+	var targetInfo TargetInfo
+	err = yaml.Unmarshal(targetInfoFile, &targetInfo)
+	if err != nil {
+		glog.Fatalf("Failed to unmarshal target info from file %v: %v", targetInfoFilePath, err)
+	}
+	tenantID = targetInfo.TenantID
 	if tenantID == "" {
-		glog.Fatalf("AZURE_TENANT_ID is missing.")
+		glog.Fatalf("Tenant ID is missing.")
 	}
-	clientID = os.Getenv("AZURE_CLIENT_ID")
+	clientID = targetInfo.ClientID
 	if clientID == "" {
-		glog.Fatalf("AZURE_CLIENT_ID is missing.")
+		glog.Fatalf("Client ID is missing.")
 	}
-	clientSecret = os.Getenv("AZURE_CLIENT_SECRET")
+	clientSecret = targetInfo.ClientSecret
 	if clientSecret == "" {
-		glog.Fatalf("AZURE_CLIENT_SECRET is missing")
+		glog.Fatalf("Client secret is missing")
 	}
 	client = &http.Client{}
 	hostMap = make(map[string]string)

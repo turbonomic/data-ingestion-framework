@@ -21,26 +21,23 @@ spec:
           env:
             - name: AZURE_LOG_ANALYTICS_WORKSPACES
               value: <WORKSPACE_IDS_SEPARATED_BY_COMMA>
-            - name: AZURE_TENANT_ID
-              value: <TENANT_ID>
-            - name: AZURE_CLIENT_ID
-              valueFrom:
-                secretKeyRef:
-                  name: azure-loganalytics-clientid
-                  key: clientid
-            - name: AZURE_CLIENT_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: azure-loganalytics-clientsecret
-                  key: clientsecret
+            - name: TARGET_ID
+              value: azure-target
           ports:
             - containerPort: 8081
           volumeMounts:
             - name: varlog
               mountPath: /var/log
+            - name: azure-secrets
+              mountPath: /etc/targets
+              readOnly: true
       volumes:
         - name: varlog
           emptyDir: {}
+        - name: azure-secrets
+          secret:
+            secretName: "azure"
+            optional: true
       restartPolicy: Always
 ---
 apiVersion: v1

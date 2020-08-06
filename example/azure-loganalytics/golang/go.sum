@@ -15,3 +15,6 @@ github.com/stretchr/testify v1.3.0/go.mod h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UV
 github.com/turbonomic/turbo-api v0.0.0-20200626181019-5fce6eb1eda1/go.mod h1:L3eNZzTD3Iw8GV+cfeJD/lfDaEGPbZZGQrtml71yG10=
 github.com/turbonomic/turbo-go-sdk v0.0.0-20200713143308-df596bab40fd h1:pNg8299UsXuZVxUA4ZPtWzhjGFiwuke4YB5gaaFsInI=
 github.com/turbonomic/turbo-go-sdk v0.0.0-20200713143308-df596bab40fd/go.mod h1:xXDxYTreywHuuMuXuzGeJ7wtpnHPD2E+3NPeAZQEmPI=
+gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
+gopkg.in/yaml.v2 v2.3.0 h1:clyUAQHOM3G0M3f5vQj7LuJrETvjVot3Z5el9nffUtU=
+gopkg.in/yaml.v2 v2.3.0/go.mod h1:hI93XBmqTisBFMUTm0b8Fm+jr3Dg1NNxqwp+5A1VGuI=

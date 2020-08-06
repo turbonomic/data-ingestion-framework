@@ -1,5 +1,6 @@
 import logging
 import os
+import yaml
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 import requests
@@ -30,6 +31,8 @@ query_memory = """
 resource_id = "https://api.loganalytics.io/.default"
 # Resource endpoint
 resource_endpoint = "https://api.loganalytics.io/v1/workspaces/{}/query"
+# Default target info location
+default_target_info_location = "/etc/targets"
 
 
 class TopologyHandler(BaseHTTPRequestHandler):
@@ -48,6 +51,7 @@ class TopologyHandler(BaseHTTPRequestHandler):
         self.send_header('Content-type', 'application/json')
         self.end_headers()
         body = opts['content']
+        logging.info(body)
         self.wfile.write(bytes(body, 'UTF-8'))
 
     def login(self):
@@ -123,16 +127,34 @@ class TopologyHandler(BaseHTTPRequestHandler):
         return t
 
 
+def get_azure_account_info():
+    target_info_location = os.environ.get("TARGET_INFO_LOCATION")
+    if not target_info_location:
+        target_info_location = default_target_info_location
+    target_id = os.environ.get("TARGET_ID")
+    if not target_id:
+        raise ValueError('Unable to retrieve account information to login to Azure. To authenticate'
+                         'with Azure service, you must define TARGET_ID environment variable to '
+                         'point to the target file that contains the account information of the '
+                         'target that you are interested in.')
+    try:
+        with open(os.path.join(target_info_location, target_id), 'r') as f:
+            data = yaml.safe_load(f)
+    except Exception as e:
+        raise e
+    tenant_id = data.get("tenant")
+    client_id = data.get("client")
+    client_secret = data.get("key")
+    if not (tenant_id and client_id and client_secret):
+        raise ValueError('Unable to retrieve account information to login to Azure. You must'
+                         'specify client, tenant, and key in the target file.')
+    return tenant_id, client_id, client_secret
+
+
 class TopologyServer(HTTPServer):
     def __init__(self, server_address, handler_class=TopologyHandler):
         super().__init__(server_address, handler_class)
-        # Retrieve the IDs and secret to use with ServicePrincipalCredentials
-        tenant_id = os.environ.get("AZURE_TENANT_ID")
-        client_id = os.environ.get("AZURE_CLIENT_ID")
-        client_secret = os.environ.get("AZURE_CLIENT_SECRET")
-        if not (tenant_id and client_id and client_secret):
-            raise ValueError('You must define AZURE_TENANT_ID, AZURE_CLIENT_ID and '
-                             'AZURE_CLIENT_SECRET environment variables.')
+        tenant_id, client_id, client_secret = get_azure_account_info()
         # Authority
         authority = "https://login.microsoftonline.com/" + tenant_id
         # Retrieve the list of Workspace IDs, separated by comma

@@ -3,6 +3,7 @@
 env
 *.iml
 *clientsecret
+*azure-target
 *clientid
 .DS_Store
 build/turbodif*
