@@ -1,6 +1,7 @@
 SOURCE_DIRS=.
 PACKAGES:=go list ./... | grep -v /vendor
-BIN=vmturbo
+BIN=azureloganalytics
+IMAGE=azure-loganalytics-go
 
 .DEFAULT_GOAL := build
 
@@ -11,7 +12,7 @@ product: clean
 	env GOOS=linux GOARCH=amd64 go build -o $(BIN).linux ./...
 
 docker: product
-	docker build -t turbonomic/vmturbo --build-arg GIT_COMMIT=$(shell git rev-parse --short HEAD) .
+	docker build -t turbonomic/$(IMAGE) --build-arg GIT_COMMIT=$(shell git rev-parse --short HEAD) .
 
 .PHONY: fmtcheck
 fmtcheck:
