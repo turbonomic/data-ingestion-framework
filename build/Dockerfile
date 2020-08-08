@@ -21,7 +21,7 @@ LABEL name="Turbodif Container" \
 ### add licenses to this directory
 COPY licenses /licenses
 
-COPY Dockerfile /Dockerfile
+COPY build/Dockerfile /Dockerfile
 
 ### Setup user for build execution and application runtime
 ENV APP_ROOT=/opt/turbonomic
