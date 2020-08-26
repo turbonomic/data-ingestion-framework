@@ -13,6 +13,12 @@ To do so, navigate to your workspace, click **Advanced Settings**, **Data**. For
 
 Make sure your Azure Active Directory App has required permission to access the Log Analytics API. For more details, refer to [Azure Log Analytics Search API](https://dev.loganalytics.io/documentation/1-Tutorials/Direct-API).
 
+In addition, this guide assumes you already have a `turbodif` probe running in your Turbonomic environment. If you deploy Turbonomic in an appliance, the Target Turbo with Turbo is automatically enabled, and a default `turbodif` probe is already enabled:
+
+![image](https://user-images.githubusercontent.com/10012486/91324907-963b5880-e790-11ea-978a-e48ebecc2752.png)
+
+If your Turbonomic environment does not have a `turbodif` probe running, you must deploy one following the instructions [here](https://github.com/turbonomic/data-ingestion-framework/tree/master/deploy).
+
 ### Collect the following required information
 * The following information is required to authenticate with Azure service, and query the specific workspaces that are connected to your virtual machines:
 
@@ -67,6 +73,9 @@ azure-loganalytics-8557cddbf5-5qc5s              1/1     Running   0          72
 $ kubectl get svc | grep loganalytics
 azure-loganalytics          ClusterIP      10.233.52.141   <none>          8081/TCP       96m
 ```
+If your metric server and `turbodif` are deployed in the same cluster, the metric endpoint can be accessed by `turbodif` at `http://azure-loganalytics:8081/metrics`.
+
+If your metric server and `turbodif` are deployed in different clusters, you **must** make sure that the metric endpoint can be accessed from `turbodif`. One simple way to do so is to expose the `loganalytics` service as a `LoadBalancer`.
 
 ### Add the metric server as a target in Turbonomic UI
 ![image](https://user-images.githubusercontent.com/10012486/89074115-c3d7e200-d349-11ea-9043-08d02cd1a5e7.png)
