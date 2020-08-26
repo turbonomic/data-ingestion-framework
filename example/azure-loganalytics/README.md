@@ -3,7 +3,7 @@ This example shows how to query memory metrics of virtual machines that are conn
 
 ## Getting started
 ### Prerequisites
-To get the memory usage of virtual machines running in Azure, these virtual machines must be connected to the corresponding Azure log analytics workspaces. In addition, you must make sure the following performance counters are enabled for these workspaces:
+To get the memory usage of virtual machines running in Azure, these virtual machines must be connected to the corresponding Azure log analytics workspaces. In addition, you must make sure the following performance counters are enabled for these workspaces. They are **NOT** enabled by default so you need manually add them:
 
 * For Linux machines: **Used Memory MBytes**
 * For Windows machines: **Memory(*)\Committed Bytes** 
