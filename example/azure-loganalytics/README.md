@@ -29,7 +29,7 @@ If your Turbonomic environment does not have a `turbodif` probe running, you mus
 * The IDs of the log analytics workspaces that are connected to the virtual machines for which you want to get the memory metrics. 
 
 ### Deploy the metric server
-It is recommend to deploy the metric server in the same cluster where your `turbodif` probe is running. The [deploy](https://github.com/turbonomic/data-ingestion-framework/tree/master/example/azure-loganalytics/deploy) subddirectory provides a sample yaml to create a deployment and a service:
+The [deploy](https://github.com/turbonomic/data-ingestion-framework/tree/master/example/azure-loganalytics/deploy) subddirectory provides a sample yaml to create a deployment and a service:
 
 #### Create an `azure` kubernetes secret object that contains the azure account information:
 * Create an `azure-target` file with the required azure target account information:
