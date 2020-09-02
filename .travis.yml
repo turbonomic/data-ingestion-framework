@@ -2,7 +2,7 @@ language: go
 
 env:
   global:
-    - DOCKER_IMAGE_NAME=$TRAVIS_REPO_SLUG
+    - DOCKER_IMAGE_NAME=turbodif
 
 services:
   - docker
