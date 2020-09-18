@@ -208,6 +208,7 @@ func (d *DIFDiscoveryClient) buildEntities(repository *data.DIFRepository, scope
 		return entities, err
 	}
 
+	idToEntityMap := make(map[string]*data.BasicDIFEntity)
 	supplyChainNodeMap := supplyChain.GetSupplyChainNodes()
 	// Build entity DTOs using the corresponding supply chain template
 	for difEntityType, eMap := range repository.EntityMap {
@@ -225,7 +226,13 @@ func (d *DIFDiscoveryClient) buildEntities(repository *data.DIFRepository, scope
 				glog.Errorf("Supply chain does not support entity type %v", difEntity)
 				continue
 			}
-
+			if existingEntity, seen := idToEntityMap[difEntityId]; seen {
+				// Entities with the same ID and same type will be merged. Entities with the same ID but different
+				// types will be rejected.
+				glog.Errorf("Duplicated entity ID detected with different entity types. Entity ID: %v," +
+					" Entity types: %v, %v", difEntityId, existingEntity.EntityType, difEntityType)
+				continue
+			}
 			ab := dtofactory.NewGenericEntityBuilder(entityType, difEntity, scope,
 				d.keepStandalone, supplyChainNode)
 			dto, err := ab.BuildEntity()
@@ -233,6 +240,7 @@ func (d *DIFDiscoveryClient) buildEntities(repository *data.DIFRepository, scope
 				glog.Errorf("Error building entity %s::%s %++v", difEntityType, difEntityId, err)
 				continue
 			}
+			idToEntityMap[difEntityId] = difEntity
 			entities = append(entities, dto)
 		}
 	}

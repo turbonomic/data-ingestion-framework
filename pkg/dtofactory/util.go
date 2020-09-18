@@ -1,6 +1,8 @@
 package dtofactory
 
 import (
+	"crypto/sha1"
+	"encoding/hex"
 	"fmt"
 	"github.com/golang/glog"
 	"github.com/turbonomic/data-ingestion-framework/pkg/data"
@@ -22,6 +24,12 @@ func EntityType(difType data.DIFEntityType) *proto.EntityDTO_EntityType {
 func getKey(entityType proto.EntityDTO_EntityType, entityName, scope string) string {
 	eType := proto.EntityDTO_EntityType_name[int32(entityType)]
 	return fmt.Sprintf("%s-%s-%s", eType, entityName, scope)
+}
+
+func getProxyEntityId(entityType proto.EntityDTO_EntityType, entityId, scope string) string {
+	hasher := sha1.New()
+	hasher.Write([]byte(fmt.Sprintf("%s%s%s", entityType, entityId, scope)))
+	return hex.EncodeToString(hasher.Sum(nil))
 }
 
 func getEntityPropertyNameValue(name, value string) *proto.EntityDTO_EntityProperty {
