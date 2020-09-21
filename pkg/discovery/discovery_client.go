@@ -229,7 +229,7 @@ func (d *DIFDiscoveryClient) buildEntities(repository *data.DIFRepository, scope
 			if existingEntity, seen := idToEntityMap[difEntityId]; seen {
 				// Entities with the same ID and same type will be merged. Entities with the same ID but different
 				// types will be rejected.
-				glog.Errorf("Duplicated entity ID detected with different entity types. Entity ID: %v," +
+				glog.Errorf("Duplicated entity ID detected with different entity types. Entity ID: %v,"+
 					" Entity types: %v, %v", difEntityId, existingEntity.EntityType, difEntityType)
 				continue
 			}
