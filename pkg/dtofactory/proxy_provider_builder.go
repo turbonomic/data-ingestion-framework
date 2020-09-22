@@ -32,7 +32,9 @@ func (eb *ProxyProviderEntityBuilder) BuildEntity() (*proto.EntityDTO, error) {
 	var dto *proto.EntityDTO
 
 	glog.Infof("Building proxy provider %s", eb.entityId)
-	entityBuilder := builder.NewEntityDTOBuilder(eb.entityType, eb.entityId).
+	entityBuilder := builder.
+		NewEntityDTOBuilder(eb.entityType,
+			getProxyEntityId(eb.entityType, eb.entityId, eb.scope)).
 		DisplayName(eb.entityId)
 
 	// no matching id

@@ -151,10 +151,13 @@ func (eb *GenericEntityBuilder) externalProviders(supplyChainNode *registration.
 		boughtCommodities := eb.externalBoughtCommodities(*eType, commoditiesMap)
 		// Add the provider and associated bought commodities to the entity builder
 		// Provider entity will be created by the proxy_provider_builder
+		// Create a unique ID for the proxy provider (a hashed value of entity type, id and scope). We do not expect
+		// to stitch the proxy provider with the real provider using the custom stitching operation (which stitch
+		// based on entity IDs).
 		for _, providerId := range providerIds {
 			glog.V(3).Infof("%s --> adding external provider %s::%s", entityID, pType, providerId)
 			entityBuilder.
-				Provider(builder.CreateProvider(*eType, providerId)).
+				Provider(builder.CreateProvider(*eType, getProxyEntityId(*eType, providerId, eb.scope))).
 				BuysCommodities(boughtCommodities)
 		}
 	}

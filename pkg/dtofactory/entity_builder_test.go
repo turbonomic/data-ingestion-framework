@@ -234,6 +234,10 @@ func TestMergingMetadataProperty(t *testing.T) {
 	}
 }
 
+// Test proxy application hosted on proxy VM:
+// - HOST_IP appears in the entity properties
+// - Provider VM's ID is not the same as the application's ID
+// - Commodity key for the bought application is correctly set
 func TestExternalLinkMetadataProperty(t *testing.T) {
 	supplyChainNodeMap, err := createSupplyChainTemplates()
 	if err != nil {
@@ -244,8 +248,8 @@ func TestExternalLinkMetadataProperty(t *testing.T) {
 	ENTITY =
 		"{" +
 			"	\"type\": \"application\"," +
-			"	\"uniqueId\":\"10.233.90.114\"," +
-			"	\"name\":\"10.233.90.114\"," +
+			"	\"uniqueId\":\"10.10.168.193\"," +
+			"	\"name\":\"10.10.168.193\"," +
 			"	\"metrics\" : {" +
 			RESPONSE_TIME +
 			" 		]," +
@@ -297,4 +301,20 @@ func TestExternalLinkMetadataProperty(t *testing.T) {
 			assert.EqualValues(t, dtoProp.GetValue(), hostIP)
 		}
 	}
+	assert.NotEqual(t, dto.GetCommoditiesBought()[0].GetProviderId(), hostIP)
+	assert.EqualValues(t, dto.GetCommoditiesBought()[0].GetProviderId(),
+		getProxyEntityId(dto.GetCommoditiesBought()[0].GetProviderType(), dto.GetId(), scope))
+	for _, boughtComms := range dto.GetCommoditiesBought() {
+		for _, boughtComm := range boughtComms.GetBought() {
+			if boughtComm.GetCommodityType() != proto.CommodityDTO_APPLICATION {
+				continue
+			}
+			boughtCommKeys := NewCommodityKeyBuilder(dto.GetEntityType(), difEntity).
+				SetScope(scope).
+				GetBoughtCommKey(false)
+			assert.EqualValues(t, boughtComm.GetKey(), boughtCommKeys[0])
+			return
+		}
+	}
+	assert.Fail(t, "Failed to find Application Commodity in %+v", dto)
 }
