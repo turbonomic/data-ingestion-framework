@@ -214,7 +214,7 @@ func sendTopology(w http.ResponseWriter, r *http.Request) {
 				}
 				for _, metric := range metrics {
 					// Create service entity
-					service := dif.NewDIFEntity(test.TestName, "service")
+					service := dif.NewDIFEntity(test.TestName, "service").Matching(metric.ServerIP)
 					capacity := float64(defaultCapacity)
 					service.AddMetrics("responseTime", []*dif.DIFMetricVal{{
 						Average:  &metric.AvgLatency,
