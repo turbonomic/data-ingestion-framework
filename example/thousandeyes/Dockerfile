@@ -1,5 +1,5 @@
 FROM registry.access.redhat.com/ubi8-minimal
-MAINTAINER Meng Ding <meng.ding@turbonomic.com>
+MAINTAINER Endre Sara <endre.sara@turbonomic.com>
 ARG GIT_COMMIT
 ENV GIT_COMMIT ${GIT_COMMIT}
 

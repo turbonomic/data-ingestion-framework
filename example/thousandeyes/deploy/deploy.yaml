@@ -23,6 +23,7 @@ spec:
           volumeMounts:
             - name: thousandeyes-secrets
               mountPath: /etc/credentials
+              subPath: credentials
               readOnly: true
             - name: varlog
               mountPath: /var/log
