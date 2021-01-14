@@ -14,6 +14,7 @@ type DIFEntity struct {
 	MatchingIdentifiers *DIFMatchingIdentifiers    `json:"matchIdentifiers"`
 	PartOf              []*DIFPartOf               `json:"partOf"`
 	Metrics             map[string][]*DIFMetricVal `json:"metrics"`
+	namespace           string
 	partOfSet           set.Set
 	hostTypeSet         set.Set
 }
@@ -48,6 +49,15 @@ func NewDIFEntity(uid, eType string) *DIFEntity {
 func (e *DIFEntity) WithName(name string) *DIFEntity {
 	e.Name = name
 	return e
+}
+
+func (e *DIFEntity) WithNamespace(namespace string) *DIFEntity {
+	e.namespace = namespace
+	return e
+}
+
+func (e *DIFEntity) GetNamespace() string {
+	return e.namespace
 }
 
 func (e *DIFEntity) PartOfEntity(entity, id, label string) *DIFEntity {
@@ -105,23 +115,75 @@ func (e *DIFEntity) Matching(id string) *DIFEntity {
 	return e
 }
 
+/**
+ Add a metric with certain type, kind, value and key to the DIF entity.
+ This function makes it easier to add a metric of the same type (e.g., memory) but
+ different kind (e.g., average, or capacity) to a DIF entity, because they can be
+ discovered at different times.
+ The DIFEntity.Metrics is a map where the key is the metric type, and the value is
+ a list of DIFMetricVal. We need a list of DIFMetricVal to hold metrics with the same
+ type but different keys, for example:
+	kpi: [
+		{
+			average: 123,
+			capacity: 1000,
+			key: "total_messages_in_queue"
+		},
+		{
+			average: 104.44444444444444,
+			capacity: 1000,
+			key: "total_waiting_time_in_queue"
+		}
+	],
+*/
 func (e *DIFEntity) AddMetric(metricType string, kind DIFMetricValKind, value float64, key string) {
-	meList, found := e.Metrics[metricType]
-	if !found {
-		meList = append(meList, &DIFMetricVal{})
-		e.Metrics[metricType] = meList
+	var metricVal *DIFMetricVal
+	var metricKey *string
+	// Only set non-empty key
+	if key != "" {
+		metricKey = &key
 	}
-	if len(meList) < 1 {
-		return
+	meList, found := e.Metrics[metricType]
+	if !found || len(meList) < 1 {
+		// This is a new metric type, or the metric list for this type is empty
+		metricVal = &DIFMetricVal{Key: metricKey}
+		e.Metrics[metricType] = []*DIFMetricVal{metricVal}
+	} else {
+		// The metric type already exists with non-empty metric list
+		for _, me := range meList {
+			if sameKey(me.Key, metricKey) {
+				// We found a metric with the same key (including nil key).
+				// The existing metricVal.Average or metricVal.Capacity
+				// will be overwritten.
+				metricVal = me
+				break
+			}
+		}
+		if metricVal == nil {
+			// This is a metric of the same type, but a new key.
+			// Create a new metricVal and append it to the metric list.
+			metricVal = &DIFMetricVal{Key: metricKey}
+			e.Metrics[metricType] = append(e.Metrics[metricType], metricVal)
+		}
 	}
 	if kind == AVERAGE {
-		meList[0].Average = &value
+		metricVal.Average = &value
 	} else if kind == CAPACITY {
-		meList[0].Capacity = &value
+		metricVal.Capacity = &value
 	}
-	if key != "" {
-		meList[0].Key = &key
+}
+
+func sameKey(key1 *string, key2 *string) bool {
+	if key1 == key2 {
+		return true
 	}
+	if key1 == nil || key2 == nil {
+		return false
+	}
+	if *key1 == *key2 {
+		return true
+	}
+	return false
 }
 
 func (e *DIFEntity) AddMetrics(metricType string, metricVals []*DIFMetricVal) {

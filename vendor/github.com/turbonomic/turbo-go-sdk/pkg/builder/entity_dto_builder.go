@@ -2,6 +2,7 @@ package builder
 
 import (
 	"fmt"
+
 	"github.com/turbonomic/turbo-go-sdk/pkg/proto"
 )
 
@@ -102,6 +103,7 @@ type EntityDTOBuilder struct {
 	containerPodData       *proto.EntityDTO_ContainerPodData
 	containerData          *proto.EntityDTO_ContainerData
 	workloadControllerData *proto.EntityDTO_WorkloadControllerData
+	namespaceData          *proto.EntityDTO_NamespaceData
 
 	virtualMachineRelatedData    *proto.EntityDTO_VirtualMachineRelatedData
 	physicalMachineRelatedData   *proto.EntityDTO_PhysicalMachineRelatedData
@@ -172,6 +174,8 @@ func (eb *EntityDTOBuilder) Create() (*proto.EntityDTO, error) {
 		entityDTO.EntityData = &proto.EntityDTO_ContainerData_{eb.containerData}
 	} else if eb.workloadControllerData != nil {
 		entityDTO.EntityData = &proto.EntityDTO_WorkloadControllerData_{eb.workloadControllerData}
+	} else if eb.namespaceData != nil {
+		entityDTO.EntityData = &proto.EntityDTO_NamespaceData_{eb.namespaceData}
 	}
 
 	if eb.virtualMachineRelatedData != nil {
@@ -505,6 +509,19 @@ func (eb *EntityDTOBuilder) WorkloadControllerData(workloadControllerData *proto
 		return eb
 	}
 	eb.workloadControllerData = workloadControllerData
+	eb.entityDataHasSet = true
+	return eb
+}
+
+func (eb *EntityDTOBuilder) NamespaceData(namespaceData *proto.EntityDTO_NamespaceData) *EntityDTOBuilder {
+	if eb.err != nil {
+		return eb
+	}
+	if eb.entityDataHasSet {
+		eb.err = fmt.Errorf("EntityData has already been set. Cannot use %v as entity data.", namespaceData)
+		return eb
+	}
+	eb.namespaceData = namespaceData
 	eb.entityDataHasSet = true
 	return eb
 }
