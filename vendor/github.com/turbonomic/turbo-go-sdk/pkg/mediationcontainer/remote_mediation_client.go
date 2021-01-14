@@ -121,7 +121,7 @@ func (remoteMediationClient *remoteMediationClient) Init(probeRegisteredMsgCh ch
 				// handle WebSocket creation errors
 				if err != nil { //transport.ws == nil {
 					glog.Errorf("[Reconnect] Initialization of remote mediation client failed: %v", err)
-					remoteMediationClient.Stop()
+					close(disconnectFromTurbo)
 					break
 				}
 				// sdk registration protocol
@@ -130,7 +130,7 @@ func (remoteMediationClient *remoteMediationClient) Init(probeRegisteredMsgCh ch
 				endProtocol := <-transportReady
 				if !endProtocol {
 					glog.Errorf("[Reconnect] Registration with server failed")
-					remoteMediationClient.Stop()
+					close(disconnectFromTurbo)
 					break
 				}
 				// start listener for server messages
@@ -155,7 +155,6 @@ func (remoteMediationClient *remoteMediationClient) Init(probeRegisteredMsgCh ch
 	select {
 	case <-remoteMediationClient.stopMediationClientCh:
 		glog.V(4).Infof("[Init] Exit routine *************")
-		close(disconnectFromTurbo)
 		return
 	}
 }

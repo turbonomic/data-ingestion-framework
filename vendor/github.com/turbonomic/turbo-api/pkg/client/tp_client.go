@@ -43,6 +43,9 @@ func (c *TPClient) AddTarget(target *api.Target) error {
 		return c.updateTarget(existingTarget, target)
 	}
 
+	glog.V(2).Infof("Getting probe ID for probe with category %v and type %v.",
+		target.Category, target.Type)
+
 	probeID, err := c.getProbeID(target.Type, target.Category)
 	if err != nil {
 		return fmt.Errorf("failed to get probe ID: %v", err)
@@ -144,11 +147,10 @@ func (c *TPClient) getProbeID(probeType, probeCategory string) (int64, error) {
 		Header("Accept", "application/json")
 	// Get the Probe ID based on probe type and probe category
 	// Retry 5 times with 1 second delay
-	var response Result
-	var err error
+	var probeID int64
 	errs := retry.Do(
 		func() error {
-			response, err = request.Do()
+			response, err := request.Do()
 			if err != nil {
 				return fmt.Errorf("failed to execute get probe request %+v: %v",
 					request, err)
@@ -156,7 +158,25 @@ func (c *TPClient) getProbeID(probeType, probeCategory string) (int64, error) {
 			if response.statusCode != 200 {
 				return buildResponseError("get probe", response.status, response.body)
 			}
-			return nil
+			glog.V(4).Infof("Received response from get probe request %+v: %+v", request, response)
+			// Parse the response - list of probes
+			var probesMap map[string][]api.ProbeDescription
+			if err = json.Unmarshal([]byte(response.body), &probesMap); err != nil {
+				return fmt.Errorf("failed to unmarshal get probe response: %v", err)
+			}
+			probes, found := probesMap["probes"]
+			if !found {
+				return fmt.Errorf("failed to find key \"probes\" from response")
+			}
+			for _, probe := range probes {
+				if probe.Category == probeCategory &&
+					probe.Type == probeType {
+					probeID = probe.ID
+					return nil
+				}
+			}
+			return fmt.Errorf("failed to find probe with category %v and type %v",
+				probeCategory, probeType)
 		},
 		retry.Attempts(uint(retryAttempts)),
 		retry.OnRetry(func(n uint, err error) {
@@ -169,28 +189,13 @@ func (c *TPClient) getProbeID(probeType, probeCategory string) (int64, error) {
 	if errs != nil {
 		return 0, errs
 	}
-	glog.V(4).Infof("Received response from get probe request %+v: %+v", request, response)
-	// Parse the response - list of probes
-	var probesMap map[string][]api.ProbeDescription
-	if err := json.Unmarshal([]byte(response.body), &probesMap); err != nil {
-		return 0, fmt.Errorf("failed to unmarshal get probe response: %v", err)
-	}
-	probes, found := probesMap["probes"]
-	if !found {
-		return 0, fmt.Errorf("failed to find key \"probes\" from response")
-	}
-	for _, probe := range probes {
-		if probe.Category == probeCategory &&
-			probe.Type == probeType {
-			return probe.ID, nil
-		}
-	}
-	return 0, fmt.Errorf("failed to find probe with category %v and type %v",
-		probeCategory, probeType)
+	return probeID, nil
 }
 
 func (c *TPClient) updateTarget(existingTarget *api.TargetInfo, input *api.Target) error {
-	inputFieldsData, err := json.Marshal(input.InputFields)
+	// existingTarget.TargetSpec is guaranteed to be non nil
+	existingTarget.TargetSpec.InputFields = input.InputFields
+	targetData, err := json.Marshal(existingTarget.TargetSpec)
 	if err != nil {
 		return fmt.Errorf("failed to marshall input fields array: %v", err)
 	}
@@ -198,10 +203,10 @@ func (c *TPClient) updateTarget(existingTarget *api.TargetInfo, input *api.Targe
 	request := c.Put().Resource(api.Resource_Type_Target).Name(strconv.FormatInt(existingTarget.TargetID, 10)).
 		Header("Content-Type", "application/json").
 		Header("Accept", "application/json").
-		Data(inputFieldsData)
+		Data(targetData)
 
 	glog.V(4).Infof("[UpdateTarget] %v", request)
-	glog.V(4).Infof("[UpdateTarget] Data: %s", inputFieldsData)
+	glog.V(4).Infof("[UpdateTarget] Data: %s", targetData)
 
 	// Execute the request
 	response, err := request.Do()

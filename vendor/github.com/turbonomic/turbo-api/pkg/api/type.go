@@ -43,6 +43,8 @@ type TargetSpec struct {
 	DerivedTargetIDs []string `json:"derivedTargetIds"`
 	// Account values to use to add the target
 	InputFields []*InputField `json:"inputFields,omitempty"`
+	// The communication channel of a target
+	CommunicationBindingChannel string `json:"communicationBindingChannel,omitempty"`
 }
 
 // ProbeDescription defines the protocols of the GET /probe topology-processor service
