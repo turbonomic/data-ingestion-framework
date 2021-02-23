@@ -143,25 +143,6 @@ supplyChainNode:
           - commodityType: KPI
             key: key-placeholder
             optional: true
-    mergedEntityMetaData:
-      keepStandalone: false
-      matchingMetadata:
-        matchingData:
-          - matchingProperty:
-              propertyName: IP
-        externalEntityMatchingProperty:
-          - matchingProperty:
-              propertyName: IP
-            delimiter: ","
-      commoditiesSold:
-        - RESPONSE_TIME
-        - TRANSACTION
-        - KPI
-      commoditiesBought:
-        - providerType: APPLICATION_COMPONENT
-          commodityMetadata:
-            - RESPONSE_TIME
-            - TRANSACTION
   - templateClass: APPLICATION_COMPONENT
     templateType: BASE
     templatePriority: -1
