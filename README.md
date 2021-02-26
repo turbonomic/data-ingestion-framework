@@ -26,7 +26,12 @@ For detailed documentation on the JSON schema, see [here](https://docs.turbonomi
       "matchIdentifiers": {
         "ipAddress": "172.23.0.5"
       },
-      "partOf": null,
+      "partOf": [
+        {
+          "uniqueId": "DatabaseServer-10.10.169.38-turbonomic",
+          "entity": "databaseServer"
+        }
+      ],
       "metrics": {
         "memory": [
           {

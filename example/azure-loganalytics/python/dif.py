@@ -34,12 +34,18 @@ class Topology:
 
 
 class DIFEntity:
-    def __init__(self, uid, entity_type):
+    def __init__(self, uid, entity_type, name=None):
         self.uniqueId = uid
         self.type = entity_type
-        self.name = uid
         self.matchIdentifiers = None
+        self.hostedOn = None
+        self.partOf = None
         self.metrics = {}
+
+        if name:
+            self.name = name
+        else:
+            self.name = uid
 
     def AddMetric(self, metric_type, metric_kind, value, key=None):
         if metric_type not in self.metrics:
@@ -62,6 +68,17 @@ class DIFEntity:
         if not self.matchIdentifiers:
             self.matchIdentifiers = DIFMatchingIdentifiers(matching_id)
         return self
+
+    def HostedOn(self, ip_address, host_type='virtualMachine'):
+        if not self.hostedOn:
+            self.hostedOn = {'hostType': [host_type], 'ipAddress': ip_address}
+        return self
+
+    def PartOf(self, uid, entity):
+        if not self.partOf:
+            self.partOf = [{'uniqueId': uid, 'entity': entity}]
+        return self
+
 
 
 class DIFMatchingIdentifiers:
