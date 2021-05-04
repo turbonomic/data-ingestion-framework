@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: csv-to-dif-config
+  namespace: turbointegrations
+  labels:
+    environment: nonprod
+    team: integration
+    app: csv-to-dif-app
+    version: 1.0.0
+data:
+  config.json: |
+    {
+      "CSV_LOCATION": "FTP",
+      "INPUT_CSV_NAME": "input_dif.csv",
+      "APP_PREFIX": "DIF_",
+      "ENTITY_FIELD_MAP": {
+        "app_name": "businessApp",
+        "entity_name": "entity_name",
+        "entity_type": "entity_type",
+        "entity_ip": "ip_address",
+        "parent_name": "parent_name",
+        "parent_type": "parent_type"
+      },
+      "METRIC_FIELD_MAP": {
+        "memory_average": "memory_used",
+        "memory_capacity": "memory_capacity",
+        "cpu_average": "cpu_used",
+        "cpu_capacity": "cpu_capacity",
+        "cacheHitRate_average": "",
+        "cacheHitRate_capacity": "",
+      },
+      "LOG_DIR": "",
+      "LOG_FILE": "",
+      "LOG_LEVEL": "INFO"
+    }
