@@ -6,7 +6,7 @@ import (
 	"github.com/turbonomic/turbo-go-sdk/pkg"
 )
 
-// The configuration for Probe
+// ProbeConfig hosts the configuration for Probe
 // probeCategory - information about probe category, used for categorizing the probe in UI
 // probeType - information about probe type
 // discoveryMetadata - information about the discovery intervals for the probe
@@ -15,9 +15,11 @@ type ProbeConfig struct {
 	ProbeCategory     string
 	ProbeUICategory   string
 	discoveryMetadata *DiscoveryMetadata
+	Version           string
+	DisplayName       string
 }
 
-// Create new instance of ProbeConfig.
+// NewProbeConfig creates a new instance of ProbeConfig.
 // Sets default discovery intervals for the full, incremental and performance discoveries.
 // Returns error if the probe type and category fields cannot be validated.
 //
@@ -42,6 +44,18 @@ func NewProbeConfig(probeType, probeCategory, probeUICategory string) (*ProbeCon
 	}
 
 	return probeConf, nil
+}
+
+// WithVersion sets the given probe version in the probe config.
+func (probeConfig *ProbeConfig) WithVersion(version string) *ProbeConfig {
+	probeConfig.Version = version
+	return probeConfig
+}
+
+// WithDisplayName sets a display name for the probe in the probe config.
+func (probeConfig *ProbeConfig) WithDisplayName(displayName string) *ProbeConfig {
+	probeConfig.DisplayName = displayName
+	return probeConfig
 }
 
 // Validate the probe config instance

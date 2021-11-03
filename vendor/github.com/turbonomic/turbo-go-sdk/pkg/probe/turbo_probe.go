@@ -224,7 +224,7 @@ func (theProbe *TurboProbe) GetProbeTargets() []*TurboTargetInfo {
 	return targets
 }
 
-// The ProbeInfo for the probe
+// GetProbeInfo produces a ProbeInfo to be used to register the probe.
 func (theProbe *TurboProbe) GetProbeInfo() (*proto.ProbeInfo, error) {
 	// 1. construct the basic probe info.
 	probeConf := theProbe.ProbeConfiguration
@@ -232,7 +232,8 @@ func (theProbe *TurboProbe) GetProbeInfo() (*proto.ProbeInfo, error) {
 	probeType := probeConf.ProbeType
 	probeUICat := probeConf.ProbeUICategory
 
-	probeInfoBuilder := builder.NewBasicProbeInfoBuilder(probeType, probeCat, probeUICat)
+	probeInfoBuilder := builder.NewBasicProbeInfoBuilder(probeType, probeCat, probeUICat).
+		WithVersion(probeConf.Version).WithDisplayName(probeConf.DisplayName)
 
 	// 2. discovery intervals metadata
 	probeInfoBuilder.WithFullDiscoveryInterval(probeConf.discoveryMetadata.GetFullRediscoveryIntervalSeconds())

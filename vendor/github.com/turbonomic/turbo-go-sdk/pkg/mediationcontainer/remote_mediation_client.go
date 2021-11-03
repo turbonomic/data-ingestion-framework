@@ -70,7 +70,7 @@ func (remoteMediationClient *remoteMediationClient) Init(probeRegisteredMsgCh ch
 
 	// Sdk Protocol handler
 	sdkProtocolHandler := CreateSdkClientProtocolHandler(remoteMediationClient.allProbes,
-		remoteMediationClient.containerConfig.Version)
+		remoteMediationClient.containerConfig.Version, remoteMediationClient.containerConfig.CommunicationBindingChannel)
 	// ------ Websocket transport
 
 	transport := CreateClientWebSocketTransport(connConfig) //, transportClosedNotificationCh)
