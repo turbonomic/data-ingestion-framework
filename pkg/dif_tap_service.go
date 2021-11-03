@@ -152,9 +152,8 @@ func getProbeDisplayName(probeType string) string {
 // handleExit disconnects the tap service from Turbo service when DIF probe is terminated
 func handleExit(disconnectFunc disconnectFromTurboFunc) {
 	glog.V(4).Infof("*** Handling TurboDIF Termination ***")
-	sigChan := make(chan os.Signal)
+	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan,
-		os.Interrupt,
 		syscall.SIGTERM,
 		syscall.SIGINT,
 		syscall.SIGQUIT,
