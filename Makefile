@@ -1,24 +1,38 @@
 OUTPUT_DIR=./build
 SOURCE_DIRS = cmd pkg
 PACKAGES := go list ./... | grep -v /vendor | grep -v /out
+SHELL='/bin/bash'
+REMOTE=github.com
+USER=turbonomic
+PROJECT=data-ingestion-framework
+BINARY=turbodif
+DEFAULT_VERSION=latest
 
-.DEFAULT_GOAL := build
+.DEFAULT_GOAL:=build
 
-bin=turbodif
+GIT_COMMIT=$(shell git rev-parse HEAD)
+BUILD_TIME=$(shell date -R)
+PROJECT_PATH=$(REMOTE)/$(USER)/$(PROJECT)
+VERSION=$(or $(TURBODIF_VERSION), $(DEFAULT_VERSION))
+LDFLAGS='\
+ -X "$(PROJECT_PATH)/version.GitCommit=$(GIT_COMMIT)" \
+ -X "$(PROJECT_PATH)/version.BuildTime=$(BUILD_TIME)" \
+ -X "$(PROJECT_PATH)/version.Version=$(VERSION)"'
+
 product: clean
-	env GOOS=linux GOARCH=amd64 go build -o ${OUTPUT_DIR}/${bin}.linux ./cmd
+	env GOOS=linux GOARCH=amd64 go build -ldflags $(LDFLAGS) -o $(OUTPUT_DIR)/$(BINARY).linux ./cmd
 
 debug-product: clean
-	env GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -gcflags "-N -l" -o ${OUTPUT_DIR}/${bin}_debug.linux ./cmd
+	env GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -ldflags $(LDFLAGS) -gcflags "-N -l" -o $(OUTPUT_DIR)/$(BINARY)_debug.linux ./cmd
 
 build: clean
-	go build -o ${OUTPUT_DIR}/${bin} ./cmd
+	go build -ldflags $(LDFLAGS) -o $(OUTPUT_DIR)/$(BINARY) ./cmd
 
 debug: clean
-	go build -gcflags "-N -l" -o ${OUTPUT_DIR}/${bin}.debug ./cmd
+	go build -ldflags $(LDFLAGS) -gcflags "-N -l" -o $(OUTPUT_DIR)/$(BINARY).debug ./cmd
 
 docker: product
-	docker build -f build/Dockerfile -t turbonomic/turbodif --build-arg GIT_COMMIT=$(shell git rev-parse --short HEAD) .
+	docker build -f build/Dockerfile -t turbonomic/turbodif .
 
 test: clean
 	@go test -v -race ./pkg/...
@@ -32,4 +46,4 @@ vet:
 	@go vet $(shell $(PACKAGES))
 
 clean:
-	@rm -rf ${OUTPUT_DIR}/${bin}*
+	@rm -rf $(OUTPUT_DIR)/$(BINARY)*

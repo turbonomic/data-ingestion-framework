@@ -6,13 +6,8 @@ import (
 	"github.com/golang/glog"
 	"github.com/turbonomic/data-ingestion-framework/pkg"
 	"github.com/turbonomic/data-ingestion-framework/pkg/conf"
-
-	"os"
+	"github.com/turbonomic/data-ingestion-framework/version"
 )
-
-func parseFlags() {
-	flag.Parse()
-}
 
 func main() {
 
@@ -33,11 +28,10 @@ func main() {
 		SpewKeys:              false,
 	}
 
-	// Parse command line flags
-	//parseFlags()
+	flag.Parse()
 
-	glog.Info("Starting DIF Turbo...")
-	glog.Infof("GIT_COMMIT: %s", os.Getenv("GIT_COMMIT"))
+	glog.Infof("Running turbodif VERSION: %s, GIT_COMMIT: %s, BUILD_TIME: %s",
+		version.Version, version.GitCommit, version.BuildTime)
 
 	args := conf.NewDIFProbeArgs(flag.CommandLine)
 	flag.Parse()
@@ -45,7 +39,7 @@ func main() {
 	s, err := pkg.NewDIFTAPService(args)
 
 	if err != nil {
-		glog.Fatalf("Failed creating DIFTurbo: %v", err)
+		glog.Fatalf("Failed to run turbodif: %v", err)
 	}
 
 	s.Start()

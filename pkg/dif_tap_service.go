@@ -4,6 +4,8 @@ import (
 	"github.com/turbonomic/data-ingestion-framework/pkg/conf"
 	"github.com/turbonomic/data-ingestion-framework/pkg/discovery"
 	"github.com/turbonomic/data-ingestion-framework/pkg/registration"
+	"github.com/turbonomic/data-ingestion-framework/version"
+	"strings"
 
 	"os"
 	"os/signal"
@@ -115,8 +117,13 @@ func createTAPService(args *conf.DIFProbeArgs) (*service.TAPService, error) {
 
 	discoveryClient := discovery.NewDiscoveryClient(discoveryTargetParams, *keepStandalone, supplyChainConfig)
 
+	probeVersion := version.Version
+	probeDisplayName := getProbeDisplayName(targetType)
+
 	// Turbo probe
 	builder := probe.NewProbeBuilder(targetType, probeCategory, probeUICategory).
+		WithVersion(probeVersion).
+		WithDisplayName(probeDisplayName).
 		WithDiscoveryOptions(probe.FullRediscoveryIntervalSecondsOption(int32(*args.DiscoveryIntervalSec))).
 		WithEntityMetadata(registrationClient).
 		RegisteredBy(registrationClient)
@@ -135,6 +142,11 @@ func createTAPService(args *conf.DIFProbeArgs) (*service.TAPService, error) {
 		WithTurboCommunicator(communicator).
 		WithTurboProbe(builder).
 		Create()
+}
+
+// getProbeDisplayName constructs a display name for the probe based on the input probe type
+func getProbeDisplayName(probeType string) string {
+	return strings.Join([]string{probeType, "Probe"}, " ")
 }
 
 // handleExit disconnects the tap service from Turbo service when DIF probe is terminated
