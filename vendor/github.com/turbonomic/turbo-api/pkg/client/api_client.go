@@ -6,6 +6,7 @@ import (
 	"github.com/golang/glog"
 	"github.com/turbonomic/turbo-api/pkg/api"
 	"net/http"
+	"strings"
 )
 
 // APIClient connects to api service through ingress
@@ -45,7 +46,16 @@ func (c *APIClient) AddTarget(target *api.Target) error {
 	// Update the target if it already exists
 	if existingTarget != nil {
 		glog.V(2).Infof("Target %v already exists.", getTargetId(target))
-		return c.updateTarget(existingTarget, target)
+		if target.Type == existingTarget.Type {
+			return c.updateTarget(existingTarget, target)
+		}
+		glog.V(2).Infof("Delete and re-add the target since the probe type has changed "+
+			"(old probe type: %v, new probe type: %v, old target: %v, new target: %v)",
+			existingTarget.Type, target.Type, existingTarget, target)
+		if err := c.deleteTarget(existingTarget); err != nil {
+			return fmt.Errorf("failed to delete target %v of type %v which is necessary due to probe type changed"+
+				" to %v; error: %v", existingTarget.DisplayName, existingTarget.Type, target.Type, err)
+		}
 	}
 	// Construct the Target required by the rest api
 	targetData, err := json.Marshal(target)
@@ -147,13 +157,14 @@ func (c *APIClient) findTarget(target *api.Target) (*api.Target, error) {
 
 	// Iterate over the list of targets to look for the given target
 	// by comparing the category, target type and identifier fields
+	// target type is regarded the same if the old one only differs by an extra suffix
 	for _, tgt := range targetList {
 		// array of InputFields
 		for _, inputField := range tgt.InputFields {
 			if inputField.Name == "targetIdentifier" &&
 				inputField.Value == targetId &&
 				tgt.Category == target.Category &&
-				tgt.Type == target.Type {
+				strings.HasPrefix(tgt.Type, target.Type) {
 				return &tgt, nil
 			}
 		}
@@ -193,5 +204,31 @@ func (c *APIClient) updateTarget(existing, input *api.Target) error {
 	}
 
 	glog.V(2).Infof("Successfully updated target via API service.")
+	return nil
+}
+
+// deleteTarget deletes an existing target
+func (c *APIClient) deleteTarget(existing *api.Target) error {
+	// Create the rest api request
+	request := c.Delete().Resource(api.Resource_Type_Targets).Name(existing.UUID).
+		Header("Content-Type", "application/json").
+		Header("Accept", "application/json").
+		Header("Cookie", fmt.Sprintf("%s=%s", c.SessionCookie.Name, c.SessionCookie.Value))
+
+	glog.V(4).Infof("[DeleteTarget] %v.", request)
+
+	// Execute the request
+	response, err := request.Do()
+	if err != nil {
+		return fmt.Errorf("request %v failed: %s", request, err)
+	}
+	glog.V(4).Infof("Response %+v.", response)
+
+	if response.statusCode != 200 {
+		return buildResponseError("target delete", response.status, response.body)
+	}
+
+	glog.V(2).Infof("Successfully deleted target %v of type %v via API service.",
+		existing.DisplayName, existing.Type)
 	return nil
 }

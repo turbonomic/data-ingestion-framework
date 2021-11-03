@@ -104,6 +104,7 @@ type EntityDTOBuilder struct {
 	containerData          *proto.EntityDTO_ContainerData
 	workloadControllerData *proto.EntityDTO_WorkloadControllerData
 	namespaceData          *proto.EntityDTO_NamespaceData
+	clusterData            *proto.EntityDTO_ContainerPlatformClusterData
 
 	virtualMachineRelatedData    *proto.EntityDTO_VirtualMachineRelatedData
 	physicalMachineRelatedData   *proto.EntityDTO_PhysicalMachineRelatedData
@@ -176,6 +177,8 @@ func (eb *EntityDTOBuilder) Create() (*proto.EntityDTO, error) {
 		entityDTO.EntityData = &proto.EntityDTO_WorkloadControllerData_{eb.workloadControllerData}
 	} else if eb.namespaceData != nil {
 		entityDTO.EntityData = &proto.EntityDTO_NamespaceData_{eb.namespaceData}
+	} else if eb.clusterData != nil {
+		entityDTO.EntityData = &proto.EntityDTO_ContainerPlatformClusterData_{eb.clusterData}
 	}
 
 	if eb.virtualMachineRelatedData != nil {
@@ -354,6 +357,14 @@ func (eb *EntityDTOBuilder) ConsumerPolicy(cp *proto.EntityDTO_ConsumerPolicy) *
 	return eb
 }
 
+func (eb *EntityDTOBuilder) ProviderPolicy(providerPolicy *proto.EntityDTO_ProviderPolicy) *EntityDTOBuilder {
+	if eb.err != nil {
+		return eb
+	}
+	eb.providerPolicy = providerPolicy
+	return eb
+}
+
 func (eb *EntityDTOBuilder) LayeredOver(layeredOver []string) *EntityDTOBuilder {
 	if eb.err != nil {
 		return eb
@@ -522,6 +533,19 @@ func (eb *EntityDTOBuilder) NamespaceData(namespaceData *proto.EntityDTO_Namespa
 		return eb
 	}
 	eb.namespaceData = namespaceData
+	eb.entityDataHasSet = true
+	return eb
+}
+
+func (eb *EntityDTOBuilder) ClusterData(clusterData *proto.EntityDTO_ContainerPlatformClusterData) *EntityDTOBuilder {
+	if eb.err != nil {
+		return eb
+	}
+	if eb.entityDataHasSet {
+		eb.err = fmt.Errorf("EntityData has already been set. Cannot use %v as entity data.", clusterData)
+		return eb
+	}
+	eb.clusterData = clusterData
 	eb.entityDataHasSet = true
 	return eb
 }

@@ -70,6 +70,7 @@ func (wsc *WebSocketConfig) ValidateWebSocketConfig() error {
 type MediationContainerConfig struct {
 	ServerMeta
 	WebSocketConfig
+	CommunicationBindingChannel string
 }
 
 // Validate the mediation container config and set default value if necessary.

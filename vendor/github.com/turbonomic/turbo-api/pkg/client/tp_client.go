@@ -30,6 +30,14 @@ func (c *TPClient) DiscoverTarget(uuid string) (*Result, error) {
 
 // AddTarget adds a target via topology processor service
 func (c *TPClient) AddTarget(target *api.Target) error {
+	glog.V(2).Infof("Getting probe ID for probe with category %v and type %v.",
+		target.Category, target.Type)
+
+	probeID, err := c.getProbeID(target.Type, target.Category)
+	if err != nil {
+		return fmt.Errorf("failed to get probe ID: %v", err)
+	}
+
 	// Check if the given target already exists
 	targetName := getTargetId(target)
 	existingTarget, err := c.findTarget(targetName)
@@ -40,15 +48,17 @@ func (c *TPClient) AddTarget(target *api.Target) error {
 	if existingTarget != nil {
 		glog.V(2).Infof("Target %v already exists with ID %v.",
 			targetName, existingTarget)
-		return c.updateTarget(existingTarget, target)
-	}
-
-	glog.V(2).Infof("Getting probe ID for probe with category %v and type %v.",
-		target.Category, target.Type)
-
-	probeID, err := c.getProbeID(target.Type, target.Category)
-	if err != nil {
-		return fmt.Errorf("failed to get probe ID: %v", err)
+		if probeID == existingTarget.TargetSpec.ProbeID {
+			return c.updateTarget(existingTarget, target)
+		}
+		glog.V(2).Infof("Delete and re-add the target to update the probe id "+
+			"(old probe id: %v, new probe id: %v, old target: %v, new target: %v of type %v)",
+			existingTarget.TargetSpec.ProbeID, probeID, existingTarget, target.DisplayName, target.Type)
+		if err := c.deleteTarget(existingTarget); err != nil {
+			return fmt.Errorf("failed to delete target %v of probe id %v which is necessary "+
+				"due to probe type changed to %v (new id %v); error: %v",
+				existingTarget.DisplayName, existingTarget.TargetSpec.ProbeID, target.Type, probeID, err)
+		}
 	}
 
 	// Add the target which belongs to the probe with the given probeID
@@ -56,10 +66,12 @@ func (c *TPClient) AddTarget(target *api.Target) error {
 		targetName, target.Type, probeID)
 
 	// Construct the TargetSpec required by the rest api
+	inputFields, communicationBindingChannel := c.extractCommunicationBindingChannel(target.InputFields)
 	targetSpec := &api.TargetSpec{
-		ProbeID:          probeID,
-		DerivedTargetIDs: []string{},
-		InputFields:      target.InputFields,
+		ProbeID:                     probeID,
+		DerivedTargetIDs:            []string{},
+		InputFields:                 inputFields,
+		CommunicationBindingChannel: communicationBindingChannel,
 	}
 
 	// Create the rest api request
@@ -93,6 +105,22 @@ func (c *TPClient) AddTarget(target *api.Target) error {
 		targetInfo.TargetID)
 
 	return nil
+}
+
+// extractCommunicationBindingChannel iterates the list of input fields and extracts out the communication binding
+// channel into a separate attribute to return; this also returns a list of input fields with the communication binding
+// channel removed
+func (c *TPClient) extractCommunicationBindingChannel(inputFields []*api.InputField) ([]*api.InputField, string) {
+	var communicationBindingChannel string
+	var extractedInputFields []*api.InputField
+	for _, inputField := range inputFields {
+		if inputField.Name == api.CommunicationBindingChannel {
+			communicationBindingChannel = inputField.Value
+		} else {
+			extractedInputFields = append(extractedInputFields, inputField)
+		}
+	}
+	return extractedInputFields, communicationBindingChannel
 }
 
 func (c *TPClient) findTarget(targetName string) (*api.TargetInfo, error) {
@@ -194,7 +222,9 @@ func (c *TPClient) getProbeID(probeType, probeCategory string) (int64, error) {
 
 func (c *TPClient) updateTarget(existingTarget *api.TargetInfo, input *api.Target) error {
 	// existingTarget.TargetSpec is guaranteed to be non nil
-	existingTarget.TargetSpec.InputFields = input.InputFields
+	inputFields, communicationBindingChannel := c.extractCommunicationBindingChannel(input.InputFields)
+	existingTarget.TargetSpec.InputFields = inputFields
+	existingTarget.TargetSpec.CommunicationBindingChannel = communicationBindingChannel
 	targetData, err := json.Marshal(existingTarget.TargetSpec)
 	if err != nil {
 		return fmt.Errorf("failed to marshall input fields array: %v", err)
@@ -219,5 +249,29 @@ func (c *TPClient) updateTarget(existingTarget *api.TargetInfo, input *api.Targe
 		return buildResponseError("target update", response.status, response.body)
 	}
 	glog.V(2).Infof("Successfully updated target via Topology Processor service: %v.", existingTarget.TargetID)
+	return nil
+}
+
+// deleteTarget deletes an existing target
+func (c *TPClient) deleteTarget(existingTarget *api.TargetInfo) error {
+	// Create the rest api request
+	request := c.Delete().Resource(api.Resource_Type_Target).Name(strconv.FormatInt(existingTarget.TargetID, 10)).
+		Header("Content-Type", "application/json").
+		Header("Accept", "application/json")
+
+	glog.V(4).Infof("[DeleteTarget] %v", request)
+
+	// Execute the request
+	response, err := request.Do()
+	if err != nil {
+		return fmt.Errorf("request %v failed: %s", request, err)
+	}
+	glog.V(4).Infof("Response %+v", response)
+
+	if response.statusCode != 200 {
+		return buildResponseError("target delete", response.status, response.body)
+	}
+	glog.V(2).Infof("Successfully deleted target %v of probe id %v via Topology Processor service.",
+		existingTarget.DisplayName, existingTarget.TargetSpec.ProbeID)
 	return nil
 }

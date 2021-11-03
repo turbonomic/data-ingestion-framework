@@ -16,15 +16,17 @@ const (
 )
 
 type SdkClientProtocol struct {
-	allProbes map[string]*ProbeProperties
-	version   string
+	allProbes                   map[string]*ProbeProperties
+	version                     string
+	communicationBindingChannel string
 	//TransportReady chan bool
 }
 
-func CreateSdkClientProtocolHandler(allProbes map[string]*ProbeProperties, version string) *SdkClientProtocol {
+func CreateSdkClientProtocolHandler(allProbes map[string]*ProbeProperties, version, communicationBindingChannel string) *SdkClientProtocol {
 	return &SdkClientProtocol{
-		allProbes: allProbes,
-		version:   version,
+		allProbes:                   allProbes,
+		version:                     version,
+		communicationBindingChannel: communicationBindingChannel,
 		//TransportReady: done,
 	}
 }
@@ -174,6 +176,7 @@ func (clientProtocol *SdkClientProtocol) MakeContainerInfo() (*proto.ContainerIn
 	}
 
 	return &proto.ContainerInfo{
-		Probes: probes,
+		Probes:                      probes,
+		CommunicationBindingChannel: &clientProtocol.communicationBindingChannel,
 	}, nil
 }

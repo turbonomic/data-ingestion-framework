@@ -1,5 +1,8 @@
 package api
 
+// CommunicationBindingChannel is an InputField name indicating the field value is the communication binding channel
+const CommunicationBindingChannel = "communicationBindingChannel"
+
 type Target struct {
 	// Category of a probe, i.e. Hypervisor, Storage and so on.
 	Category    string `json:"category,omitempty"`

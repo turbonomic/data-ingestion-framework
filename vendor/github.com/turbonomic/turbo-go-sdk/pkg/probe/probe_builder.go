@@ -242,3 +242,15 @@ func (pb *ProbeBuilder) ExecutesActionsBy(actionClient TurboActionExecutorClient
 
 	return pb
 }
+
+// WithVersion sets the given version in the probe config.
+func (pb *ProbeBuilder) WithVersion(version string) *ProbeBuilder {
+	pb.probeConf.Version = version
+	return pb
+}
+
+// WithDisplayName sets the given display name in the probe config.
+func (pb *ProbeBuilder) WithDisplayName(displayName string) *ProbeBuilder {
+	pb.probeConf.DisplayName = displayName
+	return pb
+}

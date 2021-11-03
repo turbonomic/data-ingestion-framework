@@ -252,6 +252,18 @@ func (builder *ProbeInfoBuilder) WithActionMergePolicySet(actionMergePolicySet [
 	return builder
 }
 
+// WithVersion sets the probe version in the builder
+func (builder *ProbeInfoBuilder) WithVersion(version string) *ProbeInfoBuilder {
+	builder.probeInfo.Version = &version
+	return builder
+}
+
+// WithDisplayName sets the probe display name in the builder
+func (builder *ProbeInfoBuilder) WithDisplayName(displayName string) *ProbeInfoBuilder {
+	builder.probeInfo.DisplayName = &displayName
+	return builder
+}
+
 // Assert that the full discovery interval is set
 func checkFullDiscoveryInterval(probeInfo *proto.ProbeInfo) {
 	var interval int32

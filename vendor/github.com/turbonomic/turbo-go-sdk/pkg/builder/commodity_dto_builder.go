@@ -53,21 +53,22 @@ func (cb *CommodityDTOBuilder) Create() (*proto.CommodityDTO, error) {
 		return nil, err
 	}
 	commodityDTO := &proto.CommodityDTO{
-		CommodityType:   cb.commodityType,
-		Key:             cb.key,
-		Used:            cb.used,
-		Reservation:     cb.reservation,
-		Capacity:        cb.capacity,
-		Limit:           cb.limit,
-		Peak:            cb.peak,
-		Active:          cb.active,
-		Resizable:       cb.resizable,
-		DisplayName:     cb.displayName,
-		Thin:            cb.thin,
-		ComputedUsed:    cb.computedUsed,
-		UsedIncrement:   cb.usedIncrement,
-		PropMap:         buildPropertyMap(cb.propMap),
-		UtilizationData: cb.utilizationData,
+		CommodityType:           cb.commodityType,
+		Key:                     cb.key,
+		Used:                    cb.used,
+		Reservation:             cb.reservation,
+		Capacity:                cb.capacity,
+		Limit:                   cb.limit,
+		Peak:                    cb.peak,
+		Active:                  cb.active,
+		Resizable:               cb.resizable,
+		DisplayName:             cb.displayName,
+		Thin:                    cb.thin,
+		ComputedUsed:            cb.computedUsed,
+		UsedIncrement:           cb.usedIncrement,
+		PropMap:                 buildPropertyMap(cb.propMap),
+		UtilizationData:         cb.utilizationData,
+		UtilizationThresholdPct: cb.utilizationThresholdPct,
 	}
 
 	if cb.storageLatencyData != nil {
@@ -124,6 +125,14 @@ func (cb *CommodityDTOBuilder) Reservation(reservation float64) *CommodityDTOBui
 		return cb
 	}
 	cb.reservation = &reservation
+	return cb
+}
+
+func (cb *CommodityDTOBuilder) UtilizationThresholdPct(utilizationThresholdPct float64) *CommodityDTOBuilder {
+	if cb.err != nil {
+		return cb
+	}
+	cb.utilizationThresholdPct = &utilizationThresholdPct
 	return cb
 }
 
