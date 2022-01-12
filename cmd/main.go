@@ -28,16 +28,17 @@ func main() {
 		SpewKeys:              false,
 	}
 
+	// Set up arguments specific to DIF
+	args := conf.NewDIFProbeArgs()
+	// Parse the flags
 	flag.Parse()
 
+	// Print out critical information
 	glog.Infof("Running turbodif VERSION: %s, GIT_COMMIT: %s, BUILD_TIME: %s",
 		version.Version, version.GitCommit, version.BuildTime)
-
-	args := conf.NewDIFProbeArgs(flag.CommandLine)
-	flag.Parse()
+	glog.Infof("IgnoreIfPresent is set to %v for all commodities.", *args.IgnoreCommodityIfPresent)
 
 	s, err := pkg.NewDIFTAPService(args)
-
 	if err != nil {
 		glog.Fatalf("Failed to run turbodif: %v", err)
 	}

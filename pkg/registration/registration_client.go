@@ -1,7 +1,6 @@
 package registration
 
 import (
-	"fmt"
 	"github.com/golang/glog"
 	protobuf "github.com/golang/protobuf/proto"
 	"github.com/turbonomic/data-ingestion-framework/pkg/conf"
@@ -16,23 +15,17 @@ const (
 	propertyId string = "id"
 )
 
-// Implements the TurboRegistrationClient interface
+// DIFRegistrationClient implements the TurboRegistrationClient interface
 type DIFRegistrationClient struct {
 	TargetTypeSuffix string
 	supplyChain      *SupplyChain
 }
 
-func NewDIFRegistrationClient(supplyChainConfig *conf.SupplyChainConfig, targetTypeSuffix string) (*DIFRegistrationClient, error) {
-	supplyChain, err := NewSupplyChain(supplyChainConfig)
-	if err != nil {
-		return nil, fmt.Errorf("error parsing supply chain %v", err)
-
-	}
+func NewDIFRegistrationClient(supplyChain *SupplyChain, targetTypeSuffix string) *DIFRegistrationClient {
 	return &DIFRegistrationClient{
 		TargetTypeSuffix: targetTypeSuffix,
 		supplyChain:      supplyChain,
-	}, nil
-
+	}
 }
 
 func (p *DIFRegistrationClient) GetSupplyChainDefinition() []*proto.TemplateDTO {

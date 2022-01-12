@@ -87,12 +87,15 @@ func createTAPService(args *conf.DIFProbeArgs) (*service.TAPService, error) {
 		glog.Errorf("Error while parsing the supply chain config file %s: %++v", supplyChainConf, err)
 		os.Exit(1)
 	}
-	// Registration client - configured with the supply chain definition
-	registrationClient, err := registration.NewDIFRegistrationClient(supplyChainConfig, difConf.TargetTypeSuffix)
-
+	supplyChain, err := registration.NewSupplyChain(supplyChainConfig)
 	if err != nil {
-		glog.Fatalf("error: %v", err)
+		glog.Errorf("Error while parsing the supply chain: %+v", err)
+		os.Exit(1)
 	}
+	supplyChain.IgnoreIfPresent(*args.IgnoreCommodityIfPresent)
+	// Registration client - configured with the supply chain definition
+	registrationClient := registration.NewDIFRegistrationClient(supplyChain, difConf.TargetTypeSuffix)
+
 	// Discovery client - target type, target address, supply chain
 	targetType := registrationClient.TargetType()
 	probeCategory := registrationClient.ProbeCategory()
