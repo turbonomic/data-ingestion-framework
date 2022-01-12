@@ -12,8 +12,9 @@ import (
 
 // SupplyChain for the TurboDIF probe created from the supply chain configuration
 type SupplyChain struct {
-	config  *conf.SupplyChainConfig
-	nodeMap map[proto.EntityDTO_EntityType]*SupplyChainNode
+	config          *conf.SupplyChainConfig
+	nodeMap         map[proto.EntityDTO_EntityType]*SupplyChainNode
+	ignoreIfPresent bool
 }
 
 type SupplyChainNode struct {
@@ -28,24 +29,26 @@ type SupplyChainNode struct {
 	ProviderByProviderType     map[proto.EntityDTO_EntityType]string
 }
 
-// Create new supply chain consisting of supply chain nodes using the supply chain configuration
+// NewSupplyChain creates new supply chain consisting of supply chain nodes using the supply chain configuration
 func NewSupplyChain(config *conf.SupplyChainConfig) (*SupplyChain, error) {
 	// parse the node config
 	nodeMap := make(map[proto.EntityDTO_EntityType]*SupplyChainNode)
 	for _, nodeConfig := range config.Nodes {
-
 		node, err := parseNodeConfig(nodeConfig)
 		if err != nil {
 			return nil, err
 		}
 		nodeMap[node.NodeType] = node
 	}
-	supplyChain := &SupplyChain{
+	return &SupplyChain{
 		config:  config,
 		nodeMap: nodeMap,
-	}
+	}, nil
+}
 
-	return supplyChain, nil
+func (s *SupplyChain) IgnoreIfPresent(ignoreIfPresent bool) *SupplyChain {
+	s.ignoreIfPresent = ignoreIfPresent
+	return s
 }
 
 func (s *SupplyChain) GetProbeCategory() string {
@@ -78,7 +81,7 @@ func (s *SupplyChain) GetSupplyChainNodes() map[proto.EntityDTO_EntityType]*Supp
 func (s *SupplyChain) CreateSupplyChainNodeTemplates() map[proto.EntityDTO_EntityType]*proto.TemplateDTO {
 	templateDtoMap := make(map[proto.EntityDTO_EntityType]*proto.TemplateDTO)
 	for nodeType, sn := range s.nodeMap {
-		templateDto, err := sn.CreateTemplateDTO()
+		templateDto, err := sn.CreateTemplateDTO(s.ignoreIfPresent)
 		if err != nil {
 			glog.Errorf("Error creating template DTO : %++v", err)
 			continue
@@ -232,7 +235,7 @@ func parseBoughtComms(nodeConfig *conf.NodeConfig, node *SupplyChainNode) error 
 	return nil
 }
 
-func (sn *SupplyChainNode) CreateTemplateDTO() (*proto.TemplateDTO, error) {
+func (sn *SupplyChainNode) CreateTemplateDTO(ignoreIfPresent bool) (*proto.TemplateDTO, error) {
 	snBuilder := supplychain.NewSupplyChainNodeBuilder(sn.NodeType)
 
 	templateType, exists := templateTypeMapping[*sn.nodeConfig.TemplateType]
@@ -338,7 +341,11 @@ func (sn *SupplyChainNode) CreateTemplateDTO() (*proto.TemplateDTO, error) {
 			KeepInTopology(metadata.KeepInTopology)
 		for _, comm := range metadata.CommSold {
 			commType := TemplateCommodityTypeMap[comm]
-			metadataBuilder.PatchSoldMetadata(commType, make(map[string][]string))
+			if ignoreIfPresent {
+				metadataBuilder.PatchSoldMetadataIgnorePresent(commType, make(map[string][]string))
+			} else {
+				metadataBuilder.PatchSoldMetadata(commType, make(map[string][]string))
+			}
 		}
 		for _, bought := range metadata.CommoditiesBought {
 			pType := TemplateEntityTypeMap[bought.Provider]

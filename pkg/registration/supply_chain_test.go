@@ -161,3 +161,45 @@ func TestSupplyChainNodeInvalidBought(t *testing.T) {
 	fmt.Printf("ERR %v\n", err)
 	assert.True(t, err != nil)
 }
+
+func TestSupplyChainNodeIgnoreIfPresent(t *testing.T) {
+	supplyChainConfig, err := conf.LoadSupplyChain("test_app_node.yaml")
+	assert.True(t, err == nil)
+	assert.True(t, len(supplyChainConfig.Nodes) > 0)
+	// Default supply chain
+	supplyChain, err := NewSupplyChain(supplyChainConfig)
+	assert.True(t, err == nil)
+	templateDtoMap := supplyChain.CreateSupplyChainNodeTemplates()
+	assert.NotEmpty(t, templateDtoMap)
+	templateDTO, ok := templateDtoMap[proto.EntityDTO_APPLICATION_COMPONENT]
+	assert.True(t, ok)
+	ignoreIfPresent, err := getIgnoreIfPresent(templateDTO)
+	assert.True(t, err == nil)
+	assert.False(t, ignoreIfPresent)
+	// Supply chain with ignoreIfPresent true
+	supplyChain, err = NewSupplyChain(supplyChainConfig)
+	assert.True(t, err == nil)
+	templateDtoMap = supplyChain.IgnoreIfPresent(true).CreateSupplyChainNodeTemplates()
+	assert.NotEmpty(t, templateDtoMap)
+	templateDTO, ok = templateDtoMap[proto.EntityDTO_APPLICATION_COMPONENT]
+	assert.True(t, ok)
+	ignoreIfPresent, err = getIgnoreIfPresent(templateDTO)
+	assert.True(t, err == nil)
+	assert.True(t, ignoreIfPresent)
+}
+
+func getIgnoreIfPresent(templateDTO *proto.TemplateDTO) (bool, error) {
+	mergedEntityMetadata := templateDTO.MergedEntityMetaData
+	if mergedEntityMetadata == nil {
+		return false, fmt.Errorf("missing mergedEntityMetadata")
+	}
+	commoditiesSoldMetadata := mergedEntityMetadata.CommoditiesSoldMetadata
+	if commoditiesSoldMetadata == nil || len(commoditiesSoldMetadata) == 0 {
+		return false, fmt.Errorf("missing commoditiesSoldMetadata")
+	}
+	ignoreIfPresent := commoditiesSoldMetadata[0].IgnoreIfPresent
+	if ignoreIfPresent == nil {
+		return false, fmt.Errorf("missing ignoreIfPresent")
+	}
+	return *ignoreIfPresent, nil
+}
