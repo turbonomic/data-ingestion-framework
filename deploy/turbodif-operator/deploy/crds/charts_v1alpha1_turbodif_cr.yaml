@@ -26,9 +26,9 @@ spec:
   # Do not specify Turbonomic as the targetTypeSuffix, it is reserved for internal use
   #targetTypeSuffix: CustomMetricSource
 
-  #targetConfig:
-    #keepStandalone: false
-
-  #args:
-    # logging level
-    #logginglevel: 2
+  # Command line arguments
+  args:
+    # Logging level 2 to 4
+    logginglevel: 2
+    # When set to true, ignore merging a commodity if a commodity of the same type already exists
+    #ignoreCommodityIfPresent: false

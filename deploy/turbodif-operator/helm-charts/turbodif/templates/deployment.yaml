@@ -24,8 +24,10 @@ spec:
           image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           args:
-            - --keepStandalone={{ .Values.targetConfig.keepStandalone }}
             - --v={{ .Values.args.logginglevel }}
+  {{- if .Values.args.ignoreCommodityIfPresent }}
+            - --ignoreCommodityIfPresent=true
+  {{- end }}
           volumeMounts:
           - name: turbodif-config
             mountPath: /etc/turbodif
