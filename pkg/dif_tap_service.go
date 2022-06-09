@@ -1,20 +1,29 @@
 package pkg
 
 import (
+	"context"
 	"github.com/turbonomic/data-ingestion-framework/pkg/conf"
 	"github.com/turbonomic/data-ingestion-framework/pkg/discovery"
 	"github.com/turbonomic/data-ingestion-framework/pkg/registration"
 	"github.com/turbonomic/data-ingestion-framework/version"
-	"strings"
-
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 
 	"github.com/golang/glog"
 
 	"github.com/turbonomic/turbo-go-sdk/pkg/probe"
 	"github.com/turbonomic/turbo-go-sdk/pkg/service"
+
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes"
+	restclient "k8s.io/client-go/rest"
+)
+
+const (
+	k8sDefaultNamespace   = "default"
+	kubernetesServiceName = "kubernetes"
 )
 
 type disconnectFromTurboFunc func()
@@ -141,7 +150,10 @@ func createTAPService(args *conf.DIFProbeArgs) (*service.TAPService, error) {
 		builder = builder.WithDiscoveryClient(discoveryClient)
 	}
 
+	bindingChannel := getBindingChannel()
+
 	return service.NewTAPServiceBuilder().
+		WithCommunicationBindingChannel(bindingChannel).
 		WithTurboCommunicator(communicator).
 		WithTurboProbe(builder).
 		Create()
@@ -150,6 +162,27 @@ func createTAPService(args *conf.DIFProbeArgs) (*service.TAPService, error) {
 // getProbeDisplayName constructs a display name for the probe based on the input probe type
 func getProbeDisplayName(probeType string) string {
 	return strings.Join([]string{probeType, "Probe"}, " ")
+}
+
+// getBindingChannel tries to fetch the in-cluster k8s service id as the binding channel; if that's not successful, an
+// empty string will be returned as the binding channel
+func getBindingChannel() string {
+	kubeConfig, err := restclient.InClusterConfig()
+	if err != nil {
+		glog.V(2).Infof("Setting an empty binding channel being unable to acquire the in-cluster kube config: %++v", err)
+		return ""
+	}
+	kubeClient, err := kubernetes.NewForConfig(kubeConfig)
+	if err != nil {
+		glog.V(2).Infof("Setting an empty binding channel being unable to acquire the kube client: %++v", err)
+		return ""
+	}
+	kubeSvc, err := kubeClient.CoreV1().Services(k8sDefaultNamespace).Get(context.TODO(), kubernetesServiceName, metav1.GetOptions{})
+	if err != nil {
+		glog.V(2).Infof("Setting an empty binding channel being unable to retrieve the k8s service id: %++v", err)
+		return ""
+	}
+	return string(kubeSvc.UID)
 }
 
 // handleExit disconnects the tap service from Turbo service when DIF probe is terminated
