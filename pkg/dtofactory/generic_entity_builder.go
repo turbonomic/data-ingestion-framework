@@ -2,6 +2,7 @@ package dtofactory
 
 import (
 	"fmt"
+
 	"github.com/golang/glog"
 	protobuf "github.com/golang/protobuf/proto"
 	"github.com/turbonomic/data-ingestion-framework/pkg/data"
@@ -118,6 +119,7 @@ func (eb *GenericEntityBuilder) BuildEntity() (*proto.EntityDTO, error) {
 	if err != nil {
 		return nil, err
 	}
+	dto.KeepStandalone = &eb.keepStandalone
 
 	logDebug(protobuf.MarshalTextString(dto))
 	return dto, nil

@@ -6,7 +6,7 @@ import (
 
 const (
 	defaultDiscoveryIntervalSec     = 600
-	defaultKeepStandalone           = false
+	defaultKeepStandalone           = true
 	defaultIgnoreCommodityIfPresent = false
 )
 
