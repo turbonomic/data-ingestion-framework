@@ -194,7 +194,7 @@ func (eb *GenericEntityBuilder) soldCommodities(commoditiesMap CommoditiesByType
 				continue
 			} else if commTemplate.Key == nil {
 				if soldComm.Key != nil {
-					glog.V(4).Info("Commodity key is not defined in the template for %+v but is "+
+					glog.V(4).Infof("Commodity key is not defined in the template for %+v but is "+
 						"discovered in the JSON. Ignore the key.", soldComm)
 				}
 				soldComm.Key = nil
