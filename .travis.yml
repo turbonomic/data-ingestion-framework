@@ -16,6 +16,7 @@ go_import_path: github.com/turbonomic/data-ingestion-framework
 
 before_install:
   - go install -v github.com/mattn/goveralls@HEAD
+  - go mod vendor
 
 script:
   - make fmtcheck
