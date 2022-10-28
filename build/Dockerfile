@@ -1,5 +1,6 @@
 FROM registry.access.redhat.com/ubi8-minimal
 MAINTAINER Enlin Xu <enlin.xu@turbonomic.com>
+ARG TARGETPLATFORM
 
 # Required OpenShift Labels
 LABEL name="Turbodif Container" \
@@ -27,7 +28,7 @@ ENV PATH=$PATH:${APP_ROOT}/bin
 
 RUN mkdir -p ${APP_ROOT}/bin
 RUN mkdir -p ${APP_ROOT}/conf
-COPY build/turbodif.linux ${APP_ROOT}/bin/turbodif
+COPY build/${TARGETPLATFORM}/turbodif ${APP_ROOT}/bin/turbodif
 COPY configs/app-supply-chain-config.yaml ${APP_ROOT}/conf/app-supply-chain-config.yaml
 RUN chmod -R ug+x ${APP_ROOT}/bin && sync && \
     chmod -R g=u ${APP_ROOT}
