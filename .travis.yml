@@ -45,8 +45,6 @@ after_success:
         DOCKER_TARGET_IMAGE=${DOCKER_IMAGE_NAME/data-ingestion-framework/turbodif}
         # Create and set a new buildx builder instance
         docker buildx create --use
-        # Build and push the image
-        cd build
         if [ -n "$TRAVIS_TAG" ]; then
             # Push a release image triggered by a git tag
             docker buildx build -f build/Dockerfile --platform $PLATFORM_OS_ARCH_LIST --label "git-version=$TRAVIS_COMMIT" --push -t $DOCKER_TARGET_IMAGE:$TRAVIS_TAG .
