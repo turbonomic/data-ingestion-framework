@@ -1,6 +1,6 @@
 OUTPUT_DIR=./build
-SOURCE_DIRS = cmd pkg
-PACKAGES := go list ./... | grep -v /vendor | grep -v /out
+SOURCE_DIRS=cmd pkg
+PACKAGES=go list ./... | grep -v /vendor | grep -v /out
 SHELL='/bin/bash'
 REMOTE=github.com
 USER=turbonomic
@@ -19,8 +19,13 @@ LDFLAGS='\
  -X "$(PROJECT_PATH)/version.BuildTime=$(BUILD_TIME)" \
  -X "$(PROJECT_PATH)/version.Version=$(VERSION)"'
 
-product: clean
-	env GOOS=linux GOARCH=amd64 go build -ldflags $(LDFLAGS) -o $(OUTPUT_DIR)/$(BINARY).linux ./cmd
+
+LINUX_ARCH=amd64 arm64 ppc64le s390x
+
+$(LINUX_ARCH): clean
+	env GOOS=linux GOARCH=$@ go build -ldflags $(LDFLAGS) -o $(OUTPUT_DIR)/linux/$@/$(BINARY) ./cmd
+
+product: $(LINUX_ARCH)	
 
 debug-product: clean
 	env GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -ldflags $(LDFLAGS) -gcflags "-N -l" -o $(OUTPUT_DIR)/$(BINARY)_debug.linux ./cmd
@@ -46,4 +51,4 @@ vet:
 	@go vet $(shell $(PACKAGES))
 
 clean:
-	@rm -rf $(OUTPUT_DIR)/$(BINARY)*
+	@rm -rf $(OUTPUT_DIR)/$(BINARY)* ${OUTPUT_DIR}/linux
