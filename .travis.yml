@@ -47,10 +47,10 @@ after_success:
         docker buildx create --use
         if [ -n "$TRAVIS_TAG" ]; then
             # Push a release image triggered by a git tag
-            docker buildx build -f build/Dockerfile --platform $PLATFORM_OS_ARCH_LIST --label "git-version=$TRAVIS_COMMIT" --push -t $DOCKER_TARGET_IMAGE:$TRAVIS_TAG .
+            docker buildx build -f build/Dockerfile --platform $PLATFORM_OS_ARCH_LIST --label "git-version=$TRAVIS_COMMIT" .
         else
             # Push the latest image built from master branch
-            docker buildx build -f build/Dockerfile --platform $PLATFORM_OS_ARCH_LIST --label "git-version=$TRAVIS_COMMIT" --push -t $DOCKER_TARGET_IMAGE .
+            docker buildx build -f build/Dockerfile --platform $PLATFORM_OS_ARCH_LIST --label "git-version=$TRAVIS_COMMIT" .
         fi
       fi
     fi
