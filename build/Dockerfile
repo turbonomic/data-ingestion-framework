@@ -1,5 +1,5 @@
 FROM registry.access.redhat.com/ubi8-minimal
-MAINTAINER Enlin Xu <enlin.xu@turbonomic.com>
+MAINTAINER Turbonomic <turbodeploy@turbonomic.com>
 ARG TARGETPLATFORM
 
 # Required OpenShift Labels
@@ -11,11 +11,12 @@ LABEL name="Turbodif Container" \
       description="Hybrid Cloud Container leverages Turbonomic control platform, to assure the performance of micro-services running in OpenShift, as well as the efficiency of underlying infrastructure." \
 ### Required labels above - recommended below
       url="https://www.turbonomic.com" \
-      run='docker run -tdi --name ${NAME} turbonomic/turbodif:latest' \
       io.k8s.description="Turbonomic Workload Automation Platform simultaneously optimizes performance, compliance, and cost in real-time. Workloads are precisely resourced, automatically, to perform while satisfying business constraints.  " \
       io.k8s.display-name="Turbodif Operator" \
       io.openshift.expose-services="" \
       io.openshift.tags="turbonomic, Multicloud Container"
+
+RUN microdnf update -y krb5-libs
 
 ### add licenses to this directory
 COPY licenses /licenses
