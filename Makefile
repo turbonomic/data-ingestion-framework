@@ -37,7 +37,7 @@ debug: clean
 	go build -ldflags $(LDFLAGS) -gcflags "-N -l" -o $(OUTPUT_DIR)/$(BINARY).debug ./cmd
 
 docker: product
-	docker build -f build/Dockerfile -t turbonomic/turbodif .
+	DOCKER_BUILDKIT=1 docker build -f build/Dockerfile -t turbonomic/turbodif .
 
 test: clean
 	@go test -v -race ./pkg/...
