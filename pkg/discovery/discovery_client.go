@@ -2,14 +2,16 @@ package discovery
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/golang/glog"
 	"github.com/turbonomic/data-ingestion-framework/pkg/conf"
 	"github.com/turbonomic/data-ingestion-framework/pkg/data"
 	"github.com/turbonomic/data-ingestion-framework/pkg/dtofactory"
 	"github.com/turbonomic/data-ingestion-framework/pkg/registration"
+	prometurboversion "github.com/turbonomic/data-ingestion-framework/version"
 	"github.com/turbonomic/turbo-go-sdk/pkg/probe"
 	"github.com/turbonomic/turbo-go-sdk/pkg/proto"
-	"strings"
 )
 
 // Implements the TurboDiscoveryClient interface
@@ -70,9 +72,16 @@ func (d *DIFDiscoveryClient) GetAccountValues() *probe.TurboTargetInfo {
 		StringValue: &targetName,
 	}
 
+	probeVersionField := registration.ProbeVersion
+	probeVersionVal := &proto.AccountValue{
+		Key:         &probeVersionField,
+		StringValue: &prometurboversion.Version,
+	}
+
 	accountValues := []*proto.AccountValue{
 		targetIdVal,
 		targetNameVal,
+		probeVersionVal,
 	}
 
 	targetInfo := probe.NewTurboTargetInfoBuilder(targetParams.ProbeCategory,

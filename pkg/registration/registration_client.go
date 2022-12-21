@@ -11,6 +11,7 @@ import (
 const (
 	TargetIdField   string = "targetIdentifier" // this is used to reach the target
 	TargetNameField string = "Name"             // this is used to display the target in the UI
+	ProbeVersion    string = "probeVersion"     // this is used to display the probe version
 
 	propertyId string = "id"
 )
@@ -70,9 +71,19 @@ func (p *DIFRegistrationClient) GetAccountDefinition() []*proto.AccountDefEntry 
 		false).
 		Create()
 
+	// this field is used as probe version of the target for displaying in UI
+	probeVersion := builder.NewAccountDefEntryBuilder(ProbeVersion,
+		"Prometurbo Version",
+		"Release Version of Prometurbo Probe",
+		".*",
+		false,
+		false).
+		Create()
+
 	return []*proto.AccountDefEntry{
 		nameIDAcctDefEntry,
 		targetIDAcctDefEntry,
+		probeVersion,
 	}
 }
 
