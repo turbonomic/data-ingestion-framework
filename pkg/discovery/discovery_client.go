@@ -72,6 +72,7 @@ func (d *DIFDiscoveryClient) GetAccountValues() *probe.TurboTargetInfo {
 		StringValue: &targetName,
 	}
 
+	//this field is used as probe version of the target for displaying in the UI
 	probeVersionField := registration.ProbeVersion
 	probeVersionVal := &proto.AccountValue{
 		Key:         &probeVersionField,
