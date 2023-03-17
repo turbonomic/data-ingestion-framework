@@ -200,6 +200,7 @@ supplyChainNode:
         externalEntityMatchingProperty:
           - matchingProperty:
               propertyName: IP
+            delimiter: ","
       commoditiesSold:
         - RESPONSE_TIME
         - TRANSACTION
