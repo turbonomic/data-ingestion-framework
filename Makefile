@@ -52,3 +52,13 @@ vet:
 
 clean:
 	@rm -rf $(OUTPUT_DIR)/$(BINARY)* ${OUTPUT_DIR}/linux
+
+
+PLATFORMS ?= linux/arm64,linux/amd64,linux/s390x,linux/ppc64le
+REPO_NAME ?= icr.io/cpopen/turbonomic
+.PHONY: docker-buildx
+docker-buildx:
+	docker buildx create --name turbodif-builder
+	- docker buildx use turbodif-builder
+	- docker buildx build --platform=$(PLATFORMS) --push --tag $(REPO_NAME)/turbodif:$(VERSION) -f build/Dockerfile.multi-archs --build-arg version=$(VERSION) .
+	docker buildx rm turbodif-builder
