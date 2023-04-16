@@ -56,9 +56,11 @@ clean:
 
 PLATFORMS ?= linux/arm64,linux/amd64,linux/s390x,linux/ppc64le
 REPO_NAME ?= icr.io/cpopen/turbonomic
+multi-archs:
+	env GOOS=${TARGETOS} GOARCH=${TARGETARCH} CGO_ENABLED=0 go build -ldflags $(LDFLAGS) -o $(OUTPUT_DIR)/$(BINARY) ./cmd
 .PHONY: docker-buildx
 docker-buildx:
 	docker buildx create --name turbodif-builder
 	- docker buildx use turbodif-builder
-	- docker buildx build --platform=$(PLATFORMS) --push --tag $(REPO_NAME)/turbodif:$(VERSION) -f build/Dockerfile.multi-archs --build-arg version=$(VERSION) .
+	- docker buildx build --platform=$(PLATFORMS) --label "git-commit=$(GIT_COMMIT)" --push --tag $(REPO_NAME)/turbodif:$(VERSION) -f build/Dockerfile.multi-archs --build-arg VERSION=$(VERSION) .
 	docker buildx rm turbodif-builder
