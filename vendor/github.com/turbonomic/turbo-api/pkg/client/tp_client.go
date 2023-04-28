@@ -22,6 +22,14 @@ type TPClient struct {
 	*RESTClient
 }
 
+func (c *TPClient) GetJwtToken(hydraToken string) (string, error) {
+	panic("the program is trying to get jwtToken from TP Client, which should never happen")
+}
+
+func (c *TPClient) GetHydraAccessToken() (string, error) {
+	panic("the program is trying to get hydra access token from TP Client, which should never happen")
+}
+
 // DiscoverTarget adds a target via Topology Processor service
 func (c *TPClient) DiscoverTarget(uuid string) (*Result, error) {
 	// Not implemented

@@ -62,7 +62,7 @@ func CreateMediationContainer(containerConfig *MediationContainerConfig) *mediat
 }
 
 // Start the RemoteMediationClient
-func InitMediationContainer(probeRegisteredMsg chan bool, disconnectFromTurbo chan struct{}) {
+func InitMediationContainer(probeRegisteredMsg chan bool, disconnectFromTurbo chan struct{}, refreshTokenChannel chan struct{}, jwTokenChannel chan string) {
 	theContainer := singletonMediationContainer()
 	glog.Infof("Initializing mediation container .....")
 	// Assert that the probes are registered before starting the handshake
@@ -74,7 +74,7 @@ func InitMediationContainer(probeRegisteredMsg chan bool, disconnectFromTurbo ch
 	glog.V(2).Infof("Registering %d probes", len(theContainer.allProbes))
 
 	remoteMediationClient := theContainer.theRemoteMediationClient
-	remoteMediationClient.Init(probeRegisteredMsg, disconnectFromTurbo)
+	remoteMediationClient.Init(probeRegisteredMsg, disconnectFromTurbo, refreshTokenChannel, jwTokenChannel)
 }
 
 func GetMediationService() string {

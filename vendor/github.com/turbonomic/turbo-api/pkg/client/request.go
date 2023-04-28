@@ -123,6 +123,11 @@ func (r *Request) Data(data []byte) *Request {
 	return r
 }
 
+func (r *Request) BufferData(data *bytes.Buffer) *Request {
+	r.data = data
+	return r
+}
+
 // URL returns the current working URL.
 func (r *Request) URL() *url.URL {
 	p := r.pathPrefix

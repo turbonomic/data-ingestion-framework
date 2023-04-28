@@ -194,6 +194,12 @@ func (builder *ProbeInfoBuilder) WithSupplyChain(supplyChainSet []*proto.Templat
 	return builder
 }
 
+// TODO: Set the secure target info
+func (builder *ProbeInfoBuilder) WithSecureTarget(probeTarget *proto.ProbeTargetInfo) *ProbeInfoBuilder {
+	builder.probeInfo.ProbeTargetInfo = probeTarget
+	return builder
+}
+
 // Set the account definition for creating targets for this probe
 func (builder *ProbeInfoBuilder) WithAccountDefinition(acctDefSet []*proto.AccountDefEntry,
 ) *ProbeInfoBuilder {

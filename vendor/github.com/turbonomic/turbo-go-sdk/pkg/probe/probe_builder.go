@@ -18,6 +18,7 @@ type ProbeBuilder struct {
 	actionPolicyProvider      IActionPolicyProvider
 	actionMergePolicyProvider IActionMergePolicyProvider
 	entityMetadataProvider    IEntityMetadataProvider
+	secureProbeTargetProvider ISecureProbeTargetProvider
 }
 
 func ErrorInvalidTargetIdentifier() error {
@@ -113,6 +114,10 @@ func (pb *ProbeBuilder) Create() (*TurboProbe, error) {
 
 	if pb.entityMetadataProvider != nil {
 		turboProbe.RegistrationClient.IEntityMetadataProvider = pb.entityMetadataProvider
+	}
+
+	if pb.secureProbeTargetProvider != nil {
+		turboProbe.RegistrationClient.ISecureProbeTargetProvider = pb.secureProbeTargetProvider
 	}
 
 	turboProbe.ActionClient = pb.actionClient
@@ -214,6 +219,19 @@ func (pb *ProbeBuilder) DiscoversTarget(targetId string, discoveryClient TurboDi
 		glog.Warningf("Overwriting discovery client %v with %v", pb.discoveryClient, discoveryClient)
 	}
 	pb.discoveryClient = discoveryClient
+
+	return pb
+}
+
+// Set a secure target and discovery client for the probe
+func (pb *ProbeBuilder) WithSecureTargetProvider(targetProvider ISecureProbeTargetProvider) *ProbeBuilder {
+
+	if targetProvider == nil {
+		pb.builderError = errors.New("Null secure target provider")
+		return pb
+	}
+
+	pb.secureProbeTargetProvider = targetProvider
 
 	return pb
 }

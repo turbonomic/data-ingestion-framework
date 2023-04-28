@@ -22,7 +22,6 @@ type ProbeConfig struct {
 // NewProbeConfig creates a new instance of ProbeConfig.
 // Sets default discovery intervals for the full, incremental and performance discoveries.
 // Returns error if the probe type and category fields cannot be validated.
-//
 func NewProbeConfig(probeType, probeCategory, probeUICategory string) (*ProbeConfig, error) {
 	if probeType == "" {
 		return nil, ErrorInvalidProbeType()

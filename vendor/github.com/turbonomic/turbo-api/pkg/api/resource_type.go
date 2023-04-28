@@ -8,4 +8,6 @@ const (
 	Resource_Type_Target          ResourceType = "target"
 	Resource_Type_Probe           ResourceType = "probe"
 	Resource_Type_External_Target ResourceType = "externaltargets"
+	Resource_Type_hydra_token     ResourceType = "token"
+	Resource_Type_auth_token      ResourceType = "exchange"
 )

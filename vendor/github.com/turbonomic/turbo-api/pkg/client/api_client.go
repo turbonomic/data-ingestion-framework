@@ -1,10 +1,12 @@
 package client
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/golang/glog"
 	"github.com/turbonomic/turbo-api/pkg/api"
+	"mime/multipart"
 	"net/http"
 	"strings"
 )
@@ -13,11 +15,111 @@ import (
 type APIClient struct {
 	*RESTClient
 	SessionCookie *http.Cookie
+	ClientId      string
+	ClientSecret  string
 }
 
 const (
 	SessionCookie string = "JSESSIONID"
 )
+
+type HydraTokenBody struct {
+	AccessToken string `json:"access_token,omitempty"`
+	ExpiresIn   int    `json:"expires_in,omitempty"`
+	Scope       string `json:"scope,omitempty"`
+	TokenType   string `json:"token_type,omitempty"`
+}
+
+func (c *APIClient) GetJwtToken(hydraToken string) (string, error) {
+	if hydraToken == "" {
+		glog.V(4).Infof("The hydra token is empty")
+		return "", nil
+	}
+	// the format of getting jwtToken with auth requires the following header
+	// key: x-oauth2, value: "hydra"
+	// key: x-auth-token, value: hydra access token
+	request := c.Post().Resource(api.Resource_Type_auth_token).Header("x-oauth2", "hydra").Header("x-auth-token", hydraToken)
+	// Execute the request
+	response, err := request.Do()
+	if err != nil {
+		return "", fmt.Errorf("request to exchange for auth token %v failed: %s", request, err)
+	}
+	if response.statusCode == 401 {
+		// When we receive the 401 status code, means that the credentials are not valid.
+		// We return error, so getJwtToken() method in tap_service will continue
+		// to retry authentication until the credentials are corrected
+		return "", fmt.Errorf("Auth service authentication failed using the given client_id and secret")
+	}
+	if response.statusCode == 403 {
+		// When we receive the 403 status code, meaning the security feature is currently not available.
+		// We will retry websocket connection without the JWTToken
+		glog.Errorf("Auth service is not accessible or disabled [%v:%s]", response.statusCode, response.status)
+		return "", nil
+	}
+	if response.statusCode == 502 {
+		// When we receive the 502 status code, meaning the auth service is currently not available.
+		// We return error, so getJwtToken() method in tap_service will continue
+		// to retry authentication until the service is restored
+		return "", fmt.Errorf("Auth service is not available [%v:%s]", response.statusCode, response.status)
+	}
+	return response.body, nil
+}
+
+func (c *APIClient) GetHydraAccessToken() (string, error) {
+	if c.ClientId == "" || c.ClientSecret == "" {
+		glog.V(4).Infof("The client id or client secret are not provided")
+		return "", nil
+	}
+	// Create the form-data format payload
+	payload := &bytes.Buffer{}
+	writer := multipart.NewWriter(payload)
+	writer.WriteField("client_id", c.ClientId)
+	writer.WriteField("client_secret", c.ClientSecret)
+	writer.WriteField("grant_type", "client_credentials")
+	err := writer.Close()
+	if err != nil {
+		return "", fmt.Errorf("failed to Close the writer: %v", err)
+	}
+	// Create the rest api request
+	// the format of get hydra access token requires the following in the body, as form-data format
+	// key: client_id, value: client id value
+	// key: client_secret, value: client secret value
+	// key: grant_type, value: client_credentials
+	request := c.Post().Resource(api.Resource_Type_hydra_token).Header("Content-Type", writer.FormDataContentType()).BufferData(payload)
+	// Execute the request
+	response, err := request.Do()
+	if err != nil {
+		return "", fmt.Errorf("failed to get hydra access token: %s", err)
+	}
+	if response.statusCode == 401 {
+		// When we receive the 401 status code, means that the credentials are not valid.
+		// We return error, so getJwtToken() method in tap_service will continue
+		// to retry authentication until the credentials are corrected
+		return "", fmt.Errorf("Hydra service authentication failed using the given client_id and secret. " +
+			"Redeploy the secret containing the correct credentials and restart the probe pod")
+	}
+	if response.statusCode == 502 {
+		// When we receive the 502 status code, meaning the hydra service is currently not available.
+		// We return error, so getJwtToken() method in tap_service will continue
+		// to retry authentication until the service is restored
+		return "", fmt.Errorf("Hydra service is not available [%v:%s]", response.statusCode, response.status)
+	}
+	if response.statusCode == 403 {
+		// When we receive the 403 status code, means that the hydra service is currently not available,
+		// This is when the security feature is not available.
+		// We are not returning error here to handle the case when customer enabled probe security in the first place then disabled
+		// In the case above, there'll be client_id and secret in the k8s secret, but we shouldn't use them in websocket connection
+		// If the hydra service is temporarily not accessible, we have retry in performWebSocketConnection in turbo-go-sdk
+		glog.Errorf("Hydra service is not accessible or disabled [%v:%s]", response.statusCode, response.status)
+		return "", nil
+	}
+	var hydraToken HydraTokenBody
+	err = json.Unmarshal([]byte(response.body), &hydraToken)
+	if err != nil {
+		return "", fmt.Errorf("failed to unmarshall get hydra token response: %v", err)
+	}
+	return hydraToken.AccessToken, nil
+}
 
 // Discover a target using API
 // This function is called by turboctl which is not being maintained

@@ -10,13 +10,17 @@ type Config struct {
 	// For Basic authentication.
 	basicAuth *BasicAuthentication
 	// For proxy
-	proxy string
+	proxy        string
+	clientId     string
+	clientSecret string
 }
 
 type ConfigBuilder struct {
 	serverAddress *url.URL
 	basicAuth     *BasicAuthentication
 	proxy         string
+	clientId      string
+	clientSecret  string
 }
 
 func NewConfigBuilder(serverAddress *url.URL) *ConfigBuilder {
@@ -27,6 +31,16 @@ func NewConfigBuilder(serverAddress *url.URL) *ConfigBuilder {
 
 func (cb *ConfigBuilder) SetProxy(proxy string) *ConfigBuilder {
 	cb.proxy = proxy
+	return cb
+}
+
+func (cb *ConfigBuilder) SetClientId(clientId string) *ConfigBuilder {
+	cb.clientId = clientId
+	return cb
+}
+
+func (cb *ConfigBuilder) SetClientSecret(clientSecret string) *ConfigBuilder {
+	cb.clientSecret = clientSecret
 	return cb
 }
 
@@ -43,5 +57,7 @@ func (cb *ConfigBuilder) Create() *Config {
 		serverAddress: cb.serverAddress,
 		basicAuth:     cb.basicAuth,
 		proxy:         cb.proxy,
+		clientId:      cb.clientId,
+		clientSecret:  cb.clientSecret,
 	}
 }

@@ -30,6 +30,10 @@ func (targetInfo *TurboTargetInfo) TargetIdentifierField() string {
 	return targetInfo.targetIdentifierField
 }
 
+func (targetInfo *TurboTargetInfo) AccountValues() []*proto.AccountValue {
+	return targetInfo.accountValues
+}
+
 func (targetInfo *TurboTargetInfo) String() string {
 	return targetInfo.targetCategory + " " + targetInfo.targetType +
 		" [" + targetInfo.targetIdentifierField + "]"
