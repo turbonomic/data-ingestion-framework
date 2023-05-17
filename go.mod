@@ -9,7 +9,7 @@ require (
 	github.com/golang/protobuf v1.5.2
 	github.com/stretchr/testify v1.7.0
 	github.com/tamerh/jsparser v1.2.0
-	github.com/turbonomic/turbo-go-sdk v0.0.0-20230426193838-3d42e481fec9
+	github.com/turbonomic/turbo-go-sdk v0.0.0-20230515144533-347e2f4f3597
 	gopkg.in/yaml.v2 v2.4.0
 	k8s.io/apimachinery v0.22.2
 	k8s.io/client-go v0.22.2

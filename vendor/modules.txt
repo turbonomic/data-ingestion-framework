@@ -65,7 +65,7 @@ github.com/tamerh/jsparser
 ## explicit
 github.com/turbonomic/turbo-api/pkg/api
 github.com/turbonomic/turbo-api/pkg/client
-# github.com/turbonomic/turbo-go-sdk v0.0.0-20230426193838-3d42e481fec9
+# github.com/turbonomic/turbo-go-sdk v0.0.0-20230515144533-347e2f4f3597
 ## explicit; go 1.13
 github.com/turbonomic/turbo-go-sdk/pkg
 github.com/turbonomic/turbo-go-sdk/pkg/builder

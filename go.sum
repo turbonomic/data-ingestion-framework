@@ -186,8 +186,8 @@ github.com/tamerh/jsparser v1.2.0 h1:TEAFLRnYx/u4nz1wE1r5hRp3dK43+gQGUj/ZaK3GYbY
 github.com/tamerh/jsparser v1.2.0/go.mod h1:Dbrn+kGS04Vak3MYe5YpN9/mwh7QWecqBLxBw3T8vSw=
 github.com/turbonomic/turbo-api v0.0.0-20221010220448-3f35ebf030aa h1:x7AkF/BAbvyJWeUd69UGqGIU96Izlz9oy9rpvsonqVI=
 github.com/turbonomic/turbo-api v0.0.0-20221010220448-3f35ebf030aa/go.mod h1:L3eNZzTD3Iw8GV+cfeJD/lfDaEGPbZZGQrtml71yG10=
-github.com/turbonomic/turbo-go-sdk v0.0.0-20230426193838-3d42e481fec9 h1:drCOeXNVkAEm/FNngouf6mS3237eKZPc1EXn10KSqi8=
-github.com/turbonomic/turbo-go-sdk v0.0.0-20230426193838-3d42e481fec9/go.mod h1:RWvXz62oL7Yhkw+WRdDRdOEZSsm8f0vR3xvsgSU9ohM=
+github.com/turbonomic/turbo-go-sdk v0.0.0-20230515144533-347e2f4f3597 h1:IFPWW2YzJRi6fYoVeuOljufXcXuE0tNPYaDf7K/tOQ0=
+github.com/turbonomic/turbo-go-sdk v0.0.0-20230515144533-347e2f4f3597/go.mod h1:RWvXz62oL7Yhkw+WRdDRdOEZSsm8f0vR3xvsgSU9ohM=
 github.com/yuin/goldmark v1.1.27/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.2.1/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 go.opencensus.io v0.21.0/go.mod h1:mSImk1erAIZhrmZN+AvHh14ztQfjbGwt4TtuofqLduU=
