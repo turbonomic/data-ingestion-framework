@@ -9,14 +9,14 @@ require (
 	github.com/golang/protobuf v1.5.2
 	github.com/stretchr/testify v1.7.0
 	github.com/tamerh/jsparser v1.2.0
-	github.com/turbonomic/turbo-go-sdk v0.0.0-20211022143620-fa99bd8922e7
+	github.com/turbonomic/turbo-go-sdk v0.0.0-20230515144533-347e2f4f3597
 	gopkg.in/yaml.v2 v2.4.0
 	k8s.io/apimachinery v0.22.2
 	k8s.io/client-go v0.22.2
 )
 
 require (
-	github.com/avast/retry-go v2.6.0+incompatible // indirect
+	github.com/avast/retry-go v3.0.0+incompatible // indirect
 	github.com/go-logr/logr v0.4.0 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/google/go-cmp v0.5.5 // indirect
@@ -27,7 +27,7 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/turbonomic/turbo-api v0.0.0-20210715215202-c125bbe789ca // indirect
+	github.com/turbonomic/turbo-api v0.0.0-20221010220448-3f35ebf030aa // indirect
 	golang.org/x/net v0.7.0 // indirect
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d // indirect
 	golang.org/x/sys v0.5.0 // indirect

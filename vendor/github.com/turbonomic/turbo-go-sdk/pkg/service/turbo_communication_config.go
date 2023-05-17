@@ -29,9 +29,10 @@ func (rc *RestAPIConfig) ValidRestAPIConfig() error {
 
 // Configuration parameters for communicating with the Turbo server
 type TurboCommunicationConfig struct {
-	mediationcontainer.ServerMeta      `json:"serverMeta,omitempty"`
-	mediationcontainer.WebSocketConfig `json:"websocketConfig,omitempty"`
-	RestAPIConfig                      `json:"restAPIConfig,omitempty"`
+	mediationcontainer.ServerMeta        `json:"serverMeta,omitempty"`
+	mediationcontainer.WebSocketConfig   `json:"websocketConfig,omitempty"`
+	RestAPIConfig                        `json:"restAPIConfig,omitempty"`
+	mediationcontainer.SdkProtocolConfig `json:"sdkProtocolConfig,omitempty"`
 }
 
 func (turboCommConfig *TurboCommunicationConfig) ValidateTurboCommunicationConfig() error {
@@ -45,7 +46,24 @@ func (turboCommConfig *TurboCommunicationConfig) ValidateTurboCommunicationConfi
 	if err := turboCommConfig.ValidRestAPIConfig(); err != nil {
 		return err
 	}
+	if err := turboCommConfig.ValidateSdkProtocolConfig(); err != nil {
+		return err
+	}
 	return nil
+}
+
+func (turboCommConfig *TurboCommunicationConfig) SecureModeCredentialsProvided() bool {
+	if len(turboCommConfig.ClientSecret) > 0 && len(turboCommConfig.ClientId) > 0 {
+		return true
+	}
+	return false
+}
+
+func (turboCommConfig *TurboCommunicationConfig) TurboAPICredentialsProvided() bool {
+	if len(turboCommConfig.OpsManagerUsername) > 0 && len(turboCommConfig.OpsManagerPassword) > 0 {
+		return true
+	}
+	return false
 }
 
 func ParseTurboCommunicationConfig(configFile string) (*TurboCommunicationConfig, error) {
@@ -55,7 +73,7 @@ func ParseTurboCommunicationConfig(configFile string) (*TurboCommunicationConfig
 		return nil, err
 	}
 	glog.V(3).Infof("TurboCommunicationConfig Config: %v", turboCommConfig)
-
+	glog.Infof("TurboCommunicationConfig Config: %v", turboCommConfig)
 	if err := turboCommConfig.ValidateTurboCommunicationConfig(); err != nil {
 		return nil, err
 	}

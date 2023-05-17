@@ -13,18 +13,26 @@ import (
 var (
 	API                   = "api"
 	TopologyProcessor     = "topology-processor"
+	HYDRA                 = "hydra"
+	AUTH                  = "auth"
 	APIPath               = "/vmturbo/rest/"
 	TopologyProcessorPath = "/"
+	HydraPath             = "/vmturbo/hydra/"
+	AuthPath              = "/vmturbo/auth/"
 
 	defaultRESTAPIEndpoints = map[string]string{
 		API:               APIPath,
 		TopologyProcessor: TopologyProcessorPath,
+		HYDRA:             HydraPath,
+		AUTH:              AuthPath,
 	}
 )
 
 type Client interface {
 	AddTarget(target *api.Target) error
 	DiscoverTarget(uuid string) (*Result, error)
+	GetHydraAccessToken() (string, error)
+	GetJwtToken(hydraToken string) (string, error)
 }
 
 // TurboClient manages REST clients to Turbonomic services
@@ -75,13 +83,13 @@ func NewTurboClient(c *Config) (*TurboClient, error) {
 	}
 	for service, endpoint := range defaultRESTAPIEndpoints {
 		turboClient.clients[service] = newClient(httpClient, c.serverAddress,
-			c.basicAuth, service, endpoint)
+			c.basicAuth, service, endpoint, c.clientId, c.clientSecret)
 	}
 	return turboClient, nil
 }
 
 func newClient(client *http.Client, baseURL *url.URL, basicAuth *BasicAuthentication,
-	service, endpoint string) Client {
+	service, endpoint, clientId, clientSecret string) Client {
 	restClient := NewRESTClient(client, baseURL, endpoint).BasicAuthentication(basicAuth)
 	if service == TopologyProcessor {
 		// Create a Turbo client without authentication
@@ -92,8 +100,26 @@ func newClient(client *http.Client, baseURL *url.URL, basicAuth *BasicAuthentica
 	// Create a Turbo client based on basic authentication
 	return &APIClient{
 		restClient.BasicAuthentication(basicAuth),
-		nil,
+		nil, clientId, clientSecret,
 	}
+}
+
+// GetHydraAccessToken gets the access token from Hydra service
+func (turboClient *TurboClient) GetHydraAccessToken() (string, error) {
+	client, ok := turboClient.clients[HYDRA]
+	if !ok {
+		return "", fmt.Errorf("client for service %v is not registered", HYDRA)
+	}
+	return client.GetHydraAccessToken()
+}
+
+// GetJwtToken gets the JwtToken from Hydra access token
+func (turboClient *TurboClient) GetJwtToken(hydraToken string) (string, error) {
+	client, ok := turboClient.clients[AUTH]
+	if !ok {
+		return "", fmt.Errorf("client for service %v is not registered", AUTH)
+	}
+	return client.GetJwtToken(hydraToken)
 }
 
 // AddTarget adds a target via a given service

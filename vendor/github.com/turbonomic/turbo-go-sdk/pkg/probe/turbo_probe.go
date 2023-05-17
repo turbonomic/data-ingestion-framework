@@ -31,6 +31,7 @@ type ProbeRegistrationAgent struct {
 	IActionPolicyProvider
 	IEntityMetadataProvider
 	IActionMergePolicyProvider
+	ISecureProbeTargetProvider
 }
 
 type TurboRegistrationClient interface {
@@ -268,6 +269,13 @@ func (theProbe *TurboProbe) GetProbeInfo() (*proto.ProbeInfo, error) {
 	// 8. action merge policy metadata
 	if registrationClient.IActionMergePolicyProvider != nil {
 		probeInfoBuilder.WithActionMergePolicySet(registrationClient.GetActionMergePolicy())
+	}
+
+	// 9. default secure target - only if the target identifier is provided
+	if registrationClient.ISecureProbeTargetProvider != nil {
+		if len(registrationClient.GetTargetIdentifier()) > 0 {
+			probeInfoBuilder.WithSecureTarget(registrationClient.GetSecureProbeTarget())
+		}
 	}
 
 	probeInfo := probeInfoBuilder.Create()

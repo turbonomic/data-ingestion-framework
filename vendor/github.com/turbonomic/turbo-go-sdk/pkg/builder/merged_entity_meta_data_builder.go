@@ -238,6 +238,7 @@ type MergedEntityMetadataBuilder struct {
 	fieldBuilders               []*fieldBuilder
 	commBoughtMetadataList      []*commodityBoughtMetadataBuilder // for different providers
 	commoditiesSoldMetadataList []*commoditySoldMetadataBuilder
+	mergePropertiesStrategy     proto.MergedEntityMetadata_MergePropertiesStrategy
 }
 
 // NewMergedEntityMetadataBuilder initializes a MergedEntityMetadataBuilder object
@@ -246,6 +247,7 @@ func NewMergedEntityMetadataBuilder() *MergedEntityMetadataBuilder {
 		metadata:                &proto.MergedEntityMetadata{},
 		matchingMetadataBuilder: newMatchingMetadataBuilder(),
 		keepStandAlone:          true,
+		mergePropertiesStrategy: proto.MergedEntityMetadata_MERGE_NOTHING,
 	}
 
 	return builder
@@ -261,7 +263,8 @@ func (builder *MergedEntityMetadataBuilder) Build() (*proto.MergedEntityMetadata
 	mergedEntityMetadata := &proto.MergedEntityMetadata{
 		KeepStandalone: &builder.keepStandAlone,
 		// Add the internal and external property matching metadata
-		MatchingMetadata: matchingMetadata,
+		MatchingMetadata:        matchingMetadata,
+		MergePropertiesStrategy: &builder.mergePropertiesStrategy,
 	}
 
 	// Add commodities sold list
@@ -297,6 +300,22 @@ func (builder *MergedEntityMetadataBuilder) Build() (*proto.MergedEntityMetadata
 // By default (if this function is not called) an entity is kept in the topology if no stitching match is found.
 func (builder *MergedEntityMetadataBuilder) KeepInTopology(keepInTopology bool) *MergedEntityMetadataBuilder {
 	builder.keepStandAlone = keepInTopology
+	return builder
+}
+
+// WithMergePropertiesStrategy defines the merge strategy for properties for stitched entities. We currntly support
+// the following strategies:
+//   1. MERGE_NOTHING: properties of the "onto" entity are preserved and no property merging is applied. This
+//      strategy should be used when we know for sure that all targets discover the same set of properties for
+//      each shared entity.
+//   2. MERGE_IF_NOT_PRESENT: the resulting property list is a union of all properties from all EntityDTOs. When a
+//      property exists in both the "from" and "onto" entities, the "onto" entity values will be preserved.
+//   3. MERGE_AND_OVERWRITE: The resulting property list is a union of all properties from all EntityDTOs. When a
+//      property exists in both the "from" and "onto" entities, the "from" entity values will overwrite those
+//      of the "onto" entity.
+// By default, the MERGE_NOTHING merge strategy is used.
+func (builder *MergedEntityMetadataBuilder) WithMergePropertiesStrategy(mergePropertiesStrategy proto.MergedEntityMetadata_MergePropertiesStrategy) *MergedEntityMetadataBuilder {
+	builder.mergePropertiesStrategy = mergePropertiesStrategy
 	return builder
 }
 
