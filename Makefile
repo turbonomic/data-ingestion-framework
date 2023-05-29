@@ -62,5 +62,5 @@ multi-archs:
 docker-buildx:
 	docker buildx create --name turbodif-builder
 	- docker buildx use turbodif-builder
-	- docker buildx build --platform=$(PLATFORMS) --label "git-commit=$(GIT_COMMIT)" --push --tag $(REPO_NAME)/turbodif:$(VERSION) -f build/Dockerfile.multi-archs --build-arg VERSION=$(VERSION) .
+	- docker buildx build --platform=$(PLATFORMS) --label "git-commit=$(GIT_COMMIT)" --label "git-version=$(VERSION)" --provenance=false --push --tag $(REPO_NAME)/turbodif:$(VERSION) -f build/Dockerfile.multi-archs --build-arg VERSION=$(VERSION) .
 	docker buildx rm turbodif-builder
