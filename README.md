@@ -8,7 +8,7 @@ The custom entities and entity metrics are declared in a predefined JSON format.
 ![image](https://user-images.githubusercontent.com/10012486/88306380-a6b36b80-ccd8-11ea-9236-063577d60430.png)
 
 ## DIF JSON Examples
-For detailed documentation on the JSON schema, see [here](https://docs.turbonomic.com/docApp/doc/indexDIF.html?config=DIF).
+For detailed documentation on the JSON schema, see [here](https://www.ibm.com/docs/en/tarm/8.9.1?topic=framework-dif-schema-files#Schema_Files__dif-topology-schema).
 
 #### A proxy Virtual Machine entity with VMEM metric
 ```json
