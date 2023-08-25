@@ -7,7 +7,6 @@ ADD . ./
 RUN make multi-archs
 
 FROM registry.access.redhat.com/ubi8-minimal
-MAINTAINER Turbonomic <turbodeploy@turbonomic.com>
 ARG TARGETPLATFORM
 
 # Required OpenShift Labels
