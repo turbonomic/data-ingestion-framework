@@ -15,14 +15,13 @@ go:
 go_import_path: github.com/turbonomic/data-ingestion-framework
 
 before_install:
-  - go install -v github.com/mattn/goveralls@HEAD
   - go mod vendor
 
 script:
   - make fmtcheck
   - make vet
   - make product
-  - $HOME/gopath/bin/goveralls -v -race -service=travis-ci
+  - make test
 
 after_success:
   - |
