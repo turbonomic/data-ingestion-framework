@@ -1,0 +1,16 @@
+FROM centos
+
+# Setup vsftpd
+RUN yum -y update && yum clean all
+RUN yum -y install vsftpd
+RUN rm -f /etc/vsftpd/vsftpd.conf
+COPY ./vsftpd.conf /etc/vsftpd/
+COPY ./start_vsftpd.sh /usr/sbin
+RUN chmod +x /usr/sbin/start_vsftpd.sh
+
+# Set up port and internal firewall
+EXPOSE 21
+EXPOSE 30020
+EXPOSE 30021
+
+ENTRYPOINT sh /usr/sbin/start_vsftpd.sh && while true; do sleep 30; done;
