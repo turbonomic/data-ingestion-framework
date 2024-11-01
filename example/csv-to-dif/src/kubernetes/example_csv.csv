@@ -1,0 +1,4 @@
+Application Name,Entity Name,Entity Type,VM IP Address,Parent Name,Parent Type,Mem Used,Mem Capacity,CPU Used,CPU Capacity,DB Cache Hit Rate,DB Cache Hit Rate Capacity
+App1,Service1,service,,App1,businessApp,,,,,,,
+App1,Database1,databaseServer,,Service1,service,,,,,244,500
+App1,VM1,virtualMachine,0.0.0.0,Database1,databaseServer,1572864,1677216,786,5000,,
