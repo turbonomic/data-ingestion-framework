@@ -1,0 +1,4 @@
+azure-loganalytics
+msal
+msrest
+pyyaml
