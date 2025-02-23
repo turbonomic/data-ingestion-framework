@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: csv-to-dif-config
+  namespace: turbointegrations
+  labels:
+    environment: nonprod
+    team: integration
+    app: csv-to-dif-app
+    version: 1.0.0
+data:
+  config.json: |
+    {
+      "CSV_LOCATION": "AWS",
+      "INPUT_CSV_NAME": "example_csv.csv",
+      "APP_PREFIX": "DIF_",
+      "ENTITY_FIELD_MAP": {
+        "app_name": "Application Name",
+        "entity_name": "Entity Name",
+        "entity_type": "Entity Type",
+        "entity_ip": "VM IP Address",
+        "parent_name": "Parent Name",
+        "parent_type": "Parent Type"
+      },
+      "METRIC_FIELD_MAP": {
+        "memory_average": "Mem Used",
+        "memory_capacity": "Mem Capacity",
+        "cpu_average": "CPU Used",
+        "cpu_capacity": "CPU Capacity",
+        "cacheHitRate_average": "DB Cache Hit Rate",
+        "cacheHitRate_capacity": "DB Cache Hit Rate Capacity",
+      },
+      "LOG_DIR": "",
+      "LOG_FILE": "",
+      "LOG_LEVEL": "INFO"
+    }
