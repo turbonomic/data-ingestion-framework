@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: azure-loganalytics
+  labels:
+    app: azure-loganalytics
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: azure-loganalytics
+  template:
+    metadata:
+      labels:
+        app: azure-loganalytics
+    spec:
+      containers:
+        - image: turbonomic/azure-loganalytics-python
+          imagePullPolicy: Always
+          name: azure-loganalytics
+          env:
+            - name: AZURE_LOG_ANALYTICS_WORKSPACES
+              value: <WORKSPACE_IDS_SEPARATED_BY_COMMA>
+            - name: TARGET_ID
+              value: azure-target
+          ports:
+            - containerPort: 8081
+          volumeMounts:
+            - name: varlog
+              mountPath: /var/log
+            - name: azure-secrets
+              mountPath: /etc/targets
+              readOnly: true
+      volumes:
+        - name: varlog
+          emptyDir: {}
+        - name: azure-secrets
+          secret:
+            secretName: "azure"
+            optional: true
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: azure-loganalytics
+  labels:
+    app: azure-loganalytics
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8081
+      targetPort: 8081
+      protocol: TCP
+      name: tcp-azure-loganalytics
+  selector:
+    app: azure-loganalytics
