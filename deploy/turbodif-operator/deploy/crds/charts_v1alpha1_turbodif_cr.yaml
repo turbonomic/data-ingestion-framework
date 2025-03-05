@@ -1,0 +1,31 @@
+apiVersion: charts.helm.k8s.io/v1alpha1
+kind: Turbodif
+metadata:
+  name: turbodif-release
+spec:
+  # Default values copied from <project_dir>/helm-charts/turbodif/values.yaml
+
+  # Default values for turbodif.
+  # This is a YAML-formatted file.
+  # Declare variables to be passed into your templates.
+
+  # Turbo server version and address
+  serverMeta:
+    version: 8.0
+    turboServer: https://Turbo_server_URL
+
+  # Turbonomic server api user and password
+  # The opsManagerUserName requires Turbo administrator role
+  #restAPIConfig:
+    #turbonomicCredentialsSecretName: "turbonomic-credentials"
+    #opsManagerUserName: Turbo_username
+    #opsManagerPassword: Turbo_password
+
+  # Command line arguments
+  args:
+    # Logging level 2 to 4
+    logginglevel: 2
+    # When set to true, ignore merging a commodity if a commodity of the same type already exists
+    #ignoreCommodityIfPresent: false
+    # The discovery interval in seconds for running the probe
+    #discoveryIntervalSec: 600

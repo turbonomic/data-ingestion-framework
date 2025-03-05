@@ -1,0 +1,33 @@
+# Default values for turbodif.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# Replace the image with desired version
+image:
+  repository: turbonomic/turbodif
+  tag: 8.4.4
+  pullPolicy: IfNotPresent
+
+#nameOverride: ""
+#fullnameOverride: ""
+
+# Turbo server version and address
+serverMeta:
+  version: 8.0
+  turboServer: https://Turbo_server_URL
+
+# Turbonomic server api user and password
+# The opsManagerUserName requires Turbo administrator role
+restAPIConfig:
+  turbonomicCredentialsSecretName: "turbonomic-credentials"
+  opsManagerUserName: Turbo_username
+  opsManagerPassword: Turbo_password
+
+args:
+  # logging level
+  logginglevel: 2
+  # When set to true, ignore merging a commodity if a commodity of the same type already exists
+  ignoreCommodityIfPresent: false
+  # The discovery interval in seconds for running the probe
+  discoveryIntervalSec: 600
+
