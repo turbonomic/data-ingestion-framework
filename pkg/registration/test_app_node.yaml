@@ -1,0 +1,49 @@
+supplyChainNode:
+  - templateClass: APPLICATION_COMPONENT
+    templateType: BASE
+    templatePriority: -1
+    commoditySold:
+      - commodityType: TRANSACTION
+        optional: true
+      - commodityType: RESPONSE_TIME
+        optional: true
+      - commodityType: KPI
+        key: key-placeholder
+        optional: true
+      - commodityType: APPLICATION
+        key: key-placeholder
+      - commodityType: HEAP
+        optional: true
+        chargedBySold:
+          - REMAINING_GC_CAPACITY
+      - commodityType: REMAINING_GC_CAPACITY
+        optional: true
+      - commodityType: THREADS
+        optional: true
+        chargedByBought:
+          - VCPU
+    commodityBought:
+      - key:
+          templateClass: VIRTUAL_MACHINE
+          providerType: HOSTING
+          cardinalityMax: 1
+          cardinalityMin: 1
+        value:
+          - commodityType: VCPU
+          - commodityType: VMEM
+    mergedEntityMetaData:
+      keepStandalone: false
+      matchingMetadata:
+        matchingData:
+          - matchingProperty:
+              propertyName: IP
+        externalEntityMatchingProperty:
+          - matchingProperty:
+              propertyName: IP
+      commoditiesSold:
+        - RESPONSE_TIME
+        - TRANSACTION
+        - HEAP
+        - REMAINING_GC_CAPACITY
+        - THREADS
+        - KPI

@@ -1,0 +1,14 @@
+FROM turbointegrations/base
+
+# Setup directory and scripts
+RUN mkdir -p /opt/turbonomic/data
+RUN mkdir -p /opt/turbonomic/config
+COPY ./csv_to_dif.py /opt/turbonomic
+
+# Download required Python packages
+RUN python -m pip install turbodif
+RUN python -m pip install boto3
+RUN python -m pip install azure.storage.blob
+
+EXPOSE 8081
+ENTRYPOINT python /opt/turbonomic/csv_to_dif.py /opt/turbonomic/config/config.json

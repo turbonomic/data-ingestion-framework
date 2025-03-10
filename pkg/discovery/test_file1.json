@@ -1,0 +1,118 @@
+{
+ "version": "v1",
+ "updateTime": 0,
+ "scope": "test",
+ "source": "10.10.10.10",
+ "topology": [
+  {
+   "uniqueId": "app-1",
+   "type": "application",
+   "name": "app-1",
+   "hostedOn": {
+    "hostType": [
+     "virtualMachine"
+    ],
+    "ipAddress": "1.1.1.1",
+    "hostUuid": ""
+   },
+   "matchIdentifiers": {
+    "ipAddress": "1.1.1.1"
+   },
+   "partOf": [
+    {
+     "entity": "service",
+     "uniqueId": "service-1"
+    }
+   ],
+   "metrics": null
+  },
+  {
+   "uniqueId": "app-2",
+   "type": "application",
+   "name": "app-2",
+   "hostedOn": {
+    "hostType": [
+     "virtualMachine"
+    ],
+    "ipAddress": "1.1.1.1",
+    "hostUuid": ""
+   },
+   "matchIdentifiers": {
+    "ipAddress": "1.1.1.1"
+   },
+   "partOf": [
+    {
+     "entity": "service",
+     "uniqueId": "service-1"
+    }
+   ],
+   "metrics": null
+  },
+  {
+   "uniqueId": "app-3",
+   "type": "application",
+   "name": "app-3",
+   "hostedOn": {
+    "hostType": [
+     "virtualMachine"
+    ],
+    "ipAddress": "1.1.1.1",
+    "hostUuid": ""
+   },
+   "matchIdentifiers": {
+    "ipAddress": "1.1.1.1"
+   },
+   "partOf": [
+    {
+     "entity": "service",
+     "uniqueId": "service-1"
+    }
+   ],
+   "metrics": null
+  },
+  {
+   "uniqueId": "app-4",
+   "type": "application",
+   "name": "app-4",
+   "hostedOn": {
+    "hostType": [
+     "virtualMachine"
+    ],
+    "ipAddress": "1.1.1.1",
+    "hostUuid": ""
+   },
+   "matchIdentifiers": {
+    "ipAddress": "1.1.1.1"
+   },
+   "partOf": [
+    {
+     "entity": "service",
+     "uniqueId": "service-1"
+    }
+   ],
+   "metrics": null
+  },
+  {
+   "uniqueId": "app-5",
+   "type": "application",
+   "name": "app-5",
+   "hostedOn": {
+    "hostType": [
+     "virtualMachine"
+    ],
+    "ipAddress": "1.1.1.1",
+    "hostUuid": ""
+   },
+   "matchIdentifiers": {
+    "ipAddress": "1.1.1.1"
+   },
+   "partOf": [
+    {
+     "entity": "service",
+     "uniqueId": "service-1"
+    }
+   ],
+   "metrics": null
+  }
+ ]
+}

@@ -1,0 +1,642 @@
+supplyChainNode:
+  - templateClass: BUSINESS_APPLICATION
+    templateType: BASE
+    templatePriority: -1
+    commoditySold:
+      - commodityType: TRANSACTION
+        optional: true
+      - commodityType: RESPONSE_TIME
+        optional: true
+      - commodityType: KPI
+        key: key-placeholder
+        optional: true
+    commodityBought:
+      - key:
+          templateClass: SERVICE
+          providerType: LAYERED_OVER
+          cardinalityMax: 2147483647
+          cardinalityMin: 0
+        value:
+          - commodityType: TRANSACTION
+            optional: true
+          - commodityType: RESPONSE_TIME
+            optional: true
+          - commodityType: APPLICATION
+            key: key-placeholder
+          - commodityType: KPI
+            key: key-placeholder
+            optional: true
+      - key:
+          templateClass: BUSINESS_TRANSACTION
+          providerType: LAYERED_OVER
+          cardinalityMax: 2147483647
+          cardinalityMin: 0
+        value:
+          - commodityType: TRANSACTION
+            optional: true
+          - commodityType: RESPONSE_TIME
+            optional: true
+          - commodityType: APPLICATION
+            key: key-placeholder
+          - commodityType: KPI
+            key: key-placeholder
+            optional: true
+    mergedEntityMetaData:
+      keepStandalone: false
+      matchingMetadata:
+        matchingData:
+          - matchingProperty:
+              propertyName: IP
+        externalEntityMatchingProperty:
+          - matchingField:
+              fieldName: id
+      commoditiesSold:
+        - RESPONSE_TIME
+        - TRANSACTION
+        - KPI
+  - templateClass: BUSINESS_TRANSACTION
+    templateType: BASE
+    templatePriority: -1
+    commoditySold:
+      - commodityType: TRANSACTION
+        optional: true
+      - commodityType: RESPONSE_TIME
+        optional: true
+      - commodityType: APPLICATION
+        key: key-placeholder
+      - commodityType: KPI
+        key: key-placeholder
+        optional: true
+    commodityBought:
+      - key:
+          templateClass: SERVICE
+          providerType: LAYERED_OVER
+          cardinalityMax: 2147483647
+          cardinalityMin: 0
+        value:
+          - commodityType: TRANSACTION
+            optional: true
+          - commodityType: RESPONSE_TIME
+            optional: true
+          - commodityType: APPLICATION
+            key: key-placeholder
+          - commodityType: KPI
+            key: key-placeholder
+            optional: true
+    mergedEntityMetaData:
+      keepStandalone: false
+      matchingMetadata:
+        matchingData:
+          - matchingProperty:
+              propertyName: IP
+        externalEntityMatchingProperty:
+          - matchingField:
+              fieldName: id
+      commoditiesSold:
+        - RESPONSE_TIME
+        - TRANSACTION
+        - KPI
+  - templateClass: SERVICE
+    templateType: BASE
+    templatePriority: -1
+    commoditySold:
+      - commodityType: TRANSACTION
+        optional: true
+      - commodityType: RESPONSE_TIME
+        optional: true
+      - commodityType: SERVICE_TIME
+        optional: true
+      - commodityType: QUEUING_TIME
+        optional: true
+      - commodityType: CONCURRENT_QUERIES
+        optional: true
+      - commodityType: LLM_CACHE
+        optional: true
+      - commodityType: APPLICATION
+        key: key-placeholder
+      - commodityType: KPI
+        key: key-placeholder
+        optional: true
+    commodityBought:
+      - key:
+          templateClass: APPLICATION_COMPONENT
+          providerType: LAYERED_OVER
+          cardinalityMax: 2147483647
+          cardinalityMin: 0
+        value:
+          - commodityType: TRANSACTION
+            optional: true
+          - commodityType: RESPONSE_TIME
+            optional: true
+          - commodityType: SERVICE_TIME
+            optional: true
+          - commodityType: QUEUING_TIME
+            optional: true
+          - commodityType: CONCURRENT_QUERIES
+            optional: true
+          - commodityType: LLM_CACHE
+            optional: true
+          - commodityType: APPLICATION
+            key: key-placeholder
+          - commodityType: KPI
+            key: key-placeholder
+            optional: true
+      - key:
+          templateClass: DATABASE_SERVER
+          providerType: LAYERED_OVER
+          cardinalityMax: 2147483647
+          cardinalityMin: 0
+        value:
+          - commodityType: TRANSACTION
+            optional: true
+          - commodityType: RESPONSE_TIME
+            optional: true
+          - commodityType: APPLICATION
+            key: key-placeholder
+          - commodityType: KPI
+            key: key-placeholder
+            optional: true
+  - templateClass: APPLICATION_COMPONENT
+    templateType: BASE
+    templatePriority: -1
+    commoditySold:
+      - commodityType: TRANSACTION
+        optional: true
+      - commodityType: RESPONSE_TIME
+        optional: true
+      - commodityType: SERVICE_TIME
+        optional: true
+      - commodityType: QUEUING_TIME
+        optional: true
+      - commodityType: LLM_CACHE
+        optional: true
+      - commodityType: CONCURRENT_QUERIES
+        optional: true
+      - commodityType: KPI
+        key: key-placeholder
+        optional: true
+      - commodityType: APPLICATION
+        key: key-placeholder
+      - commodityType: HEAP
+        optional: true
+        chargedBySold:
+          - REMAINING_GC_CAPACITY
+      - commodityType: REMAINING_GC_CAPACITY
+        optional: true
+      - commodityType: THREADS
+        optional: true
+        chargedByBought:
+          - VCPU
+    commodityBought:
+      - key:
+          templateClass: VIRTUAL_MACHINE
+          providerType: HOSTING
+          cardinalityMax: 1
+          cardinalityMin: 1
+        value:
+          - commodityType: VCPU
+            optional: true
+          - commodityType: VMEM
+            optional: true
+          - commodityType: APPLICATION
+            key: key-placeholder
+      - key:
+          templateClass: CONTAINER
+          providerType: LAYERED_OVER
+          cardinalityMax: 1
+          cardinalityMin: 1
+        value:
+          - commodityType: VCPU
+            optional: true
+          - commodityType: VMEM
+            optional: true
+          - commodityType: GPU
+            optional: true
+            key: key-placeholder
+          - commodityType: GPU_MEM
+            optional: true
+          - commodityType: GPU_REQUEST
+            optional: true
+            key: key-placeholder
+          - commodityType: ENERGY
+            optional: true
+          - commodityType: APPLICATION
+            key: key-placeholder
+    mergedEntityMetaData:
+      keepStandalone: false
+      matchingMetadata:
+        matchingData:
+          - matchingProperty:
+              propertyName: IP
+          - matchingProperty:
+              propertyName: KubernetesFullyQualifiedName
+        externalEntityMatchingProperty:
+          - matchingProperty:
+              propertyName: IP
+            delimiter: ","
+          - matchingProperty:
+              propertyName: KubernetesFullyQualifiedName
+      commoditiesSold:
+        - RESPONSE_TIME
+        - TRANSACTION
+        - HEAP
+        - REMAINING_GC_CAPACITY
+        - THREADS
+        - KPI
+        - SERVICE_TIME
+        - QUEUING_TIME
+        - LLM_CACHE
+        - CONCURRENT_QUERIES
+      commoditiesBought:
+        - providerType: CONTAINER
+          commodityMetadata:
+          - GPU
+          - GPU_MEM
+          - GPU_REQUEST
+          - ENERGY
+  - templateClass: DATABASE_SERVER
+    templateType: BASE
+    templatePriority: -1
+    commoditySold:
+      - commodityType: TRANSACTION
+        optional: true
+      - commodityType: RESPONSE_TIME
+        optional: true
+      - commodityType: APPLICATION
+        key: key-placeholder
+      - commodityType: KPI
+        key: key-placeholder
+        optional: true
+      - commodityType: CONNECTION
+        optional: true
+      - commodityType: DB_MEM
+        optional: true
+        chargedBySold:
+          - DB_CACHE_HIT_RATE
+      - commodityType: DB_CACHE_HIT_RATE
+        optional: true
+    commodityBought:
+      - key:
+          templateClass: VIRTUAL_MACHINE
+          providerType: HOSTING
+          cardinalityMax: 1
+          cardinalityMin: 1
+        value:
+          - commodityType: VCPU
+            optional: true
+          - commodityType: VMEM
+            optional: true
+          - commodityType: APPLICATION
+            key: key-placeholder
+    mergedEntityMetaData:
+      keepStandalone: false
+      matchingMetadata:
+        matchingData:
+          - matchingProperty:
+              propertyName: IP
+          - matchingProperty:
+              propertyName: KubernetesFullyQualifiedName
+        externalEntityMatchingProperty:
+          - matchingProperty:
+              propertyName: IP
+          - matchingProperty:
+              propertyName: KubernetesFullyQualifiedName
+      commoditiesSold:
+        - RESPONSE_TIME
+        - TRANSACTION
+        - DB_MEM
+        - DB_CACHE_HIT_RATE
+        - CONNECTION
+        - KPI
+  - templateClass: VIRTUAL_MACHINE
+    templateType: BASE
+    templatePriority: -2
+    commoditySold:
+      - commodityType: VCPU
+        optional: true
+      - commodityType: VMEM
+        optional: true
+      - commodityType: GPU
+        optional: true
+        key: key-placeholder
+      - commodityType: GPU_MEM
+        optional: true
+      - commodityType: GPU_REQUEST
+        optional: true
+        key: key-placeholder
+      - commodityType: CLUSTER
+        key: key-placeholder
+    commodityBought:
+      - key:
+          templateClass: CONTAINER_PLATFORM_CLUSTER
+          providerType: LAYERED_OVER
+          cardinalityMax: 1
+          cardinalityMin: 0
+        value:
+          - commodityType: VCPU
+            optional: true
+          - commodityType: VMEM
+            optional: true
+          - commodityType: GPU
+            optional: true
+            key: key-placeholder
+          - commodityType: GPU_MEM
+            optional: true
+    mergedEntityMetaData:
+      keepStandalone: false
+      matchingMetadata:
+        matchingData:
+          - matchingProperty:
+              propertyName: IP
+            delimiter: ","
+          - matchingProperty:
+              propertyName: KubernetesFullyQualifiedName
+            delimiter: ","
+        externalEntityMatchingProperty:
+          - matchingField:
+              messagePath:
+                - virtual_machine_data
+              fieldName: ipAddress
+            delimiter: ","
+          - matchingProperty:
+              propertyName: KubernetesFullyQualifiedName
+            delimiter: ","
+      commoditiesSold:
+        - APPLICATION
+        - VCPU
+        - VMEM
+        - GPU
+        - GPU_MEM
+        - GPU_REQUEST
+        - CLUSTER
+  - templateClass: CONTAINER
+    templateType: BASE
+    templatePriority: -1
+    commoditySold:
+      - commodityType: GPU
+        resold: true
+        optional: true
+        key: key-placeholder
+      - commodityType: GPU_MEM
+        resold: true
+        optional: true
+      - commodityType: GPU_REQUEST
+        resold: true
+        optional: true
+        key: key-placeholder
+      - commodityType: ENERGY
+        resold: true
+        optional: true
+      - commodityType: APPLICATION
+        key: key-placeholder
+    commodityBought:
+      - key:
+          templateClass: CONTAINER_POD
+          providerType: HOSTING
+          cardinalityMax: 1
+          cardinalityMin: 1
+        value:
+          - commodityType: GPU
+            optional: true
+            key: key-placeholder
+          - commodityType: GPU_MEM
+            optional: true
+          - commodityType: GPU_REQUEST
+            optional: true
+            key: key-placeholder
+          - commodityType: ENERGY
+            optional: true
+          - commodityType: APPLICATION
+            key: key-placeholder
+      - key:
+          templateClass: CONTAINER_SPEC
+          providerType: LAYERED_OVER
+          cardinalityMax: 1
+          cardinalityMin: 1
+        value:
+          - commodityType: APPLICATION
+            key: key-placeholder
+    mergedEntityMetaData:
+      keepStandalone: false
+      matchingMetadata:
+        matchingData:
+          - matchingProperty:
+              propertyName: HOST_UUID
+          - matchingProperty:
+              propertyName: KubernetesFullyQualifiedName
+        externalEntityMatchingProperty:
+          - matchingProperty:
+              propertyName: CNTFULL
+          - matchingProperty:
+              propertyName: KubernetesFullyQualifiedName
+      commoditiesSold:
+        - GPU
+        - GPU_MEM
+        - GPU_REQUEST
+        - ENERGY
+      commoditiesBought:
+        - providerType: CONTAINER_POD
+          commodityMetadata:
+            - GPU
+            - GPU_MEM
+            - GPU_REQUEST
+            - ENERGY
+  - templateClass: CONTAINER_POD
+    templateType: BASE
+    templatePriority: -1
+    commoditySold:
+      - commodityType: GPU
+        resold: true
+        optional: true
+        key: key-placeholder
+      - commodityType: GPU_MEM
+        resold: true
+        optional: true
+      - commodityType: GPU_REQUEST
+        optional: true
+        resold: true
+        key: key-placeholder
+      - commodityType: APPLICATION
+        key: key-placeholder
+    commodityBought:
+      - key:
+          templateClass: VIRTUAL_MACHINE
+          providerType: HOSTING
+          cardinalityMax: 1
+          cardinalityMin: 0
+        value:
+          - commodityType: GPU
+            optional: true
+            key: key-placeholder
+          - commodityType: GPU_MEM
+            optional: true
+          - commodityType: GPU_REQUEST
+            optional: true
+            key: key-placeholder
+          - commodityType: CLUSTER
+            key: key-placeholder
+      - key:
+          templateClass: WORKLOAD_CONTROLLER
+          providerType: LAYERED_OVER
+          cardinalityMax: 1
+          cardinalityMin: 0
+        value:
+          - commodityType: APPLICATION
+            key: key-placeholder
+    mergedEntityMetaData:
+      keepStandalone: false
+      matchingMetadata:
+        matchingData:
+          - matchingProperty:
+              propertyName: KubernetesFullyQualifiedName
+        externalEntityMatchingProperty:
+          - matchingProperty:
+              propertyName: KubernetesFullyQualifiedName
+      commoditiesSold:
+        - GPU
+        - GPU_MEM
+        - GPU_REQUEST
+      commoditiesBought:
+        - providerType: VIRTUAL_MACHINE
+          commodityMetadata:
+            - GPU
+            - GPU_MEM
+            - GPU_REQUEST
+  - templateClass: CONTAINER_SPEC
+    templateType: BASE
+    templatePriority: -1
+    commoditySold:
+      - commodityType: VCPU
+        optional: true
+      - commodityType: VMEM
+        optional: true
+      - commodityType: GPU
+        optional: true
+        key: key-placeholder
+      - commodityType: GPU_MEM
+        optional: true
+      - commodityType: GPU_REQUEST
+        optional: true
+        key: key-placeholder
+    commodityBought:
+      - key:
+          templateClass: WORKLOAD_CONTROLLER
+          providerType: HOSTING
+          cardinalityMax: 1
+          cardinalityMin: 0
+        value:
+          - commodityType: VCPU
+            optional: true
+          - commodityType: VMEM
+            optional: true
+          - commodityType: GPU
+            optional: true
+            key: key-placeholder
+          - commodityType: GPU_MEM
+            optional: true
+    mergedEntityMetaData:
+      keepStandalone: false
+      matchingMetadata:
+        matchingData:
+          - matchingProperty:
+              propertyName: KubernetesFullyQualifiedName
+        externalEntityMatchingProperty:
+          - matchingProperty:
+              propertyName: KubernetesFullyQualifiedName
+      commoditiesSold:
+        - GPU
+        - GPU_MEM
+        - GPU_REQUEST
+  - templateClass: WORKLOAD_CONTROLLER
+    templateType: BASE
+    templatePriority: -1
+    commoditySold:
+      - commodityType: GPU
+        optional: true
+        key: key-placeholder
+      - commodityType: GPU_MEM
+        optional: true
+      - commodityType: APPLICATION
+        key: key-placeholder
+    commodityBought:
+      - key:
+          templateClass: NAMESPACE
+          providerType: HOSTING
+          cardinalityMax: 1
+          cardinalityMin: 0
+        value:
+          - commodityType: GPU
+            optional: true
+            key: key-placeholder
+          - commodityType: GPU_MEM
+            optional: true
+    mergedEntityMetaData:
+      keepStandalone: false
+      matchingMetadata:
+        matchingData:
+          - matchingProperty:
+              propertyName: KubernetesFullyQualifiedName
+        externalEntityMatchingProperty:
+          - matchingProperty:
+              propertyName: KubernetesFullyQualifiedName
+  - templateClass: NAMESPACE
+    templateType: BASE
+    templatePriority: -1
+    commoditySold:
+      - commodityType: GPU
+        optional: true
+        key: key-placeholder
+      - commodityType: GPU_MEM
+        optional: true
+    commodityBought:
+      - key:
+          templateClass: CONTAINER_PLATFORM_CLUSTER
+          providerType: HOSTING
+          cardinalityMax: 1
+          cardinalityMin: 0
+        value:
+          - commodityType: GPU
+            optional: true
+            key: key-placeholder
+          - commodityType: GPU_REQUEST
+            optional: true
+            key: key-placeholder
+          - commodityType: GPU_MEM
+            optional: true
+    mergedEntityMetaData:
+      keepStandalone: false
+      matchingMetadata:
+        matchingData:
+          - matchingProperty:
+              propertyName: KubernetesFullyQualifiedName
+        externalEntityMatchingProperty:
+          - matchingProperty:
+              propertyName: KubernetesFullyQualifiedName
+      commoditiesBought:
+        - providerType: CONTAINER_PLATFORM_CLUSTER
+          commodityMetadata:
+            - GPU
+            - GPU_REQUEST
+            - GPU_MEM
+  - templateClass: CONTAINER_PLATFORM_CLUSTER
+    templateType: BASE
+    templatePriority: -1
+    commoditySold:
+      - commodityType: GPU
+        key: key-placeholder
+      - commodityType: GPU_REQUEST
+        key: key-placeholder
+      - commodityType: GPU_MEM
+    mergedEntityMetaData:
+      keepStandalone: false
+      matchingMetadata:
+        matchingData:
+          - matchingProperty:
+              propertyName: KubernetesFullyQualifiedName
+        externalEntityMatchingProperty:
+          - matchingProperty:
+              propertyName: KubernetesFullyQualifiedName
+      commoditiesSold:
+        - GPU
+        - GPU_MEM
+        - GPU_REQUEST

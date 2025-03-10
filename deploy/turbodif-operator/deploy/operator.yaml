@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: turbodif-operator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: turbodif-operator
+  template:
+    metadata:
+      labels:
+        name: turbodif-operator
+    spec:
+      serviceAccountName: turbodif-operator
+      containers:
+        - name: turbodif-operator
+          # Replace this with the built image name
+          image: turbonomic/turbodif-operator:8.4
+          imagePullPolicy: Always
+          env:
+            - name: WATCH_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: OPERATOR_NAME
+              value: "turbodif-operator"

@@ -1,0 +1,94 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: csv-to-dif-ftp
+  namespace: turbointegrations
+  labels:
+    app: csv-to-dif-app
+spec:
+  selector:
+    app: csv-to-dif-app
+  type: NodePort
+  ports:
+  - port: 21
+    targetPort: 21
+    nodePort: 31234
+    protocol: TCP
+    name: ftp
+  - port: 30020
+    targetPort: 30020
+    nodePort: 30020
+    name: pasv1
+  - port: 30021
+    targetPort: 30021
+    nodePort: 30021
+    name: pasv2
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: csv-to-dif-target
+  namespace: turbointegrations
+  labels:
+    app: csv-to-dif-app
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8081
+    targetPort: 8081
+    protocol: TCP
+    name: http
+  selector:
+    app: csv-to-dif-app
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: csv-to-dif
+  namespace: turbointegrations
+spec:
+  selector:
+    matchLabels:
+      environment: nonprod
+      team: integration
+      app: csv-to-dif-app
+      version: 1.0.0
+  template:
+    metadata:
+      labels:
+        environment: nonprod
+        team: integration
+        app: csv-to-dif-app
+        version: 1.0.0
+    spec:
+      containers:
+        - image: turbointegrations/csv-to-dif:1.0.1
+          imagePullPolicy: IfNotPresent
+          name: csv-to-dif
+          ports:
+          - containerPort: 8081
+          volumeMounts:
+            - name: config
+              mountPath: /opt/turbonomic/config
+            - name: shared-data
+              mountPath: /opt/turbonomic/data
+        - image: turbointegrations/turbo-ftp:1.0.1
+          imagePullPolicy: IfNotPresent
+          name: turbo-ftp
+          ports:
+          - containerPort: 21
+          - containerPort: 30020
+          - containerPort: 30021
+          envFrom:
+            - secretRef:
+                name: dif-csv-location-info
+          volumeMounts:
+            - name: shared-data
+              mountPath: /ftp/pub/data
+      volumes:
+        - name: config
+          configMap:
+            name: csv-to-dif-config
+        - name: shared-data
+          emptyDir: {}
+      restartPolicy: Always

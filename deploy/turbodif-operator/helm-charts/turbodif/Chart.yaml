@@ -1,0 +1,7 @@
+apiVersion: v1
+appVersion: "8.0"
+description: A Helm chart for Turbonomic data ingestion framework probe
+name: turbodif
+version: 1.0.0
+sources:
+- https://github.com/turbonomic/data-ingestion-framework

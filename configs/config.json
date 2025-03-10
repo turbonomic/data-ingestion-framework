@@ -1,0 +1,16 @@
+{
+    "communicationConfig": {
+        "serverMeta": {
+            "version": "<TURBONOMIC_SERVER_VERSION>",
+            "turboServer": "https://<TURBO-SERVER-ADDRESS>:<PORT>"
+        },
+        "restAPIConfig": {
+            "opsManagerUserName": "administrator",
+            "opsManagerPassword": "<TURBO-SERVER-PASSWORD>"
+        }
+    },
+    "targetConfig": {
+        "targetName":"<TARGET-NAME>",
+        "targetAddress":"<METRIC-ENDPOINT-URL>"
+    }
+}
